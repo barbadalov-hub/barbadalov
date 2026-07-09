@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!--
+    If you are serving your web app in a path other than the root, change the
+    href value below to reflect the base path you are serving from.
+
+    The path provided below has to start and end with a slash "/" in order for
+    it to work correctly.
+
+    For more details:
+    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+
+    This is a placeholder for base href that will be replaced by the value of
+    the `--base-href` argument provided to `flutter build`.
+  -->
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="LifeOS — the operating system for your life. Finance, health, food, habits, goals and an AI life assistant.">
+  <meta name="theme-color" content="#0A0518">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="LifeOS">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>LifeOS</title>
+  <link rel="manifest" href="manifest.json">
+
+  <style>
+    /* Cosmos splash shown before Flutter paints — no white flash. */
+    html, body { margin: 0; height: 100%; background: #0A0518; }
+    #cosmos-boot {
+      position: fixed; inset: 0; display: flex; align-items: center;
+      justify-content: center; z-index: 2147483647;
+      background: radial-gradient(circle at 50% 42%, #2A1A5E 0%, #0A0518 70%);
+      transition: opacity .5s ease; }
+    #cosmos-boot.hide { opacity: 0; pointer-events: none; }
+    #cosmos-boot .ring {
+      width: 96px; height: 96px; border-radius: 50%;
+      border: 6px solid rgba(124,247,255,.25);
+      border-top-color: #7C5CFF; border-right-color: #7BF7FF;
+      animation: cosmos-spin 1s linear infinite; }
+    @keyframes cosmos-spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div id="cosmos-boot"><div class="ring"></div></div>
+  <!--
+    You can customize the "flutter_bootstrap.js" script.
+    This is useful to provide a custom configuration to the Flutter loader
+    or to give the user feedback during the initialization process.
+
+    For more details:
+    * https://docs.flutter.dev/platform-integration/web/initialization
+  -->
+  <script src="flutter_bootstrap.js" async></script>
+  <script>
+    // Fade the cosmos splash out once Flutter's first frame is up.
+    window.addEventListener('flutter-first-frame', function () {
+      var b = document.getElementById('cosmos-boot');
+      if (b) { b.classList.add('hide'); setTimeout(function () { b.remove(); }, 600); }
+    });
+  </script>
+</body>
+</html>

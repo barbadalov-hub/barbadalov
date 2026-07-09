@@ -1,0 +1,20 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  language:
+    strict-casts: true
+    strict-raw-types: true
+  errors:
+    # Treat missing awaits and dead code as errors — this is a "no chaos" codebase.
+    unawaited_futures: error
+    dead_code: error
+
+linter:
+  rules:
+    - always_declare_return_types
+    - prefer_const_constructors
+    - prefer_final_locals
+    - unawaited_futures
+    - sort_child_properties_last
+    # NOTE: `require_trailing_commas` is intentionally omitted — it conflicts
+    # with the Dart 3.7+ "tall" formatter, which owns comma placement now.

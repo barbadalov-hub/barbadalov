@@ -1,0 +1,20 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // The append-only life-event log: each signed-in user (anonymous included)
+    // may only touch their own subtree. Events are immutable — create only.
+    match /events/{uid}/log/{eventId} {
+      allow create: if request.auth != null && request.auth.uid == uid;
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow update, delete: if false;
+    }
+    // Full-state backup, one document per user — read/write your own only.
+    match /backups/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+    // Everything else stays closed.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

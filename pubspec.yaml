@@ -1,0 +1,107 @@
+name: lifeos
+description: "LifeOS — the operating system for your life. Finance, health, food, habits, goals and an AI life assistant, unified by an event-based core."
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+
+# ---------------------------------------------------------------------------
+# Phase 1 keeps the dependency surface intentionally small and rock-solid so
+# the app compiles and runs *offline*, with zero external service setup.
+#
+# Firebase packages are listed but commented out. Uncomment them only after
+# running `flutterfire configure` (which generates lib/firebase_options.dart).
+# The architecture already isolates persistence behind repository interfaces,
+# so swapping the in-memory data source for Firestore touches only the data
+# layer — never the UI, domain, or core engine.
+# ---------------------------------------------------------------------------
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Localization framework (Material/Cupertino/Widgets translations + locale
+  # resolution). SDK package, not a plugin — no effect on native builds.
+  flutter_localizations:
+    sdk: flutter
+
+  # State management (composition root + reactive UI).
+  flutter_riverpod: ^2.5.1
+
+  # Value equality without boilerplate.
+  equatable: ^2.0.5
+
+  # Stable ids for events and entities.
+  uuid: ^4.4.0
+
+  # Locale-aware currency / number / date formatting.
+  # (Pinned to match the version flutter_localizations depends on.)
+  intl: ^0.20.2
+
+  # Browser APIs (localStorage) for web persistence — pure Dart, no native
+  # plugin, so desktop builds need no symlink/Developer-Mode support.
+  web: ^1.1.0
+
+  # HTTP client (pure Dart) — live grocery prices from the public zakaz.ua
+  # stores API (no account/API key required).
+  http: ^1.2.0
+
+  # Real OS notifications on phones (Android/iOS). It has no Windows
+  # implementation, so the plugin-free desktop build is unaffected; on web it is
+  # excluded via a conditional import (see core/services/notification_gateway).
+  flutter_local_notifications: ^18.0.1
+
+  # Pure-Dart timezone database — lets us schedule *daily* reminders at the
+  # right wall-clock time via zonedSchedule. No native code; web excludes it
+  # through the same conditional import as the notification plugin.
+  timezone: ^0.10.0
+
+  # SHA-256 for the local app-lock PIN (pure Dart, no native code) — the PIN is
+  # only ever stored hashed on-device.
+  crypto: ^3.0.0
+
+  # On-device receipt OCR (Android/iOS only, free, no account/API key). ML Kit
+  # and the Android/iOS-only image-picker packages have NO Windows/web
+  # implementation, so the plugin-free desktop build stays intact and web keeps
+  # the text-paste path (see core/services/ocr_gateway). NOTE: on-device text
+  # recognition is Latin-script — it reads prices/digits from any receipt but
+  # not Cyrillic product names.
+  google_mlkit_text_recognition: ^0.13.1
+  image_picker_platform_interface: ^2.10.0
+  image_picker_android: ^0.8.12+20
+  image_picker_ios: ^0.8.12+2
+
+  # --- Firebase (enable in Phase 3 after `flutterfire configure`) ----------
+  # firebase_core: ^3.6.0
+  # firebase_auth: ^5.3.1
+  # cloud_firestore: ^5.4.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+  # Build-time only: generates the cosmos launcher icons for every platform
+  # from assets/icon/*. It is a dev tool (never shipped), so it adds no runtime
+  # plugin and the plugin-free desktop build is unaffected.
+  flutter_launcher_icons: ^0.14.1
+
+flutter:
+  uses-material-design: true
+
+# Cosmos brand icon → run `dart run flutter_launcher_icons` after changing.
+flutter_launcher_icons:
+  image_path: "assets/icon/app_icon.png"
+  android: true
+  min_sdk_android: 21
+  adaptive_icon_background: "#0A0518"
+  adaptive_icon_foreground: "assets/icon/app_icon_foreground.png"
+  web:
+    generate: true
+    image_path: "assets/icon/app_icon.png"
+    background_color: "#0A0518"
+    theme_color: "#7B5CFF"
+  windows:
+    generate: true
+    image_path: "assets/icon/app_icon.png"
+    icon_size: 256
