@@ -229,7 +229,12 @@ class _CustomizeSheet extends ConsumerWidget {
               shrinkWrap: true,
               padding: const EdgeInsets.only(bottom: 12),
               itemCount: order.length,
-              onReorderItem: ord.reorder,
+              onReorder: (oldIndex, newIndex) {
+                // ReorderableListView reports newIndex in pre-removal terms;
+                // ord.reorder expects post-removal semantics.
+                if (newIndex > oldIndex) newIndex -= 1;
+                ord.reorder(oldIndex, newIndex);
+              },
               itemBuilder: (context, index) {
                 final id = order[index];
                 return ListTile(
