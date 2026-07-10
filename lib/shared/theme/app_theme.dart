@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 /// Central Material 3 theme. UI code pulls colours and text styles from here so
@@ -25,43 +26,50 @@ class AppTheme {
         primary: Color.lerp(seed, Colors.white, 0.35),
       );
     }
+    // Bolder display numbers + tighter headings (Ivy-Wallet-style type scale).
+    var textTheme = Typography.material2021(platform: TargetPlatform.android)
+        .englishLike
+        .apply(
+          bodyColor: scheme.onSurface,
+          displayColor: scheme.onSurface,
+        )
+        .copyWith(
+          displaySmall: TextStyle(
+            fontSize: 38,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -1.2,
+            color: scheme.onSurface,
+          ),
+          headlineSmall: TextStyle(
+            fontSize: 26,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.6,
+            color: scheme.onSurface,
+          ),
+          titleLarge: TextStyle(
+            fontSize: 21,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.3,
+            color: scheme.onSurface,
+          ),
+          titleMedium: TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.2,
+            color: scheme.onSurface,
+          ),
+        );
+    // On the web, CanvasKit has no system emoji font, so emoji render as tofu
+    // boxes. Fall every text style back to the bundled Noto color-emoji subset.
+    // Mobile keeps its native emoji, so this is web-only.
+    if (kIsWeb) {
+      textTheme = textTheme.apply(fontFamilyFallback: const ['NotoColorEmoji']);
+    }
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
       scaffoldBackgroundColor: scheme.surface,
-      // Bolder display numbers + tighter headings (Ivy-Wallet-style type scale).
-      textTheme: Typography.material2021(platform: TargetPlatform.android)
-          .englishLike
-          .apply(
-            bodyColor: scheme.onSurface,
-            displayColor: scheme.onSurface,
-          )
-          .copyWith(
-            displaySmall: TextStyle(
-              fontSize: 38,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -1.2,
-              color: scheme.onSurface,
-            ),
-            headlineSmall: TextStyle(
-              fontSize: 26,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.6,
-              color: scheme.onSurface,
-            ),
-            titleLarge: TextStyle(
-              fontSize: 21,
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.3,
-              color: scheme.onSurface,
-            ),
-            titleMedium: TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.2,
-              color: scheme.onSurface,
-            ),
-          ),
+      textTheme: textTheme,
       // Modern zoom/fade route transitions on every platform (M3 style)
       // instead of the default platform-specific slides.
       pageTransitionsTheme: PageTransitionsTheme(

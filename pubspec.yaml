@@ -89,6 +89,16 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
+  # Color-emoji fallback so CanvasKit (web) renders emoji instead of tofu boxes;
+  # it fetches Noto Color Emoji from a CDN by default, which breaks offline. This
+  # is a Noto COLRv1 build subset to only the emoji the app actually uses
+  # (~300 KB). Wired in as a web-only fontFamilyFallback in AppTheme — mobile
+  # keeps its native system emoji.
+  fonts:
+    - family: NotoColorEmoji
+      fonts:
+        - asset: assets/fonts/NotoColorEmoji.ttf
+
 # Cosmos brand icon → run `dart run flutter_launcher_icons` after changing.
 flutter_launcher_icons:
   image_path: "assets/icon/app_icon.png"
