@@ -27,7 +27,7 @@ class AppTheme {
       );
     }
     // Bolder display numbers + tighter headings (Ivy-Wallet-style type scale).
-    var textTheme = Typography.material2021(platform: TargetPlatform.android)
+    final textTheme = Typography.material2021(platform: TargetPlatform.android)
         .englishLike
         .apply(
           bodyColor: scheme.onSurface,
@@ -59,17 +59,32 @@ class AppTheme {
             color: scheme.onSurface,
           ),
         );
-    // On the web, CanvasKit has no system emoji font, so emoji render as tofu
-    // boxes. Fall every text style back to the bundled Noto color-emoji subset.
-    // Mobile keeps its native emoji, so this is web-only.
-    if (kIsWeb) {
-      textTheme = textTheme.apply(fontFamilyFallback: const ['NotoColorEmoji']);
-    }
+    // On the web, CanvasKit ships no system fonts and would fetch Roboto, its
+    // Noto fallbacks and color emoji from a CDN — breaking offline. Use the
+    // bundled subsets instead: RobotoWeb for text, NotoSans for glyphs Roboto
+    // lacks (notably ₴), and the color-emoji subset for emoji. Mobile keeps its
+    // native system fonts, so this whole stack is web-only.
+    //
+    // The family is applied directly to every text style (the base Material
+    // typography hard-codes 'Roboto', which ThemeData.fontFamily does not
+    // override on a supplied textTheme), and to ThemeData for widgets that read
+    // the family off the theme rather than a text style.
+    const String? webFontFamily = kIsWeb ? 'RobotoWeb' : null;
+    const List<String>? webFontFallback =
+        kIsWeb ? ['NotoColorEmoji', 'NotoSans'] : null;
+    final resolvedTextTheme = kIsWeb
+        ? textTheme.apply(
+            fontFamily: webFontFamily,
+            fontFamilyFallback: webFontFallback,
+          )
+        : textTheme;
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
       scaffoldBackgroundColor: scheme.surface,
-      textTheme: textTheme,
+      fontFamily: webFontFamily,
+      fontFamilyFallback: webFontFallback,
+      textTheme: resolvedTextTheme,
       // Modern zoom/fade route transitions on every platform (M3 style)
       // instead of the default platform-specific slides.
       pageTransitionsTheme: PageTransitionsTheme(

@@ -647,7 +647,7 @@ const Map<String, Map<String, String>> _values = {
   'wo.search': {'en': 'Search exercises…', 'ru': 'Поиск упражнений…', 'uk': 'Пошук вправ…'},
   'wo.loading': {'en': 'Loading the live catalog from wger.de…', 'ru': 'Загружаю живой каталог с wger.de…', 'uk': 'Завантажую живий каталог із wger.de…'},
   'wo.noDesc': {'en': 'No description yet — watch the video for form.', 'ru': 'Описания пока нет — техника в видео.', 'uk': 'Опису поки немає — техніка у відео.'},
-  'wo.videoWger': {'en': '▶ wger video', 'ru': '▶ Видео wger', 'uk': '▶ Відео wger'},
+  'wo.videoWger': {'en': 'wger video', 'ru': 'Видео wger', 'uk': 'Відео wger'},
   'wo.withVideo': {'en': 'with video', 'ru': 'только с видео', 'uk': 'лише з відео'},
   'wo.favorites': {'en': 'favorites', 'ru': 'избранное', 'uk': 'обране'},
   'wo.allMuscles': {'en': 'All', 'ru': 'Все', 'uk': 'Усі'},
