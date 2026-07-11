@@ -275,6 +275,9 @@ const Map<String, Map<String, String>> _values = {
 
   // --- Health -------------------------------------------------------------
   'health.scoreToday': {'en': 'Health score today', 'ru': 'Индекс здоровья сегодня', 'uk': 'Індекс здоровʼя сьогодні'},
+  'health.week': {'en': 'This week', 'ru': 'На этой неделе', 'uk': 'Цього тижня'},
+  'health.weekAvg': {'en': 'Avg {steps} steps · {water} glasses · {sleep}h', 'ru': 'В среднем {steps} шагов · {water} стаканов · {sleep}ч', 'uk': 'У середньому {steps} кроків · {water} склянок · {sleep}год'},
+  'health.weekGoals': {'en': 'On goal — steps {steps}/{n} · water {water}/{n} · sleep {sleep}/{n}', 'ru': 'В цели — шаги {steps}/{n} · вода {water}/{n} · сон {sleep}/{n}', 'uk': 'У цілі — кроки {steps}/{n} · вода {water}/{n} · сон {sleep}/{n}'},
   'health.scoreSubtitle': {'en': 'Water, steps and sleep vs your goals', 'ru': 'Вода, шаги и сон относительно ваших целей', 'uk': 'Вода, кроки та сон відносно ваших цілей'},
   'health.water': {'en': 'Water', 'ru': 'Вода', 'uk': 'Вода'},
   'health.steps': {'en': 'Steps', 'ru': 'Шаги', 'uk': 'Кроки'},
