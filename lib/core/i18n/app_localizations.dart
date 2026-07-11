@@ -346,6 +346,7 @@ const Map<String, Map<String, String>> _values = {
 
   // --- Food ---------------------------------------------------------------
   'food.pantry': {'en': 'Pantry', 'ru': 'Кладовая', 'uk': 'Комора'},
+  'food.useNext': {'en': 'Use next: {name} · {days}d left', 'ru': 'Съесть первым: {name} · осталось {days}д', 'uk': 'Зʼїсти першим: {name} · лишилось {days}д'},
   'food.pantryEmpty': {'en': 'Pantry is empty.', 'ru': 'Кладовая пуста.', 'uk': 'Комора порожня.'},
   'food.shopping': {'en': 'Shopping list', 'ru': 'Список покупок', 'uk': 'Список покупок'},
   'food.nothingToBuy': {'en': 'Nothing to buy.', 'ru': 'Покупать нечего.', 'uk': 'Купувати нічого.'},
