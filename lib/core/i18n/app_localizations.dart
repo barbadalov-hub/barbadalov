@@ -338,6 +338,7 @@ const Map<String, Map<String, String>> _values = {
   'goals.behind': {'en': 'behind target', 'ru': 'отстаёт от плана', 'uk': 'відстає від плану'},
   'goals.ofTarget': {'en': '{saved} of {target} · {remaining} to go', 'ru': '{saved} из {target} · осталось {remaining}', 'uk': '{saved} з {target} · залишилось {remaining}'},
   'goals.forecast': {'en': '~{months} mo · {date} · {flag}', 'ru': '~{months} мес · {date} · {flag}', 'uk': '~{months} міс · {date} · {flag}'},
+  'goals.needMonthly': {'en': 'Save {amount}/mo to hit your date', 'ru': 'Откладывайте {amount}/мес, чтобы успеть к сроку', 'uk': 'Відкладайте {amount}/міс, щоб встигнути до строку'},
   'goals.addTo': {'en': 'Add to "{title}"', 'ru': 'Пополнить «{title}»', 'uk': 'Поповнити «{title}»'},
   'goals.addStage': {'en': 'Add stage', 'ru': 'Добавить этап', 'uk': 'Додати етап'},
   'goals.newStage': {'en': 'New stage', 'ru': 'Новый этап', 'uk': 'Новий етап'},
