@@ -182,6 +182,8 @@ const Map<String, Map<String, String>> _values = {
   },
   'today.lifeScore': {'en': 'Life Score', 'ru': 'Индекс жизни', 'uk': 'Індекс життя'},
   'today.thisMonth': {'en': 'This month', 'ru': 'В этом месяце', 'uk': 'Цього місяця'},
+  'today.projLeftover': {'en': 'Projected month-end', 'ru': 'Прогноз на конец месяца', 'uk': 'Прогноз на кінець місяця'},
+  'today.projOver': {'en': 'At this pace you overspend', 'ru': 'При таком темпе перерасход', 'uk': 'За таким темпом перевитрата'},
   'today.aiInsight': {'en': 'AI insight', 'ru': 'Совет ИИ', 'uk': 'Порада ШІ'},
   'today.comingOnline': {'en': 'Coming online next', 'ru': 'Скоро появится', 'uk': 'Незабаром зʼявиться'},
   'today.ai.addIncome': {

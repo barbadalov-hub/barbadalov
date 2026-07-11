@@ -21,6 +21,7 @@ import 'package:lifeos/features/mind/domain/mood.dart';
 import 'package:lifeos/features/mind/presentation/pages/mind_page.dart';
 import 'package:lifeos/features/mind/presentation/pages/mood_journal_page.dart';
 import 'package:lifeos/features/mind/presentation/providers/mind_providers.dart';
+import 'package:lifeos/features/money/application/project_month_end.dart';
 import 'package:lifeos/features/money/domain/entities/budget.dart';
 import 'package:lifeos/features/money/presentation/widgets/add_transaction_sheet.dart';
 import 'package:lifeos/features/profile/presentation/pages/profile_page.dart';
@@ -400,6 +401,16 @@ class _BudgetBreakdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Project where the month lands if spending keeps its current pace.
+    final now = DateTime.now();
+    final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
+    final projection = const ProjectMonthEnd()(
+      income: budget.income,
+      expensesSoFar: budget.expenses,
+      reserve: budget.reserve,
+      dayOfMonth: now.day,
+      daysInMonth: daysInMonth,
+    );
     return SectionCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -417,6 +428,16 @@ class _BudgetBreakdown extends StatelessWidget {
           _row(context, context.tr('money.available'),
               budget.available.format(), Theme.of(context).colorScheme.primary,
               bold: true),
+          if (budget.income.isPositive)
+            _row(
+              context,
+              context.tr(
+                  projection.onTrack ? 'today.projLeftover' : 'today.projOver'),
+              projection.projectedLeftover.format(),
+              projection.onTrack
+                  ? LifeColors.finance
+                  : LifeColors.financeDanger,
+            ),
         ],
       ),
     );
