@@ -21,6 +21,7 @@ import 'package:lifeos/features/mind/domain/mood.dart';
 import 'package:lifeos/features/mind/presentation/pages/mind_page.dart';
 import 'package:lifeos/features/mind/presentation/pages/mood_journal_page.dart';
 import 'package:lifeos/features/mind/presentation/providers/mind_providers.dart';
+import 'package:lifeos/features/mind/domain/habit_consistency.dart';
 import 'package:lifeos/features/money/application/project_month_end.dart';
 import 'package:lifeos/features/money/domain/entities/budget.dart';
 import 'package:lifeos/features/money/presentation/widgets/add_transaction_sheet.dart';
@@ -651,6 +652,7 @@ class _HabitsMiniCard extends ConsumerWidget {
     final habits = ref.watch(habitsProvider).valueOrNull ?? const [];
     if (habits.isEmpty) return const SizedBox.shrink();
     final done = habits.where((h) => h.doneToday).length;
+    final week = HabitConsistency.weekly(habits, DateTime.now());
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: SectionCard(
@@ -673,6 +675,14 @@ class _HabitsMiniCard extends ConsumerWidget {
                         )),
               ],
             ),
+            if (week.target > 0)
+              Text(
+                context.trp('tsec.habitsWeek',
+                    {'n': week.completed, 'target': week.target}),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+              ),
             for (final h in habits.take(4))
               Row(
                 children: [

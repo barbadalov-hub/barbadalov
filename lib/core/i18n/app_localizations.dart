@@ -1230,6 +1230,7 @@ const Map<String, Map<String, String>> _values = {
   'tsec.diet': {'en': 'Nutrition', 'ru': 'Питание', 'uk': 'Харчування'},
   'tsec.health': {'en': 'Health', 'ru': 'Здоровье', 'uk': 'Здоров’я'},
   'tsec.habits': {'en': 'Habits', 'ru': 'Привычки', 'uk': 'Звички'},
+  'tsec.habitsWeek': {'en': 'This week {n}/{target}', 'ru': 'За неделю {n}/{target}', 'uk': 'За тиждень {n}/{target}'},
   'tsec.tasks': {'en': 'Tasks', 'ru': 'Задачи', 'uk': 'Завдання'},
   'tsec.goal': {'en': 'Goal', 'ru': 'Цель', 'uk': 'Ціль'},
   'tsec.backup': {'en': 'Backup nudge', 'ru': 'Напоминание о бэкапе', 'uk': 'Нагадування про бекап'},
