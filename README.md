@@ -42,12 +42,16 @@ Persistence is in-memory behind repository interfaces (swap for Firestore per
 
 ## 🚀 Getting started
 
-**Flutter 3.44.4 (stable) is installed** at `C:\src\flutter`, and the project has
-been verified:
+Built and verified on **Flutter 3.35.5 (stable)** — the version pinned by CI
+(`.github/workflows/ci.yml`) and the Claude Code web hook. Any 3.35.x stable
+should work; the SDK constraint is `>=3.4.0 <4.0.0`.
 
-- `flutter analyze` → **No issues found** (all 84 files)
-- `flutter test` → **9/9 passing** (unit + full-app boot + event-flow)
+- `flutter analyze` → **No issues found**
+- `flutter test` → **194/194 passing** (unit + full-app boot + event-flow)
 - `flutter build web --release` → **builds** (`build/web`)
+
+These same three checks run automatically on every push and pull request via
+GitHub Actions.
 
 ### ⚠️ Critical: run tooling from the ASCII path, not the Cyrillic one
 
@@ -83,6 +87,29 @@ flutter run -d chrome     # or: flutter run -d edge   (web works today)
 `web/` platform files were generated with `flutter create . --platforms=web`;
 add `,windows,android,ios` to that command to target the rest (it never
 overwrites `lib/`, `pubspec.yaml`, `README.md` or `test/`).
+
+#### Web behind a restricted network / fully offline
+
+By default Flutter web (CanvasKit) fetches its rendering engine — and the
+default text font — from Google's CDN at runtime. To vendor CanvasKit into the
+bundle so the build never depends on that CDN:
+
+```powershell
+flutter build web --release --no-web-resources-cdn
+```
+
+Color emoji are already handled: the app bundles a subset of Noto Color Emoji
+and uses it as a web-only font fallback, so emoji render offline instead of
+showing as empty boxes (mobile keeps its native system emoji). The primary text
+font (Roboto) is still loaded from the CDN on web — bundle it too if you need
+text to render with no network at all.
+
+### Developing from Claude Code on the web / mobile
+
+`.claude/hooks/session-start.sh` (a `SessionStart` hook) installs Flutter and
+runs `flutter pub get` automatically when a Claude Code web session starts, so
+the project is ready to analyze, test and build without any manual setup — you
+can keep working on it from a phone.
 
 ---
 
