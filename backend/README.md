@@ -11,6 +11,14 @@ GET /prices?ids=eggs,milk,cheese
 → { "prices": { "eggs": { "atb": 5490, "silpo": 5990 } } }   // prices in kopecks
 ```
 
+Built-in hardening: `/prices` responses are **edge-cached** for 30 min (so we
+never hammer the chains), every upstream fetch has an **8 s timeout**, and the
+`ids` list is de-duped and capped. The pure parsers are unit-tested:
+
+```bash
+cd backend && node --test        # or: npm test
+```
+
 ## Deploy (Cloudflare Workers — free, no server)
 
 **Option A — dashboard (no tools):**
