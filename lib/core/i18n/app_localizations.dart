@@ -1303,6 +1303,10 @@ const Map<String, Map<String, String>> _values = {
   'coach.tipTitle': {'en': 'Coach tip', 'ru': 'Совет коуча', 'uk': 'Порада коуча'},
   'coach.tipCta': {'en': 'Ask the coach', 'ru': 'Спросить коуча', 'uk': 'Запитати коуча'},
   'coach.chip.help': {'en': 'What can you do?', 'ru': 'Что ты умеешь?', 'uk': 'Що ти вмієш?'},
+  'coach.chip.diet': {'en': 'How\'s my nutrition?', 'ru': 'Как моё питание?', 'uk': 'Як моє харчування?'},
+  'coach.chip.weight': {'en': 'How\'s my weight?', 'ru': 'Как мой вес?', 'uk': 'Як моя вага?'},
+  'coach.chip.workout': {'en': 'Should I train today?', 'ru': 'Тренироваться сегодня?', 'uk': 'Тренуватися сьогодні?'},
+  'coach.chip.tasks': {'en': 'What should I focus on?', 'ru': 'Чем мне заняться?', 'uk': 'Чим мені зайнятися?'},
   'coach.reply.greeting': {
     'en': 'Hi {name}! I\'m your AI coach. Ask me about finances, sleep, habits or mood — or tap a suggestion below.',
     'ru': 'Привет, {name}! Я твой AI-коуч. Спроси меня о финансах, сне, привычках или настроении — или выбери подсказку ниже.',
@@ -1473,6 +1477,19 @@ const Map<String, Map<String, String>> _values = {
     'ru': 'Не совсем понял вопрос 🤔 Попробуй иначе или выбери подсказку ниже — например, «Как прошла неделя?».',
     'uk': 'Не зовсім зрозумів 🤔 Спробуй інакше або обери підказку нижче — наприклад, «Як минув тиждень?».'
   },
+  'coach.reply.dietNone': {'en': 'Set up your dietitian profile and I\'ll track calories vs your target 🥗', 'ru': 'Заполни профиль диетолога — и я буду следить за калориями относительно цели 🥗', 'uk': 'Заповни профіль дієтолога — і я стежитиму за калоріями відносно цілі 🥗'},
+  'coach.reply.diet': {'en': 'You\'ve eaten {eaten} of {target} kcal today — {left} kcal left. Nicely on track 🍽️', 'ru': 'Сегодня съедено {eaten} из {target} ккал — осталось {left}. Хорошо идёшь 🍽️', 'uk': 'Сьогодні з\'їдено {eaten} з {target} ккал — лишилось {left}. Гарно тримаєш 🍽️'},
+  'coach.reply.dietOver': {'en': 'You\'re {over} kcal over your {target} target today — go lighter this evening 🥦', 'ru': 'Ты на {over} ккал выше цели {target} — вечером выбери что-то лёгкое 🥦', 'uk': 'Ти на {over} ккал вище цілі {target} — увечері обери щось легше 🥦'},
+  'coach.reply.weightNone': {'en': 'Log your weight a couple of times and I\'ll show the trend ⚖️', 'ru': 'Отметь вес пару раз — и я покажу динамику ⚖️', 'uk': 'Познач вагу кілька разів — і я покажу динаміку ⚖️'},
+  'coach.reply.weightDown': {'en': 'You\'re at {w}, down {d} kg since last time — great progress 📉', 'ru': 'Сейчас {w}, минус {d} кг с прошлого раза — отличный прогресс 📉', 'uk': 'Зараз {w}, мінус {d} кг з минулого разу — чудовий прогрес 📉'},
+  'coach.reply.weightUp': {'en': 'You\'re at {w}, up {d} kg since last time. One reading isn\'t a trend — keep logging 📈', 'ru': 'Сейчас {w}, плюс {d} кг с прошлого раза. Одно измерение — не тренд, продолжай отмечать 📈', 'uk': 'Зараз {w}, плюс {d} кг з минулого разу. Одне вимірювання — не тренд, продовжуй 📈'},
+  'coach.reply.weightFlat': {'en': 'Holding steady at {w} ⚖️ Consistency is a win too.', 'ru': 'Держишься на {w} ⚖️ Стабильность — тоже победа.', 'uk': 'Тримаєшся на {w} ⚖️ Стабільність — теж перемога.'},
+  'coach.reply.workoutNone': {'en': 'Log some steps or a workout and I\'ll factor it in 🏃', 'ru': 'Отметь шаги или тренировку — и я это учту 🏃', 'uk': 'Познач кроки чи тренування — і я це врахую 🏃'},
+  'coach.reply.workoutLow': {'en': 'Only ~{n} steps a day lately — a short walk or a quick session would help 💪', 'ru': 'В среднем ~{n} шагов в день — короткая прогулка или лёгкая тренировка не помешают 💪', 'uk': 'У середньому ~{n} кроків на день — коротка прогулянка чи легке тренування не завадять 💪'},
+  'coach.reply.workoutOk': {'en': '~{n} steps a day — solid! A strength session would round it out 💪', 'ru': '~{n} шагов в день — отлично! Силовая тренировка дополнит картину 💪', 'uk': '~{n} кроків на день — чудово! Силове тренування доповнить картину 💪'},
+  'coach.reply.tasksNone': {'en': 'Add a habit or two and I\'ll help you keep the streak going 📌', 'ru': 'Добавь пару привычек — и я помогу держать серию 📌', 'uk': 'Додай кілька звичок — і я допоможу тримати серію 📌'},
+  'coach.reply.tasks': {'en': 'You\'ve done {done}/{total} habits today. Knock out the rest and call it a win ✅', 'ru': 'Сегодня выполнено {done}/{total} привычек. Закрой остальные — и день зачёт ✅', 'uk': 'Сьогодні виконано {done}/{total} звичок. Закрий решту — і день зараховано ✅'},
+  'coach.reply.thanks': {'en': 'Anytime — I\'ve got your back 💜 Keep showing up.', 'ru': 'Всегда пожалуйста — я рядом 💜 Продолжай в том же духе.', 'uk': 'Завжди будь ласка — я поруч 💜 Продовжуй у тому ж дусі.'},
 
   // --- Achievements wall --------------------------------------------------
   'ach.title': {'en': 'Achievements', 'ru': 'Достижения', 'uk': 'Досягнення'},

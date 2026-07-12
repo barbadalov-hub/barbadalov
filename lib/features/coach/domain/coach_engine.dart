@@ -14,6 +14,11 @@ enum CoachIntent {
   insight,
   motivate,
   help,
+  diet,
+  weight,
+  workout,
+  tasks,
+  thanks,
   unknown,
 }
 
@@ -46,6 +51,15 @@ class CoachContext {
   final int goalsCompleted;
   final int seed;
 
+  /// Dietitian: daily calorie target (0 = no profile yet) and calories eaten.
+  final int kcalTarget;
+  final int kcalEaten;
+
+  /// Latest logged weight, pre-formatted ('' = none), and its signed change in
+  /// kg versus the previous reading.
+  final String weightStr;
+  final double weightDeltaKg;
+
   /// A pre-localized "patterns" sentence from Insights (e.g. "you feel better on
   /// days you sleep more"), or '' when there's no strong correlation yet.
   final String insightSentence;
@@ -75,6 +89,10 @@ class CoachContext {
     this.goalsCompleted = 0,
     this.seed = 0,
     this.insightSentence = '',
+    this.kcalTarget = 0,
+    this.kcalEaten = 0,
+    this.weightStr = '',
+    this.weightDeltaKg = 0,
   });
 }
 
@@ -100,7 +118,11 @@ class CoachEngine {
     CoachIntent.mood,
     CoachIntent.steps,
     CoachIntent.water,
+    CoachIntent.diet,
+    CoachIntent.weight,
+    CoachIntent.workout,
     CoachIntent.habits,
+    CoachIntent.tasks,
     CoachIntent.goals,
     CoachIntent.money,
     CoachIntent.insight,
@@ -111,6 +133,9 @@ class CoachEngine {
   /// The one proactive tip to surface unprompted (e.g. on Today), chosen from
   /// the most actionable signal in [c].
   CoachIntent suggestOfTheDay(CoachContext c) {
+    if (c.kcalTarget > 0 && c.kcalEaten > c.kcalTarget * 1.1) {
+      return CoachIntent.diet;
+    }
     if (c.avgSleep > 0 && c.avgSleep < 7) return CoachIntent.sleep;
     if (c.insightSentence.isNotEmpty) return CoachIntent.insight;
     final weakest = [c.finance, c.health, c.discipline, c.productivity]
@@ -134,19 +159,29 @@ class CoachEngine {
     CoachIntent.insight: ['pattern', 'закономерн', 'связ', 'инсайт', 'insight', 'зв’яз', 'залежн'],
     CoachIntent.focus: ['focus', 'фокус', 'сфокус', 'на чём', 'на чем', 'priorit', 'что делать', 'важно'],
     CoachIntent.motivate: ['motiv', 'мотив', 'вдохнов', 'подбадр', 'поддерж', 'надихн'],
+    CoachIntent.diet: ['diet', 'calor', 'kcal', 'ккал', 'кало', 'nutri', 'еда', 'пита', 'харч', 'їж', 'рацион', 'раціон', 'protein', 'белк', 'білк', 'macro'],
+    CoachIntent.weight: ['weight', 'вес', 'вага', 'похуд', 'схуд', 'кг', 'kg', 'pounds', 'жир', 'lose', 'сброс'],
+    CoachIntent.workout: ['workout', 'train', 'трениров', 'трену', 'упражн', 'вправ', 'exercise', 'gym', 'зал', 'качал', 'фитнес', 'фітнес', 'спорт'],
+    CoachIntent.tasks: ['task', 'задач', 'todo', 'to do', 'продуктивн', 'productiv', 'справ', 'встиг', 'план на день', 'plan my day'],
+    CoachIntent.thanks: ['thank', 'thx', 'спасиб', 'дякую', 'дяку', 'благодар', 'вдячн'],
     CoachIntent.greeting: ['hello', 'привет', 'прив', 'здравств', 'вітаю', 'добрый', 'доброго', 'hi'],
   };
 
   /// Priority order: more specific intents win over greetings.
   static const _priority = [
     CoachIntent.help,
+    CoachIntent.thanks,
     CoachIntent.weekly,
     CoachIntent.spend,
+    CoachIntent.diet,
+    CoachIntent.weight,
+    CoachIntent.workout,
     CoachIntent.sleep,
     CoachIntent.mood,
     CoachIntent.steps,
     CoachIntent.water,
     CoachIntent.habits,
+    CoachIntent.tasks,
     CoachIntent.goals,
     CoachIntent.insight,
     CoachIntent.money,
@@ -265,6 +300,45 @@ class CoachEngine {
               'coach.reply.streakPraise', {'n': c.loggingStreak});
         }
         return CoachReply('coach.reply.motivate.${c.seed % 5}');
+
+      case CoachIntent.diet:
+        if (c.kcalTarget <= 0) return const CoachReply('coach.reply.dietNone');
+        if (c.kcalEaten > c.kcalTarget * 1.05) {
+          return CoachReply('coach.reply.dietOver',
+              {'over': c.kcalEaten - c.kcalTarget, 'target': c.kcalTarget});
+        }
+        return CoachReply('coach.reply.diet', {
+          'eaten': c.kcalEaten,
+          'target': c.kcalTarget,
+          'left': (c.kcalTarget - c.kcalEaten).clamp(0, 1 << 31),
+        });
+
+      case CoachIntent.weight:
+        if (c.weightStr.isEmpty) return const CoachReply('coach.reply.weightNone');
+        final d = c.weightDeltaKg.abs().toStringAsFixed(1);
+        if (c.weightDeltaKg < -0.05) {
+          return CoachReply('coach.reply.weightDown', {'w': c.weightStr, 'd': d});
+        }
+        if (c.weightDeltaKg > 0.05) {
+          return CoachReply('coach.reply.weightUp', {'w': c.weightStr, 'd': d});
+        }
+        return CoachReply('coach.reply.weightFlat', {'w': c.weightStr});
+
+      case CoachIntent.workout:
+        if (c.avgSteps <= 0) return const CoachReply('coach.reply.workoutNone');
+        final key = c.avgSteps < 6000
+            ? 'coach.reply.workoutLow'
+            : 'coach.reply.workoutOk';
+        return CoachReply(key, {'n': c.avgSteps});
+
+      case CoachIntent.tasks:
+        return c.habitsTotal == 0
+            ? const CoachReply('coach.reply.tasksNone')
+            : CoachReply('coach.reply.tasks',
+                {'done': c.habitsDone, 'total': c.habitsTotal});
+
+      case CoachIntent.thanks:
+        return const CoachReply('coach.reply.thanks');
 
       case CoachIntent.unknown:
         return const CoachReply('coach.reply.unknown');
