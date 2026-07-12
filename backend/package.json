@@ -1,0 +1,6 @@
+{
+  "name": "lifeos-price-scraper",
+  "private": true,
+  "type": "module",
+  "scripts": { "test": "node --test" }
+}

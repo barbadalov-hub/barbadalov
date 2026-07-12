@@ -170,5 +170,88 @@ void main() {
               moodEntries: 5)),
           CoachIntent.motivate);
     });
+
+    test('surfaces a calorie overshoot before other tips', () {
+      expect(
+          engine.suggestOfTheDay(const CoachContext(
+              avgSleep: 5, kcalTarget: 2000, kcalEaten: 2400)),
+          CoachIntent.diet);
+    });
+  });
+
+  group('new intents: classify', () {
+    test('recognises diet / weight / workout / tasks / thanks', () {
+      expect(engine.classify('сколько калорий я съел'), CoachIntent.diet);
+      expect(engine.classify('how is my nutrition'), CoachIntent.diet);
+      expect(engine.classify('как мой вес'), CoachIntent.weight);
+      expect(engine.classify('should i train today'), CoachIntent.workout);
+      expect(engine.classify('чем мне заняться, какие задачи'),
+          CoachIntent.tasks);
+      expect(engine.classify('спасибо большое'), CoachIntent.thanks);
+      expect(engine.classify('thanks!'), CoachIntent.thanks);
+    });
+  });
+
+  group('new intents: reply', () {
+    test('diet compares eaten vs target and handles no profile', () {
+      expect(engine.reply(CoachIntent.diet, const CoachContext()).messageKey,
+          'coach.reply.dietNone');
+      final over = engine.reply(CoachIntent.diet,
+          const CoachContext(kcalTarget: 2000, kcalEaten: 2300));
+      expect(over.messageKey, 'coach.reply.dietOver');
+      expect(over.params['over'], 300);
+      final ok = engine.reply(CoachIntent.diet,
+          const CoachContext(kcalTarget: 2000, kcalEaten: 1200));
+      expect(ok.messageKey, 'coach.reply.diet');
+      expect(ok.params['left'], 800);
+    });
+
+    test('weight reports direction from the delta, or nudges when none', () {
+      expect(engine.reply(CoachIntent.weight, const CoachContext()).messageKey,
+          'coach.reply.weightNone');
+      expect(
+          engine
+              .reply(CoachIntent.weight,
+                  const CoachContext(weightStr: '71.0 kg', weightDeltaKg: -0.8))
+              .messageKey,
+          'coach.reply.weightDown');
+      expect(
+          engine
+              .reply(CoachIntent.weight,
+                  const CoachContext(weightStr: '73.0 kg', weightDeltaKg: 0.6))
+              .messageKey,
+          'coach.reply.weightUp');
+      expect(
+          engine
+              .reply(CoachIntent.weight,
+                  const CoachContext(weightStr: '72.0 kg', weightDeltaKg: 0.0))
+              .messageKey,
+          'coach.reply.weightFlat');
+    });
+
+    test('workout scales with steps; tasks with habits; thanks is warm', () {
+      expect(engine.reply(CoachIntent.workout, const CoachContext()).messageKey,
+          'coach.reply.workoutNone');
+      expect(
+          engine
+              .reply(CoachIntent.workout, const CoachContext(avgSteps: 3000))
+              .messageKey,
+          'coach.reply.workoutLow');
+      expect(
+          engine
+              .reply(CoachIntent.workout, const CoachContext(avgSteps: 9000))
+              .messageKey,
+          'coach.reply.workoutOk');
+      expect(engine.reply(CoachIntent.tasks, const CoachContext()).messageKey,
+          'coach.reply.tasksNone');
+      expect(
+          engine
+              .reply(CoachIntent.tasks,
+                  const CoachContext(habitsDone: 1, habitsTotal: 3))
+              .messageKey,
+          'coach.reply.tasks');
+      expect(engine.reply(CoachIntent.thanks, const CoachContext()).messageKey,
+          'coach.reply.thanks');
+    });
   });
 }

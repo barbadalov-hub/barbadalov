@@ -33,3 +33,6 @@ firebase.json
 # OS
 .DS_Store
 Thumbs.db
+
+# Firebase build-time config (your project ids) — keep the .example, ignore the real one
+firebase.defines.json

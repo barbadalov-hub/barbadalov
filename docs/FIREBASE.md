@@ -2,7 +2,39 @@
 
 Firebase is **not enabled by default** so the app runs fully offline. Turning it
 on cannot be done from here — it needs *your* Firebase project and credentials.
-This doc is the exact recipe + reference code.
+
+## Quick enable (REST mode — what the app ships with)
+
+The app already contains a plugin-free, REST-based cloud sync
+(`lib/features/cloud/`). You don't need the FlutterFire SDK — just point it at
+your project with three build-time defines (all are public identifiers; real
+security comes from the Firestore rules in §5):
+
+```bash
+flutter run -d chrome \
+  --dart-define=FIREBASE_PROJECT_ID=your-project \
+  --dart-define=FIREBASE_API_KEY=AIza... \
+  --dart-define=FIREBASE_GOOGLE_CLIENT_ID=...apps.googleusercontent.com
+```
+
+Get the values from the Firebase console → Project settings → *Your apps (Web)*.
+Or keep them in a gitignored JSON file and pass `--dart-define-from-file`:
+
+```bash
+cp firebase.defines.example.json firebase.defines.json   # fill it in (gitignored)
+flutter build web --release --dart-define-from-file=firebase.defines.json
+```
+
+With the values set, `FirebaseConfig.isConfigured` becomes true, the
+`CloudSyncHandler` wakes up, and Account → *Continue with Google* / sync appears.
+Leave them empty and the app stays fully offline. The Firestore layout and rules
+are in §4–§5 below.
+
+---
+
+## Advanced — full FlutterFire SDK swap (optional)
+
+If you'd rather use the native Firestore SDK than the REST layer:
 
 ## 1. Create the project & configure
 

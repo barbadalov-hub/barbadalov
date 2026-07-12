@@ -1,0 +1,5 @@
+{
+  "FIREBASE_PROJECT_ID": "your-project",
+  "FIREBASE_API_KEY": "AIza...your-web-api-key",
+  "FIREBASE_GOOGLE_CLIENT_ID": "...apps.googleusercontent.com"
+}

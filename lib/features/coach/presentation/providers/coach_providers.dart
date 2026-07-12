@@ -2,7 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:lifeos/core/i18n/locale_controller.dart';
 import 'package:lifeos/features/coach/domain/coach_engine.dart';
+import 'package:lifeos/features/food/presentation/providers/diet_providers.dart';
 import 'package:lifeos/features/goals/presentation/providers/goal_providers.dart';
+import 'package:lifeos/features/health/presentation/providers/health_providers.dart';
 import 'package:lifeos/features/home/presentation/providers/today_providers.dart';
 import 'package:lifeos/features/insights/presentation/providers/insights_providers.dart';
 import 'package:lifeos/features/mind/presentation/providers/mood_providers.dart';
@@ -42,6 +44,20 @@ final coachContextProvider = Provider<CoachContext>((ref) {
     if (g.isComplete) completed++;
   }
 
+  // Dietitian calories and the weight trend, when available.
+  final assessment = ref.watch(assessmentProvider);
+  final eaten = ref.watch(consumedNutritionProvider);
+  final weights = ref.watch(weightHistoryProvider);
+  var weightStr = '';
+  var weightDelta = 0.0;
+  if (weights.isNotEmpty) {
+    final latest = weights.last.$2;
+    weightStr = '${latest.toStringAsFixed(1)} kg';
+    if (weights.length >= 2) {
+      weightDelta = latest - weights[weights.length - 2].$2;
+    }
+  }
+
   return CoachContext(
     name: profile?.name ?? '',
     lifeScore: score.total,
@@ -67,6 +83,10 @@ final coachContextProvider = Provider<CoachContext>((ref) {
     goalsCompleted: completed,
     seed: now.difference(DateTime(now.year)).inDays,
     insightSentence: insightSentence,
+    kcalTarget: assessment?.targetKcal ?? 0,
+    kcalEaten: eaten.kcal,
+    weightStr: weightStr,
+    weightDeltaKg: weightDelta,
   );
 });
 
