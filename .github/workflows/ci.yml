@@ -54,7 +54,7 @@ jobs:
       # The price-scraper Worker is plain JS with no deps — test its pure
       # parsers with Node's built-in runner.
       - name: Backend worker tests
-        run: node --test backend/
+        run: node --test backend/*.test.js
 
   build-web:
     name: Build web
