@@ -1,8 +1,10 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:lifeos/core/utils/download_file.dart';
+import 'package:lifeos/core/utils/pick_file.dart';
 import 'package:lifeos/features/backup/presentation/providers/local_backup_provider.dart';
 import 'package:lifeos/shared/widgets/animated_backdrop.dart';
 
@@ -46,6 +48,17 @@ class _BackupPageState extends ConsumerState<BackupPage> {
     if (data?.text != null) {
       _importCtrl.text = data!.text!;
       setState(() {});
+    }
+  }
+
+  // File picking is web-only; native platforms use the paste path.
+  bool get _canPickFile => kIsWeb;
+
+  Future<void> _pickFile() async {
+    final content = await pickTextFile();
+    if (content != null && content.trim().isNotEmpty) {
+      _importCtrl.text = content;
+      if (mounted) setState(() {});
     }
   }
 
@@ -190,6 +203,12 @@ class _BackupPageState extends ConsumerState<BackupPage> {
                           icon: const Icon(Icons.paste),
                           label: Text(context.tr('backup.paste')),
                         ),
+                        if (_canPickFile)
+                          OutlinedButton.icon(
+                            onPressed: _pickFile,
+                            icon: const Icon(Icons.upload_file),
+                            label: Text(context.tr('backup.fromFile')),
+                          ),
                         FilledButton.icon(
                           onPressed: _busy ? null : _import,
                           icon: _busy

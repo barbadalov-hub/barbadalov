@@ -985,6 +985,7 @@ const Map<String, Map<String, String>> _values = {
   'backup.importTitle': {'en': 'Import', 'ru': 'Импорт', 'uk': 'Імпорт'},
   'backup.importSub': {'en': 'Paste a backup here to restore it. This replaces matching data.', 'ru': 'Вставьте сюда копию, чтобы восстановить. Совпадающие данные будут заменены.', 'uk': 'Вставте сюди копію, щоб відновити. Збіжні дані буде замінено.'},
   'backup.paste': {'en': 'Paste', 'ru': 'Вставить', 'uk': 'Вставити'},
+  'backup.fromFile': {'en': 'From file', 'ru': 'Из файла', 'uk': 'З файлу'},
   'backup.import': {'en': 'Restore', 'ru': 'Восстановить', 'uk': 'Відновити'},
   'backup.importWarn': {'en': 'This overwrites your current data with the backup. Continue?', 'ru': 'Текущие данные будут перезаписаны копией. Продолжить?', 'uk': 'Поточні дані буде перезаписано копією. Продовжити?'},
   'backup.imported': {'en': 'Restored {n} entries', 'ru': 'Восстановлено записей: {n}', 'uk': 'Відновлено записів: {n}'},
