@@ -41,6 +41,13 @@ jobs:
       - name: Analyze
         run: flutter analyze
 
+      # Every glyph used in UI strings must live in a bundled font, or it tofus
+      # in the offline web build (CanvasKit has no system fonts).
+      - name: Check offline font coverage
+        run: |
+          pip install --quiet fonttools
+          python3 tool/check_font_coverage.py
+
       - name: Run tests
         run: flutter test
 

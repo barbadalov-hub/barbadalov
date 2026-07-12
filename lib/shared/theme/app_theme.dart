@@ -71,7 +71,7 @@ class AppTheme {
     // the family off the theme rather than a text style.
     const String? webFontFamily = kIsWeb ? 'RobotoWeb' : null;
     const List<String>? webFontFallback =
-        kIsWeb ? ['NotoColorEmoji', 'NotoSans'] : null;
+        kIsWeb ? ['NotoColorEmoji', 'NotoSans', 'DejaVuSymbols'] : null;
     final resolvedTextTheme = kIsWeb
         ? textTheme.apply(
             fontFamily: webFontFamily,

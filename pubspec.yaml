@@ -98,6 +98,7 @@ flutter:
   #   RobotoWeb      — primary text (Latin + Cyrillic), matches mobile Roboto.
   #   NotoSans       — fallback for glyphs Roboto lacks, notably ₴ (hryvnia).
   #   NotoColorEmoji — Noto COLRv1 emoji subset (~300 KB) for color emoji.
+  #   DejaVuSymbols  — monochrome symbols Roboto/Noto lack (→ ✓ ✗ ≈ …).
   fonts:
     - family: RobotoWeb
       fonts:
@@ -115,6 +116,9 @@ flutter:
     - family: NotoColorEmoji
       fonts:
         - asset: assets/fonts/NotoColorEmoji.ttf
+    - family: DejaVuSymbols
+      fonts:
+        - asset: assets/fonts/DejaVuSymbols.ttf
 
 # Cosmos brand icon → run `dart run flutter_launcher_icons` after changing.
 flutter_launcher_icons:
