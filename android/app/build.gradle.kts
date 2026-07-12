@@ -3,6 +3,9 @@ import java.io.FileInputStream
 
 plugins {
     id("com.android.application")
+    // Registers the top-level `kotlin { compilerOptions {} }` extension used
+    // below. Without it the block fails to resolve under AGP 9 / Kotlin 2.3.
+    id("org.jetbrains.kotlin.android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
