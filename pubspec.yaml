@@ -89,6 +89,37 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
+  # Web-only bundled fonts. CanvasKit ships no system fonts and fetches Roboto,
+  # its Noto fallbacks and color emoji from a CDN at runtime — so the web build
+  # (and the "runs fully offline" promise) breaks with no network. These are
+  # subset to just what the app uses and wired in as a web-only font stack in
+  # AppTheme (family `RobotoWeb` + fallbacks). Mobile keeps its native system
+  # fonts and emoji, so it never loads these.
+  #   RobotoWeb      — primary text (Latin + Cyrillic), matches mobile Roboto.
+  #   NotoSans       — fallback for glyphs Roboto lacks, notably ₴ (hryvnia).
+  #   NotoColorEmoji — Noto COLRv1 emoji subset (~300 KB) for color emoji.
+  #   DejaVuSymbols  — monochrome symbols Roboto/Noto lack (→ ✓ ✗ ≈ …).
+  fonts:
+    - family: RobotoWeb
+      fonts:
+        - asset: assets/fonts/Roboto-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Roboto-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Roboto-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Roboto-Black.ttf
+          weight: 900
+    - family: NotoSans
+      fonts:
+        - asset: assets/fonts/NotoSans.ttf
+    - family: NotoColorEmoji
+      fonts:
+        - asset: assets/fonts/NotoColorEmoji.ttf
+    - family: DejaVuSymbols
+      fonts:
+        - asset: assets/fonts/DejaVuSymbols.ttf
+
 # Cosmos brand icon → run `dart run flutter_launcher_icons` after changing.
 flutter_launcher_icons:
   image_path: "assets/icon/app_icon.png"

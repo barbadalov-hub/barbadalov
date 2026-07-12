@@ -1,0 +1,90 @@
+name: CI
+
+# Guards against regressions. To keep Actions minutes low on a private repo,
+# every PR runs only the fast checks (analyze + test); the heavier release web
+# build runs on pushes to main and on demand, where the artifact is useful.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze-and-test:
+    name: Analyze & test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.35.5
+          channel: stable
+          cache: true
+
+      # pubspec.lock is gitignored, so key the pub cache on pubspec.yaml.
+      - name: Cache pub packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: pub-${{ runner.os }}-${{ hashFiles('pubspec.yaml') }}
+          restore-keys: pub-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze
+
+      # Every glyph used in UI strings must live in a bundled font, or it tofus
+      # in the offline web build (CanvasKit has no system fonts).
+      - name: Check offline font coverage
+        run: |
+          pip install --quiet fonttools
+          python3 tool/check_font_coverage.py
+
+      - name: Run tests
+        run: flutter test
+
+  build-web:
+    name: Build web
+    runs-on: ubuntu-latest
+    needs: analyze-and-test
+    # Skip the expensive web build on PRs; run it on main and manual dispatch.
+    if: github.event_name != 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.35.5
+          channel: stable
+          cache: true
+
+      - name: Cache pub packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: pub-${{ runner.os }}-${{ hashFiles('pubspec.yaml') }}
+          restore-keys: pub-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # --no-web-resources-cdn bundles CanvasKit locally so the build (and the
+      # app) never depends on a third-party CDN being reachable.
+      - name: Build web (release)
+        run: flutter build web --release --no-web-resources-cdn
+
+      - name: Upload web build
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-build
+          path: build/web
+          retention-days: 7

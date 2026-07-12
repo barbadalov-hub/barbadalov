@@ -182,6 +182,8 @@ const Map<String, Map<String, String>> _values = {
   },
   'today.lifeScore': {'en': 'Life Score', 'ru': 'Индекс жизни', 'uk': 'Індекс життя'},
   'today.thisMonth': {'en': 'This month', 'ru': 'В этом месяце', 'uk': 'Цього місяця'},
+  'today.projLeftover': {'en': 'Projected month-end', 'ru': 'Прогноз на конец месяца', 'uk': 'Прогноз на кінець місяця'},
+  'today.projOver': {'en': 'At this pace you overspend', 'ru': 'При таком темпе перерасход', 'uk': 'За таким темпом перевитрата'},
   'today.aiInsight': {'en': 'AI insight', 'ru': 'Совет ИИ', 'uk': 'Порада ШІ'},
   'today.comingOnline': {'en': 'Coming online next', 'ru': 'Скоро появится', 'uk': 'Незабаром зʼявиться'},
   'today.ai.addIncome': {
@@ -273,6 +275,9 @@ const Map<String, Map<String, String>> _values = {
 
   // --- Health -------------------------------------------------------------
   'health.scoreToday': {'en': 'Health score today', 'ru': 'Индекс здоровья сегодня', 'uk': 'Індекс здоровʼя сьогодні'},
+  'health.week': {'en': 'This week', 'ru': 'На этой неделе', 'uk': 'Цього тижня'},
+  'health.weekAvg': {'en': 'Avg {steps} steps · {water} glasses · {sleep}h', 'ru': 'В среднем {steps} шагов · {water} стаканов · {sleep}ч', 'uk': 'У середньому {steps} кроків · {water} склянок · {sleep}год'},
+  'health.weekGoals': {'en': 'On goal — steps {steps}/{n} · water {water}/{n} · sleep {sleep}/{n}', 'ru': 'В цели — шаги {steps}/{n} · вода {water}/{n} · сон {sleep}/{n}', 'uk': 'У цілі — кроки {steps}/{n} · вода {water}/{n} · сон {sleep}/{n}'},
   'health.scoreSubtitle': {'en': 'Water, steps and sleep vs your goals', 'ru': 'Вода, шаги и сон относительно ваших целей', 'uk': 'Вода, кроки та сон відносно ваших цілей'},
   'health.water': {'en': 'Water', 'ru': 'Вода', 'uk': 'Вода'},
   'health.steps': {'en': 'Steps', 'ru': 'Шаги', 'uk': 'Кроки'},
@@ -336,6 +341,7 @@ const Map<String, Map<String, String>> _values = {
   'goals.behind': {'en': 'behind target', 'ru': 'отстаёт от плана', 'uk': 'відстає від плану'},
   'goals.ofTarget': {'en': '{saved} of {target} · {remaining} to go', 'ru': '{saved} из {target} · осталось {remaining}', 'uk': '{saved} з {target} · залишилось {remaining}'},
   'goals.forecast': {'en': '~{months} mo · {date} · {flag}', 'ru': '~{months} мес · {date} · {flag}', 'uk': '~{months} міс · {date} · {flag}'},
+  'goals.needMonthly': {'en': 'Save {amount}/mo to hit your date', 'ru': 'Откладывайте {amount}/мес, чтобы успеть к сроку', 'uk': 'Відкладайте {amount}/міс, щоб встигнути до строку'},
   'goals.addTo': {'en': 'Add to "{title}"', 'ru': 'Пополнить «{title}»', 'uk': 'Поповнити «{title}»'},
   'goals.addStage': {'en': 'Add stage', 'ru': 'Добавить этап', 'uk': 'Додати етап'},
   'goals.newStage': {'en': 'New stage', 'ru': 'Новый этап', 'uk': 'Новий етап'},
@@ -343,6 +349,7 @@ const Map<String, Map<String, String>> _values = {
 
   // --- Food ---------------------------------------------------------------
   'food.pantry': {'en': 'Pantry', 'ru': 'Кладовая', 'uk': 'Комора'},
+  'food.useNext': {'en': 'Use next: {name} · {days}d left', 'ru': 'Съесть первым: {name} · осталось {days}д', 'uk': 'Зʼїсти першим: {name} · лишилось {days}д'},
   'food.pantryEmpty': {'en': 'Pantry is empty.', 'ru': 'Кладовая пуста.', 'uk': 'Комора порожня.'},
   'food.shopping': {'en': 'Shopping list', 'ru': 'Список покупок', 'uk': 'Список покупок'},
   'food.nothingToBuy': {'en': 'Nothing to buy.', 'ru': 'Покупать нечего.', 'uk': 'Купувати нічого.'},
@@ -647,7 +654,7 @@ const Map<String, Map<String, String>> _values = {
   'wo.search': {'en': 'Search exercises…', 'ru': 'Поиск упражнений…', 'uk': 'Пошук вправ…'},
   'wo.loading': {'en': 'Loading the live catalog from wger.de…', 'ru': 'Загружаю живой каталог с wger.de…', 'uk': 'Завантажую живий каталог із wger.de…'},
   'wo.noDesc': {'en': 'No description yet — watch the video for form.', 'ru': 'Описания пока нет — техника в видео.', 'uk': 'Опису поки немає — техніка у відео.'},
-  'wo.videoWger': {'en': '▶ wger video', 'ru': '▶ Видео wger', 'uk': '▶ Відео wger'},
+  'wo.videoWger': {'en': 'wger video', 'ru': 'Видео wger', 'uk': 'Відео wger'},
   'wo.withVideo': {'en': 'with video', 'ru': 'только с видео', 'uk': 'лише з відео'},
   'wo.favorites': {'en': 'favorites', 'ru': 'избранное', 'uk': 'обране'},
   'wo.allMuscles': {'en': 'All', 'ru': 'Все', 'uk': 'Усі'},
@@ -1227,6 +1234,7 @@ const Map<String, Map<String, String>> _values = {
   'tsec.diet': {'en': 'Nutrition', 'ru': 'Питание', 'uk': 'Харчування'},
   'tsec.health': {'en': 'Health', 'ru': 'Здоровье', 'uk': 'Здоров’я'},
   'tsec.habits': {'en': 'Habits', 'ru': 'Привычки', 'uk': 'Звички'},
+  'tsec.habitsWeek': {'en': 'This week {n}/{target}', 'ru': 'За неделю {n}/{target}', 'uk': 'За тиждень {n}/{target}'},
   'tsec.tasks': {'en': 'Tasks', 'ru': 'Задачи', 'uk': 'Завдання'},
   'tsec.goal': {'en': 'Goal', 'ru': 'Цель', 'uk': 'Ціль'},
   'tsec.backup': {'en': 'Backup nudge', 'ru': 'Напоминание о бэкапе', 'uk': 'Нагадування про бекап'},

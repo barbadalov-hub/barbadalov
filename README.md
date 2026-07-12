@@ -46,10 +46,14 @@ Windows desktop, Web and Android from the same code, no Developer Mode needed).
 
 ## 🚀 Getting started
 
+Built and verified on **Flutter 3.35.5 (stable)** — the version pinned by CI and
+the Claude Code web hook (SDK constraint `>=3.4.0 <4.0.0`). These checks run on
+every push and pull request via GitHub Actions.
+
 ```bash
 flutter pub get
 flutter analyze     # → No issues found
-flutter test        # → ~194 tests passing
+flutter test        # → 269 tests passing
 flutter run -d chrome        # or -d windows / an Android device
 ```
 
@@ -61,7 +65,7 @@ flutter build apk --release      # Android
 flutter build windows --release  # Windows host only (needs VS C++ toolchain)
 ```
 
-Status: `flutter analyze` clean · **~194 tests passing** · Web, Android APK and
+Status: `flutter analyze` clean · **269 tests passing** · Web, Android APK and
 Windows desktop all build.
 
 > **Windows note:** the Dart analyzer LSP crashes on non-ASCII project paths, so
@@ -69,6 +73,30 @@ Windows desktop all build.
 > ASCII junction/copy (e.g. `C:\src\lifeos`). Not an issue on macOS/Linux.
 
 See [`CLAUDE.md`](CLAUDE.md) for conventions and constraints before contributing.
+
+#### Web behind a restricted network / fully offline
+
+By default Flutter web (CanvasKit) fetches its rendering engine — and the
+default text font — from Google's CDN at runtime. To vendor CanvasKit into the
+bundle so the build never depends on that CDN:
+
+```powershell
+flutter build web --release --no-web-resources-cdn
+```
+
+Fonts are fully bundled too: a web-only stack (Roboto + Noto Sans for ₴ and
+other glyphs + a Noto color-emoji subset + a DejaVu symbols fallback) so text,
+currency and emoji all render with **zero network** — verified with every
+`*.gstatic.com`/`*.googleapis.com` request blocked. A CI check
+(`tool/check_font_coverage.py`) fails the build if any UI string uses a glyph no
+bundled font carries. Mobile keeps its native system fonts.
+
+### Developing from Claude Code on the web / mobile
+
+`.claude/hooks/session-start.sh` (a `SessionStart` hook) installs Flutter and
+runs `flutter pub get` automatically when a Claude Code web session starts, so
+the project is ready to analyze, test and build without any manual setup — you
+can keep working on it from a phone.
 
 ---
 

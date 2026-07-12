@@ -5,6 +5,7 @@ import 'package:lifeos/features/food/domain/entities/food_item.dart';
 import 'package:lifeos/features/food/domain/entities/meal_plan.dart';
 import 'package:lifeos/features/food/domain/entities/recipe.dart';
 import 'package:lifeos/features/food/domain/entities/shopping_item.dart';
+import 'package:lifeos/features/food/domain/pantry_planner.dart';
 import 'package:lifeos/features/food/domain/repositories/food_repository.dart';
 import 'package:lifeos/features/money/domain/entities/category.dart';
 import 'package:lifeos/features/money/presentation/providers/money_providers.dart';
@@ -111,6 +112,13 @@ final expiringSoonProvider = Provider<List<FoodItem>>((ref) {
   final now = ref.watch(clockProvider).now();
   final items = ref.watch(pantryProvider).valueOrNull ?? const [];
   return items.where((i) => i.isExpiringSoon(now) || i.isExpired(now)).toList();
+});
+
+/// The single pantry item to eat next (soonest-expiring, not yet spoiled).
+final useNextProvider = Provider<FoodItem?>((ref) {
+  final now = ref.watch(clockProvider).now();
+  final items = ref.watch(pantryProvider).valueOrNull ?? const [];
+  return PantryPlanner.useNext(items, now);
 });
 
 final addFoodItemProvider = Provider<AddFoodItem>((ref) => AddFoodItem(

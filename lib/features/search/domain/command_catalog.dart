@@ -40,7 +40,7 @@ const kCommands = <Command>[
   Command('nav_health', '❤️', 'nav.health',
       ['health', 'здоровье', 'шаги', 'вода', 'сон', 'steps', 'sleep', 'здоров']),
   Command('nav_goals', '🎯', 'nav.goals', ['goals', 'цели', 'мечта', 'saving', 'ціл']),
-  Command('nav_more', '⋯', 'nav.more', ['more', 'ещё', 'меню', 'настройки', 'ще']),
+  Command('nav_more', '…', 'nav.more', ['more', 'ещё', 'меню', 'настройки', 'ще']),
 
   // Modules & tools.
   Command('food', '🥗', 'more.food', ['food', 'продукты', 'кладовая', 'pantry', 'shopping', 'їжа']),

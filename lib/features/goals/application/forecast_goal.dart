@@ -9,11 +9,16 @@ class GoalForecast {
   final bool onTrackForTargetDate;
   final bool complete;
 
+  /// The monthly contribution needed to reach the goal by its target date;
+  /// null when there is no target date or it has already passed.
+  final Money? requiredMonthly;
+
   const GoalForecast({
     this.monthsRemaining,
     this.projectedDate,
     this.onTrackForTargetDate = true,
     this.complete = false,
+    this.requiredMonthly,
   });
 }
 
@@ -28,8 +33,14 @@ class ForecastGoal {
     required DateTime now,
   }) {
     if (goal.isComplete) return const GoalForecast(complete: true);
+
+    final required = _requiredMonthly(goal, now);
+
     if (monthlyNet.minorUnits <= 0) {
-      return const GoalForecast(onTrackForTargetDate: false);
+      return GoalForecast(
+        onTrackForTargetDate: false,
+        requiredMonthly: required,
+      );
     }
 
     final months = (goal.remaining.minorUnits / monthlyNet.minorUnits).ceil();
@@ -41,6 +52,19 @@ class ForecastGoal {
       monthsRemaining: months,
       projectedDate: projected,
       onTrackForTargetDate: onTrack,
+      requiredMonthly: required,
     );
+  }
+
+  /// Monthly contribution needed to fund [goal] by its target date. Null when
+  /// there is no target date or the target month has already arrived/passed.
+  Money? _requiredMonthly(Goal goal, DateTime now) {
+    final target = goal.targetDate;
+    if (target == null) return null;
+    final monthsUntil =
+        (target.year - now.year) * 12 + (target.month - now.month);
+    if (monthsUntil <= 0) return null;
+    final perMonth = (goal.remaining.minorUnits / monthsUntil).ceil();
+    return Money(perMonth, currency: goal.remaining.currency);
   }
 }

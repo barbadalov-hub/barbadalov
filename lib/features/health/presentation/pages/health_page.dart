@@ -110,6 +110,8 @@ class HealthPage extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
             const _StreaksCard(),
+            const SizedBox(height: 12),
+            const _WeekSummaryCard(),
             const SizedBox(height: 20),
             Text(context.tr('health.log'),
                 style: Theme.of(context).textTheme.titleMedium),
@@ -428,6 +430,45 @@ class _StreaksCard extends ConsumerWidget {
                       style: const TextStyle(fontWeight: FontWeight.w600)),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A 7-day rollup: average water/steps/sleep and how many days hit each goal.
+class _WeekSummaryCard extends ConsumerWidget {
+  const _WeekSummaryCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final s = ref.watch(weeklyHealthProvider);
+    if (!s.hasData) return const SizedBox.shrink();
+    final outline = Theme.of(context).colorScheme.outline;
+    return SectionCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(context.tr('health.week'),
+              style: Theme.of(context).textTheme.titleSmall),
+          const SizedBox(height: 6),
+          Text(
+            context.trp('health.weekAvg', {
+              'steps': s.avgSteps,
+              'water': s.avgWater.toStringAsFixed(1),
+              'sleep': s.avgSleep.toStringAsFixed(1),
+            }),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            context.trp('health.weekGoals', {
+              'steps': s.daysStepGoal,
+              'water': s.daysWaterGoal,
+              'sleep': s.daysSleepGoal,
+              'n': s.daysLogged,
+            }),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: outline),
           ),
         ],
       ),

@@ -281,21 +281,39 @@ class _GoalCard extends ConsumerWidget {
     if (f.complete) {
       return Text(context.tr('goals.reached'), style: style);
     }
+    final Widget main;
     if (f.monthsRemaining == null) {
-      return Text(context.tr('goals.saveMonthly'), style: style);
+      main = Text(context.tr('goals.saveMonthly'), style: style);
+    } else {
+      final date = DateFormat.yMMM().format(f.projectedDate!);
+      final flag = f.onTrackForTargetDate
+          ? '✅ ${context.tr('goals.onTrack')}'
+          : '⚠️ ${context.tr('goals.behind')}';
+      main = Text(
+        context.trp('goals.forecast', {
+          'months': f.monthsRemaining!,
+          'date': date,
+          'flag': flag,
+        }),
+        style: style,
+      );
     }
-    final date = DateFormat.yMMM().format(f.projectedDate!);
-    final flag = f.onTrackForTargetDate
-        ? '✅ ${context.tr('goals.onTrack')}'
-        : '⚠️ ${context.tr('goals.behind')}';
-    return Text(
-      context.trp('goals.forecast', {
-        'months': f.monthsRemaining!,
-        'date': date,
-        'flag': flag,
-      }),
-      style: style,
-    );
+    // When the goal has a deadline it isn't on pace for, show the monthly
+    // contribution needed to still make it.
+    final required = f.requiredMonthly;
+    if (required != null && !f.onTrackForTargetDate) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          main,
+          Text(
+            context.trp('goals.needMonthly', {'amount': required.format()}),
+            style: style?.copyWith(fontWeight: FontWeight.w600),
+          ),
+        ],
+      );
+    }
+    return main;
   }
 
   Future<void> _contributeDialog(BuildContext context, WidgetRef ref) async {

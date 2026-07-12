@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 /// Central Material 3 theme. UI code pulls colours and text styles from here so
@@ -25,43 +26,65 @@ class AppTheme {
         primary: Color.lerp(seed, Colors.white, 0.35),
       );
     }
+    // Bolder display numbers + tighter headings (Ivy-Wallet-style type scale).
+    final textTheme = Typography.material2021(platform: TargetPlatform.android)
+        .englishLike
+        .apply(
+          bodyColor: scheme.onSurface,
+          displayColor: scheme.onSurface,
+        )
+        .copyWith(
+          displaySmall: TextStyle(
+            fontSize: 38,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -1.2,
+            color: scheme.onSurface,
+          ),
+          headlineSmall: TextStyle(
+            fontSize: 26,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.6,
+            color: scheme.onSurface,
+          ),
+          titleLarge: TextStyle(
+            fontSize: 21,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.3,
+            color: scheme.onSurface,
+          ),
+          titleMedium: TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.2,
+            color: scheme.onSurface,
+          ),
+        );
+    // On the web, CanvasKit ships no system fonts and would fetch Roboto, its
+    // Noto fallbacks and color emoji from a CDN — breaking offline. Use the
+    // bundled subsets instead: RobotoWeb for text, NotoSans for glyphs Roboto
+    // lacks (notably ₴), and the color-emoji subset for emoji. Mobile keeps its
+    // native system fonts, so this whole stack is web-only.
+    //
+    // The family is applied directly to every text style (the base Material
+    // typography hard-codes 'Roboto', which ThemeData.fontFamily does not
+    // override on a supplied textTheme), and to ThemeData for widgets that read
+    // the family off the theme rather than a text style.
+    const String? webFontFamily = kIsWeb ? 'RobotoWeb' : null;
+    const List<String>? webFontFallback =
+        kIsWeb ? ['NotoColorEmoji', 'NotoSans', 'DejaVuSymbols'] : null;
+    final resolvedTextTheme = kIsWeb
+        ? textTheme.apply(
+            fontFamily: webFontFamily,
+            fontFamilyFallback: webFontFallback,
+          )
+        : textTheme;
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
       scaffoldBackgroundColor: scheme.surface,
-      // Bolder display numbers + tighter headings (Ivy-Wallet-style type scale).
-      textTheme: Typography.material2021(platform: TargetPlatform.android)
-          .englishLike
-          .apply(
-            bodyColor: scheme.onSurface,
-            displayColor: scheme.onSurface,
-          )
-          .copyWith(
-            displaySmall: TextStyle(
-              fontSize: 38,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -1.2,
-              color: scheme.onSurface,
-            ),
-            headlineSmall: TextStyle(
-              fontSize: 26,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.6,
-              color: scheme.onSurface,
-            ),
-            titleLarge: TextStyle(
-              fontSize: 21,
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.3,
-              color: scheme.onSurface,
-            ),
-            titleMedium: TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.2,
-              color: scheme.onSurface,
-            ),
-          ),
+      fontFamily: webFontFamily,
+      fontFamilyFallback: webFontFallback,
+      textTheme: resolvedTextTheme,
       // Modern zoom/fade route transitions on every platform (M3 style)
       // instead of the default platform-specific slides.
       pageTransitionsTheme: PageTransitionsTheme(

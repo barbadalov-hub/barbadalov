@@ -21,6 +21,8 @@ import 'package:lifeos/features/mind/domain/mood.dart';
 import 'package:lifeos/features/mind/presentation/pages/mind_page.dart';
 import 'package:lifeos/features/mind/presentation/pages/mood_journal_page.dart';
 import 'package:lifeos/features/mind/presentation/providers/mind_providers.dart';
+import 'package:lifeos/features/mind/domain/habit_consistency.dart';
+import 'package:lifeos/features/money/application/project_month_end.dart';
 import 'package:lifeos/features/money/domain/entities/budget.dart';
 import 'package:lifeos/features/money/presentation/widgets/add_transaction_sheet.dart';
 import 'package:lifeos/features/profile/presentation/pages/profile_page.dart';
@@ -229,7 +231,12 @@ class _CustomizeSheet extends ConsumerWidget {
               shrinkWrap: true,
               padding: const EdgeInsets.only(bottom: 12),
               itemCount: order.length,
-              onReorderItem: ord.reorder,
+              onReorder: (oldIndex, newIndex) {
+                // ReorderableListView reports newIndex in pre-removal terms;
+                // ord.reorder expects post-removal semantics.
+                if (newIndex > oldIndex) newIndex -= 1;
+                ord.reorder(oldIndex, newIndex);
+              },
               itemBuilder: (context, index) {
                 final id = order[index];
                 return ListTile(
@@ -395,6 +402,16 @@ class _BudgetBreakdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Project where the month lands if spending keeps its current pace.
+    final now = DateTime.now();
+    final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
+    final projection = const ProjectMonthEnd()(
+      income: budget.income,
+      expensesSoFar: budget.expenses,
+      reserve: budget.reserve,
+      dayOfMonth: now.day,
+      daysInMonth: daysInMonth,
+    );
     return SectionCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -412,6 +429,16 @@ class _BudgetBreakdown extends StatelessWidget {
           _row(context, context.tr('money.available'),
               budget.available.format(), Theme.of(context).colorScheme.primary,
               bold: true),
+          if (budget.income.isPositive)
+            _row(
+              context,
+              context.tr(
+                  projection.onTrack ? 'today.projLeftover' : 'today.projOver'),
+              projection.projectedLeftover.format(),
+              projection.onTrack
+                  ? LifeColors.finance
+                  : LifeColors.financeDanger,
+            ),
         ],
       ),
     );
@@ -625,6 +652,7 @@ class _HabitsMiniCard extends ConsumerWidget {
     final habits = ref.watch(habitsProvider).valueOrNull ?? const [];
     if (habits.isEmpty) return const SizedBox.shrink();
     final done = habits.where((h) => h.doneToday).length;
+    final week = HabitConsistency.weekly(habits, DateTime.now());
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: SectionCard(
@@ -647,6 +675,14 @@ class _HabitsMiniCard extends ConsumerWidget {
                         )),
               ],
             ),
+            if (week.target > 0)
+              Text(
+                context.trp('tsec.habitsWeek',
+                    {'n': week.completed, 'target': week.target}),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+              ),
             for (final h in habits.take(4))
               Row(
                 children: [

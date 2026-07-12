@@ -6,6 +6,7 @@ import 'package:lifeos/features/health/application/sync_device_health.dart';
 import 'package:lifeos/features/health/data/health_repository_impl.dart';
 import 'package:lifeos/features/health/domain/entities/health_day.dart';
 import 'package:lifeos/features/health/domain/repositories/health_repository.dart';
+import 'package:lifeos/features/health/domain/weekly_health.dart';
 import 'package:lifeos/shared/providers/core_providers.dart';
 
 final healthScoreServiceProvider =
@@ -122,6 +123,17 @@ final healthScoreProvider = Provider<int>((ref) {
   final day = ref.watch(todayHealthProvider).valueOrNull;
   if (day == null) return 50;
   return ref.watch(healthScoreServiceProvider).scoreFor(day);
+});
+
+/// A 7-day rollup (today + archived history) of averages and goal-hit days.
+final weeklyHealthProvider = Provider<WeeklyHealthSummary>((ref) {
+  final now = ref.watch(clockProvider).now();
+  final history = ref.watch(healthHistoryProvider);
+  final today = ref.watch(todayHealthProvider).valueOrNull;
+  return HealthWeek.summarize(
+    [...history, if (today != null) today],
+    now,
+  );
 });
 
 final logHealthProvider = Provider<LogHealth>((ref) => LogHealth(

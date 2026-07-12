@@ -21,6 +21,7 @@ class FoodPage extends ConsumerWidget {
     final mealPlan = ref.watch(mealPlanProvider);
     final foodBudget = ref.watch(foodBudgetProvider);
     final foodSpent = ref.watch(foodSpentThisMonthProvider);
+    final useNext = ref.watch(useNextProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(context.tr('more.food'))),
@@ -37,6 +38,25 @@ class FoodPage extends ConsumerWidget {
           ),
           const SizedBox(height: 20),
           const _PantryOverview(),
+          if (useNext != null) ...[
+            const SizedBox(height: 12),
+            SectionCard(
+              child: Row(
+                children: [
+                  if (useNext.emoji.isNotEmpty) ...[
+                    Text(useNext.emoji, style: const TextStyle(fontSize: 20)),
+                    const SizedBox(width: 10),
+                  ],
+                  Expanded(
+                    child: Text(context.trp('food.useNext', {
+                      'name': useNext.name,
+                      'days': useNext.daysUntilExpiry(now)!,
+                    })),
+                  ),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 12),
           _Header(
             title: context.tr('food.pantry'),
