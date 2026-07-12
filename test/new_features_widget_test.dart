@@ -3,10 +3,21 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
+import 'package:lifeos/core/services/clock.dart';
 import 'package:lifeos/features/health/presentation/pages/workouts_page.dart';
 import 'package:lifeos/features/money/presentation/pages/money_page.dart';
+import 'package:lifeos/shared/providers/core_providers.dart';
 
-Widget _app(Widget home) => ProviderScope(
+/// Fixed "now" so date-dependent seeds/verdicts don't drift with the calendar.
+class _FixedClock implements Clock {
+  final DateTime _t;
+  const _FixedClock(this._t);
+  @override
+  DateTime now() => _t;
+}
+
+Widget _app(Widget home, {List<Override> overrides = const []}) => ProviderScope(
+      overrides: overrides,
       child: MaterialApp(
         locale: const Locale('uk'),
         localizationsDelegates: const [
@@ -54,7 +65,14 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(_app(const MoneyPage()));
+    // Pin "now" to early in the month so the seeded spend (1090 of a 3200
+    // income) reads as an over-pace regardless of today's calendar date.
+    await tester.pumpWidget(_app(
+      const MoneyPage(),
+      overrides: [
+        clockProvider.overrideWithValue(_FixedClock(DateTime(2026, 3, 5))),
+      ],
+    ));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 700));
 
