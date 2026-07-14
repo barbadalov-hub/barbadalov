@@ -4,7 +4,7 @@
     <!-- Receipt photo capture for on-device OCR. -->
     <uses-permission android:name="android.permission.CAMERA"/>
     <application
-        android:label="lifeos"
+        android:label="Lumo"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

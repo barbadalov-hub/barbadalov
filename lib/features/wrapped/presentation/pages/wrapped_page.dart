@@ -277,7 +277,7 @@ class _WrappedPageState extends ConsumerState<WrappedPage> {
                 key: _shareKey,
                 child: ShareCard(
                   emoji: '🌌',
-                  kicker: 'LifeOS Wrapped',
+                  kicker: 'Lumo Wrapped',
                   title: '${s.year}',
                   titleSize: 40,
                   rows: rows,

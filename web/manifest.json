@@ -1,11 +1,11 @@
 {
-    "name": "LifeOS",
-    "short_name": "LifeOS",
+    "name": "Lumo",
+    "short_name": "Lumo",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0A0518",
     "theme_color": "#7B5CFF",
-    "description": "The operating system for your life — finance, health, food, habits, goals and an AI life assistant.",
+    "description": "Lumo — the operating system for your life: finance, health, food, habits, goals and an AI life assistant.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

@@ -28,7 +28,7 @@ String _baseDir() {
       env['LOCALAPPDATA'] ??
       env['HOME'] ??
       Directory.systemTemp.path;
-  return '$base${Platform.pathSeparator}LifeOS';
+  return '$base${Platform.pathSeparator}Lumo';
 }
 
 class _FileKeyValueStore implements KeyValueStore {

@@ -161,3 +161,13 @@ lib/
 - `analysis_options.yaml` promotes `dead_code` / `unawaited_futures` to errors.
 - Pure use cases and engines are unit-tested without any I/O; there's a full-app
   boot smoke test and widget tests for the key screens.
+
+---
+
+## 📄 License
+
+Source code is released under the [MIT License](LICENSE) — © 2026 barbadalov.
+
+Bundled fonts keep their own licenses (Roboto — Apache-2.0; Noto Sans / Noto
+Color Emoji — SIL OFL-1.1; DejaVu symbols — Bitstream Vera); full texts ship in
+[`assets/licenses/`](assets/licenses/).
