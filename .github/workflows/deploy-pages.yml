@@ -31,7 +31,17 @@ jobs:
       - run: flutter pub get
       # Pages serves under /<repo>/, and CanvasKit is vendored so it works with
       # no third-party CDN.
-      - run: flutter build web --release --no-web-resources-cdn --base-href "/barbadalov/"
+      #
+      # Firebase config is injected from repo Variables (Settings → Secrets and
+      # variables → Actions → Variables). These are public identifiers (a web
+      # apiKey is not a secret — Firestore security rules protect the data), so
+      # Variables are fine. Leave them unset and the app stays fully offline.
+      - run: |
+          flutter build web --release --no-web-resources-cdn \
+            --base-href "/barbadalov/" \
+            --dart-define=FIREBASE_PROJECT_ID="${{ vars.FIREBASE_PROJECT_ID }}" \
+            --dart-define=FIREBASE_API_KEY="${{ vars.FIREBASE_API_KEY }}" \
+            --dart-define=FIREBASE_GOOGLE_CLIENT_ID="${{ vars.FIREBASE_GOOGLE_CLIENT_ID }}"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: build/web

@@ -496,6 +496,14 @@ const Map<String, Map<String, String>> _values = {
   'acc.err.net': {'en': 'No connection — try again.', 'ru': 'Нет соединения — попробуйте ещё раз.', 'uk': 'Немає зʼєднання — спробуйте ще раз.'},
   'acc.err.generic': {'en': 'Something went wrong — try again.', 'ru': 'Что-то пошло не так — попробуйте ещё раз.', 'uk': 'Щось пішло не так — спробуйте ще раз.'},
   'acc.note': {'en': 'Passwords are handled by Firebase Authentication and never stored in the app.', 'ru': 'Пароли обрабатывает Firebase Authentication и никогда не хранятся в приложении.', 'uk': 'Паролі обробляє Firebase Authentication і ніколи не зберігаються в застосунку.'},
+
+  // --- First-run registration gate ---------------------------------------
+  'reg.title': {'en': 'Create your account', 'ru': 'Создай аккаунт', 'uk': 'Створи акаунт'},
+  'reg.signinTitle': {'en': 'Sign in', 'ru': 'Вход', 'uk': 'Вхід'},
+  'reg.subtitle': {'en': 'Your data is saved to your own private account and syncs across your devices.', 'ru': 'Твои данные сохраняются в твоём личном аккаунте и синхронизируются между устройствами.', 'uk': 'Твої дані зберігаються у твоєму особистому акаунті й синхронізуються між пристроями.'},
+  'reg.create': {'en': 'Register', 'ru': 'Зарегистрироваться', 'uk': 'Зареєструватися'},
+  'reg.toSignin': {'en': 'Already have an account? Sign in', 'ru': 'Уже есть аккаунт? Войти', 'uk': 'Уже є акаунт? Увійти'},
+  'reg.toCreate': {'en': 'New here? Create an account', 'ru': 'Впервые здесь? Создать аккаунт', 'uk': 'Уперше тут? Створити акаунт'},
   'acc.backupTitle': {'en': 'Cloud backup', 'ru': 'Резервная копия', 'uk': 'Резервна копія'},
   'acc.backupNow': {'en': 'Back up now', 'ru': 'Сохранить копию', 'uk': 'Зберегти копію'},
   'acc.restore': {'en': 'Restore', 'ru': 'Восстановить', 'uk': 'Відновити'},

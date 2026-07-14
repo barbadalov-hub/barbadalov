@@ -24,6 +24,12 @@ final accountEmailProvider = StateProvider<String?>(
   (ref) => ref.watch(keyValueStoreProvider).getString('cloud.email'),
 );
 
+/// Whether a real account is required before the app can be used. True only
+/// when a cloud project is configured (so a database exists to register into);
+/// off by default so the app still runs fully offline. Overridable in tests.
+final authRequiredProvider =
+    Provider<bool>((ref) => FirebaseConfig.isConfigured);
+
 /// The device's cloud session survives restarts: uid + refresh token live in
 /// the local store, so one device = one identity forever. Linking an email
 /// keeps the same uid and lets that history follow you to other devices.

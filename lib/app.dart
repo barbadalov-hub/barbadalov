@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lifeos/core/constants/app_constants.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:lifeos/core/i18n/locale_controller.dart';
+import 'package:lifeos/features/cloud/presentation/pages/auth_gate_page.dart';
+import 'package:lifeos/features/cloud/presentation/providers/cloud_providers.dart';
 import 'package:lifeos/features/home/presentation/pages/home_shell.dart';
 import 'package:lifeos/features/onboarding/presentation/pages/onboarding_page.dart';
 import 'package:lifeos/features/onboarding/presentation/providers/onboarding_provider.dart';
@@ -49,11 +51,28 @@ class LifeOsApp extends ConsumerWidget {
       ],
       supportedLocales: AppLocalizations.supportedLocales,
       home: _SplashGate(
-        child: ref.watch(onboardingDoneProvider)
-            ? const _AppLock(child: HomeShell())
-            : const OnboardingPage(),
+        child: _AuthGate(
+          child: ref.watch(onboardingDoneProvider)
+              ? const _AppLock(child: HomeShell())
+              : const OnboardingPage(),
+        ),
       ),
     );
+  }
+}
+
+/// Requires a registered account before the app when a cloud project is
+/// configured; otherwise (offline build) passes straight through. Each user
+/// registers via [AuthGatePage], so every account is separate.
+class _AuthGate extends ConsumerWidget {
+  final Widget child;
+  const _AuthGate({required this.child});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (!ref.watch(authRequiredProvider)) return child;
+    final signedIn = ref.watch(accountEmailProvider) != null;
+    return signedIn ? child : const AuthGatePage();
   }
 }
 
