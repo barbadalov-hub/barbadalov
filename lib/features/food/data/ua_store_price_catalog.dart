@@ -2,21 +2,24 @@ import 'package:lifeos/features/food/domain/entities/nutrition.dart';
 import 'package:lifeos/features/food/domain/repositories/store_price_source.dart';
 import 'package:lifeos/shared/models/money.dart';
 
-/// Curated Ukrainian grocery prices (UAH per standard pack) for the launch
-/// stores — АТБ, Сільпо, Novus. Values are realistic mid-2026 shelf prices and
-/// clearly marked as approximate in the UI. Swap this class for a live
-/// scraper/backend adapter behind [StorePriceSource] without touching the UI.
+/// Curated approximate grocery prices (UAH per standard pack) across three
+/// anonymous price tiers. Values are realistic mid-2026 shelf prices, clearly
+/// marked as approximate in the UI, and are **not** tied to any real retailer
+/// (the store labels are generic — see the `store.*` i18n keys). Swap this
+/// class for another [StorePriceSource] without touching the UI.
 class UaStorePriceCatalog implements StorePriceSource {
   const UaStorePriceCatalog();
 
-  static const atb = Store('atb', 'АТБ');
-  static const silpo = Store('silpo', 'Сільпо');
-  static const novus = Store('novus', 'Novus');
+  // Anonymous, brand-free price tiers. Display names are localized in the UI
+  // via the `store.<id>` i18n keys; the strings here are only fallbacks.
+  static const s1 = Store('s1', 'Store 1');
+  static const s2 = Store('s2', 'Store 2');
+  static const s3 = Store('s3', 'Store 3');
 
   @override
-  List<Store> get stores => const [atb, silpo, novus];
+  List<Store> get stores => const [s1, s2, s3];
 
-  /// productId → (packAmount, packUnit, [АТБ, Сільпо, Novus] price in UAH).
+  /// productId → (packAmount, packUnit, [tier 1, tier 2, tier 3] price in UAH).
   static const Map<String, (int, PortionUnit, List<double>)> _catalog = {
     'eggs': (10, PortionUnit.pcs, [62, 68, 72]),
     'milk': (1000, PortionUnit.ml, [44, 47, 50]),

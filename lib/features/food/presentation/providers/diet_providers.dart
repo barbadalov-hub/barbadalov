@@ -1,84 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lifeos/features/food/application/diet_planner.dart';
-import 'package:lifeos/features/food/data/backend_price_source.dart';
 import 'package:lifeos/features/food/data/meal_catalog.dart';
 import 'package:lifeos/features/food/data/ua_store_price_catalog.dart';
-import 'package:lifeos/features/food/data/zakaz_price_source.dart';
 import 'package:lifeos/features/food/domain/entities/nutrition.dart';
 import 'package:lifeos/features/food/domain/events/food_events.dart';
 import 'package:lifeos/features/food/domain/repositories/store_price_source.dart';
 import 'package:lifeos/features/profile/presentation/providers/profile_providers.dart';
 import 'package:lifeos/shared/providers/core_providers.dart';
 
-/// Live price cache: productId → chainId → kopecks, fetched from the public
-/// zakaz.ua API (Novus/METRO/Auchan, no account needed) and persisted.
-class LivePricesController extends Notifier<Map<String, Map<String, int>>> {
-  static const _key = 'prices.live';
-
-  @override
-  Map<String, Map<String, int>> build() {
-    final raw = ref.watch(jsonStoreProvider).loadObject<Map<String, dynamic>>(
-          _key,
-          (j) => j,
-          fallback: const {},
-        );
-    final prices = raw['prices'];
-    if (prices is! Map<String, dynamic>) return {};
-    return {
-      for (final e in prices.entries)
-        e.key: {
-          for (final c in (e.value as Map<String, dynamic>).entries)
-            c.key: c.value as int,
-        },
-    };
-  }
-
-  /// Fetch fresh prices for [productIds]. Returns how many quotes landed
-  /// (0 usually means offline / web-CORS — offline catalog stays in charge).
-  /// Pulls Novus/METRO/Auchan from the public zakaz.ua API and, when a price
-  /// scraper backend is configured, АТБ/Сільпо from it too — in parallel.
-  Future<int> refresh(Set<String> productIds) async {
-    final results = await Future.wait([
-      ZakazUaClient().fetchAll(productIds),
-      BackendPriceClient().fetchAll(productIds),
-    ]);
-    // Merge both sources per product (chain maps don't overlap).
-    final fetched = <String, Map<String, int>>{};
-    for (final source in results) {
-      for (final e in source.entries) {
-        (fetched[e.key] ??= {}).addAll(e.value);
-      }
-    }
-    if (fetched.isEmpty) return 0;
-    final merged = {
-      for (final e in {...state, ...fetched}.keys)
-        e: {...?state[e], ...?fetched[e]},
-    };
-    ref.read(jsonStoreProvider).saveObject<Map<String, dynamic>>(
-      _key,
-      {
-        'ts': ref.read(clockProvider).now().toIso8601String(),
-        'prices': merged,
-      },
-      (m) => m,
-    );
-    state = merged;
-    return fetched.values.fold<int>(0, (n, m) => n + m.length);
-  }
-}
-
-final livePricesProvider =
-    NotifierProvider<LivePricesController, Map<String, Map<String, int>>>(
-        LivePricesController.new);
-
-/// Ukrainian stores: curated АТБ/Сільпо catalog + live Novus/METRO/Auchan
-/// overlay when the internet has been reached at least once.
-final storePriceSourceProvider = Provider<StorePriceSource>((ref) {
-  return CompositePriceSource(
-    const UaStorePriceCatalog(),
-    ref.watch(livePricesProvider),
-  );
-});
+/// Grocery prices come from a curated, fully offline catalog of brand-free
+/// approximate prices. (There is no live scraping of any retailer.)
+final storePriceSourceProvider =
+    Provider<StorePriceSource>((ref) => const UaStorePriceCatalog());
 
 final mealCostCalculatorProvider = Provider<MealCostCalculator>(
     (ref) => MealCostCalculator(ref.watch(storePriceSourceProvider)));

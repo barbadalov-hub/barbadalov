@@ -56,7 +56,7 @@ void main() {
       for (final entry in totals.entries) {
         expect(price <= entry.value, isTrue);
       }
-      expect(store.id, 'atb'); // АТБ is cheapest across the seeded catalog
+      expect(store.id, 's1'); // tier 1 is cheapest across the seeded catalog
     });
   });
 }

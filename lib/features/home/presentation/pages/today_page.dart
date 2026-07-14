@@ -536,7 +536,7 @@ class _DietCard extends ConsumerWidget {
                   ? ''
                   : ' · ${context.trp('diet.fromStore', {
                           'price': cheapest.$2.format(),
-                          'store': cheapest.$1.name,
+                          'store': context.tr('store.${cheapest.$1.id}'),
                         })}';
               return Text(
                 '${context.tr('today.dietNext')}: ${next.emoji} '

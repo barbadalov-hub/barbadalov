@@ -47,7 +47,7 @@ class _CategoryRulesPageState extends ConsumerState<CategoryRulesPage> {
                     controller: _keyword,
                     decoration: InputDecoration(
                       labelText: context.tr('rules.keyword'),
-                      hintText: 'АТБ, Netflix, Uber…',
+                      hintText: 'Groceries, Netflix, Uber…',
                       border: const OutlineInputBorder(),
                       isDense: true,
                     ),

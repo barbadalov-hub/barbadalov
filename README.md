@@ -150,8 +150,8 @@ lib/
   (`docs/FIREBASE.md`).
 - **Real device health data** — port + mock in place; add the `health` package on
   a phone (`docs/DEVICES.md`).
-- **Live UA grocery prices** — deployable Cloudflare Worker in `backend/`
-  (`backend/README.md`); the app degrades to an offline catalog without it.
+- **Grocery prices** — a curated, fully offline catalog of brand-free
+  approximate prices (no retailer is contacted).
 
 ---
 

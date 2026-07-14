@@ -67,14 +67,14 @@ void main() {
     expect(find.textContaining('Обід'), findsWidgets);
     expect(find.textContaining('Вечеря'), findsWidgets);
 
-    // Store pricing is visible ("Де купити · від ₴… в АТБ").
+    // Brand-free price tiers are visible ("Де купити · від ₴… в Магазин 1").
     expect(find.textContaining('Де купити'), findsWidgets);
-    expect(find.textContaining('АТБ'), findsWidgets);
+    expect(find.textContaining('Магазин 1'), findsWidgets);
 
-    // Expanding a meal shows all three stores with totals.
+    // Expanding a meal shows all three anonymous price tiers with totals.
     await tester.tap(find.textContaining('Де купити').first);
     await tester.pump(const Duration(milliseconds: 400));
-    expect(find.textContaining('Сільпо'), findsWidgets);
-    expect(find.textContaining('Novus'), findsWidgets);
+    expect(find.textContaining('Магазин 2'), findsWidgets);
+    expect(find.textContaining('Магазин 3'), findsWidgets);
   });
 }

@@ -14,8 +14,8 @@ import 'package:lifeos/shared/widgets/motion.dart';
 import 'package:lifeos/shared/widgets/section_card.dart';
 
 /// The built-in dietitian: today's menu fitted to the user's calorie/macro
-/// targets, and for each dish — where to buy the ingredients (АТБ / Сільпо /
-/// Novus) and for how much.
+/// targets, and for each dish — an approximate cost of the ingredients across
+/// three brand-free price tiers (fully offline; no retailer is contacted).
 class DietPage extends ConsumerWidget {
   const DietPage({super.key});
 
@@ -43,28 +43,6 @@ class DietPage extends ConsumerWidget {
                   ..hideCurrentSnackBar()
                   ..showSnackBar(SnackBar(
                       content: Text(context.tr('food.addedToShopping'))));
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.cloud_download_outlined),
-              tooltip: context.tr('diet.refreshPrices'),
-              onPressed: () async {
-                final products = {
-                  for (final m in plan.meals)
-                    for (final i in m.ingredients) i.productId,
-                };
-                final n = await ref
-                    .read(livePricesProvider.notifier)
-                    .refresh(products);
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context)
-                    ..hideCurrentSnackBar()
-                    ..showSnackBar(SnackBar(
-                      content: Text(n > 0
-                          ? context.trp('diet.pricesUpdated', {'n': n})
-                          : context.tr('diet.pricesOffline')),
-                    ));
-                }
               },
             ),
             IconButton(
@@ -548,7 +526,7 @@ class _MealCard extends ConsumerWidget {
                 '${context.tr('diet.whereToBuy')} · '
                 '${context.trp('diet.fromStore', {
                       'price': cheapest.$2.format(),
-                      'store': cheapest.$1.name,
+                      'store': context.tr('store.${cheapest.$1.id}'),
                     })}',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
@@ -561,8 +539,8 @@ class _MealCard extends ConsumerWidget {
                         Expanded(
                           child: Text(
                             entry.key == cheapest.$1
-                                ? '⭐ ${entry.key.name} · ${context.tr('diet.cheapest')}'
-                                : entry.key.name,
+                                ? '⭐ ${context.tr('store.${entry.key.id}')} · ${context.tr('diet.cheapest')}'
+                                : context.tr('store.${entry.key.id}'),
                           ),
                         ),
                         Text(entry.value.format(),
