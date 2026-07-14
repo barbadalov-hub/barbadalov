@@ -32,15 +32,16 @@ jobs:
       # Pages serves under /<repo>/, and CanvasKit is vendored so it works with
       # no third-party CDN.
       #
-      # Firebase config is injected from repo Variables (Settings → Secrets and
-      # variables → Actions → Variables). These are public identifiers (a web
-      # apiKey is not a secret — Firestore security rules protect the data), so
-      # Variables are fine. Leave them unset and the app stays fully offline.
+      # Firebase config for the LifeOS (lifeos-arkadiy) project. A web apiKey is
+      # a PUBLIC identifier (it ships in every web build; security comes from the
+      # Firestore rules), so committing it here is standard and safe. The Google
+      # OAuth Web client id is read from a repo Variable so the Google button can
+      # be enabled later without a code change; empty keeps it hidden.
       - run: |
           flutter build web --release --no-web-resources-cdn \
             --base-href "/barbadalov/" \
-            --dart-define=FIREBASE_PROJECT_ID="${{ vars.FIREBASE_PROJECT_ID }}" \
-            --dart-define=FIREBASE_API_KEY="${{ vars.FIREBASE_API_KEY }}" \
+            --dart-define=FIREBASE_PROJECT_ID="lifeos-arkadiy" \
+            --dart-define=FIREBASE_API_KEY="AIzaSyBaT5c8GfbEqqKdcVVFwJVihkYMLqEbvXY" \
             --dart-define=FIREBASE_GOOGLE_CLIENT_ID="${{ vars.FIREBASE_GOOGLE_CLIENT_ID }}"
       - uses: actions/upload-pages-artifact@v3
         with:
