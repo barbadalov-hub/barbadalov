@@ -89,6 +89,12 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
+  # Full license texts for the bundled fonts (Apache-2.0 / OFL-1.1 / Bitstream
+  # Vera). Shipped so redistribution stays compliant and they can be surfaced
+  # in an in-app "Open source licenses" screen via LicenseRegistry.
+  assets:
+    - assets/licenses/
+
   # Web-only bundled fonts. CanvasKit ships no system fonts and fetches Roboto,
   # its Noto fallbacks and color emoji from a CDN at runtime — so the web build
   # (and the "runs fully offline" promise) breaks with no network. These are

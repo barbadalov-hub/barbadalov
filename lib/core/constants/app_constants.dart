@@ -5,7 +5,7 @@ library;
 class AppConstants {
   const AppConstants._();
 
-  static const String appName = 'LifeOS';
+  static const String appName = 'Lumo';
   static const String defaultCurrency = 'USD';
 
   // --- MoneyOS business rules --------------------------------------------

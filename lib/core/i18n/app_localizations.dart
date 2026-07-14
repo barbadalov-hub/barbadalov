@@ -437,13 +437,13 @@ const Map<String, Map<String, String>> _values = {
   'ai.allClearHint': {'en': 'No pressing insights right now — keep it up.', 'ru': 'Срочных советов сейчас нет — так держать.', 'uk': 'Термінових порад зараз немає — так тримати.'},
   'ai.locked': {'en': 'AI is a Pro feature', 'ru': 'ИИ — функция Pro', 'uk': 'ШІ — функція Pro'},
   'ai.lockedHint': {
-    'en': 'Upgrade to LifeOS Pro to unlock AI analysis, forecasts and your daily plan.',
-    'ru': 'Оформите LifeOS Pro, чтобы открыть ИИ-анализ, прогнозы и дневной план.',
-    'uk': 'Оформіть LifeOS Pro, щоб відкрити ШІ-аналіз, прогнози та денний план.',
+    'en': 'Upgrade to Lumo Pro to unlock AI analysis, forecasts and your daily plan.',
+    'ru': 'Оформите Lumo Pro, чтобы открыть ИИ-анализ, прогнозы и дневной план.',
+    'uk': 'Оформіть Lumo Pro, щоб відкрити ШІ-аналіз, прогнози та денний план.',
   },
 
   // --- Monetization / Pro -------------------------------------------------
-  'pro.title': {'en': 'LifeOS Pro', 'ru': 'LifeOS Pro', 'uk': 'LifeOS Pro'},
+  'pro.title': {'en': 'Lumo Pro', 'ru': 'Lumo Pro', 'uk': 'Lumo Pro'},
   'pro.free': {'en': "You're on the Free plan", 'ru': 'У вас бесплатный план', 'uk': 'У вас безкоштовний план'},
   'pro.active': {'en': 'Pro is active', 'ru': 'Pro активен', 'uk': 'Pro активний'},
   'pro.blurb': {
@@ -566,10 +566,13 @@ const Map<String, Map<String, String>> _values = {
   'diet.whereToBuy': {'en': 'Where to buy', 'ru': 'Где купить', 'uk': 'Де купити'},
   'diet.fromStore': {'en': 'from {price} at {store}', 'ru': 'от {price} в {store}', 'uk': 'від {price} в {store}'},
   'diet.cheapest': {'en': 'cheapest', 'ru': 'выгоднее всего', 'uk': 'найвигідніше'},
+  'store.s1': {'en': 'Store 1', 'ru': 'Магазин 1', 'uk': 'Магазин 1'},
+  'store.s2': {'en': 'Store 2', 'ru': 'Магазин 2', 'uk': 'Магазин 2'},
+  'store.s3': {'en': 'Store 3', 'ru': 'Магазин 3', 'uk': 'Магазин 3'},
   'diet.shuffle': {'en': 'Another option', 'ru': 'Другой вариант', 'uk': 'Інший варіант'},
   'diet.noProfile': {'en': 'Fill in your profile (height, weight, activity) and the dietitian will build a menu for your goal.', 'ru': 'Заполните профиль (рост, вес, активность) — и диетолог соберёт меню под вашу цель.', 'uk': 'Заповніть профіль (зріст, вага, активність) — і дієтолог збере меню під вашу ціль.'},
   'diet.openProfile': {'en': 'Open profile', 'ru': 'Открыть профиль', 'uk': 'Відкрити профіль'},
-  'diet.approx': {'en': 'Prices are approximate, per standard pack (АТБ · Сільпо · Novus).', 'ru': 'Цены ориентировочные, за стандартную упаковку (АТБ · Сільпо · Novus).', 'uk': 'Ціни орієнтовні, за стандартну упаковку (АТБ · Сільпо · Novus).'},
+  'diet.approx': {'en': 'Prices are approximate, per standard pack.', 'ru': 'Цены ориентировочные, за стандартную упаковку.', 'uk': 'Ціни орієнтовні, за стандартну упаковку.'},
   'diet.addAllToShopping': {'en': 'Add whole day to list', 'ru': 'Весь день в список покупок', 'uk': 'Весь день до списку покупок'},
   'diet.dayCost': {'en': "Today's menu cost", 'ru': 'Стоимость меню на день', 'uk': 'Вартість меню на день'},
   'diet.remaining': {'en': 'Remaining today', 'ru': 'Осталось на сегодня', 'uk': 'Залишилось на сьогодні'},
@@ -580,9 +583,6 @@ const Map<String, Map<String, String>> _values = {
   'diet.foodLogEmpty': {'en': 'Log anything else you ate today.', 'ru': 'Запишите, что ещё съели сегодня.', 'uk': 'Запишіть, що ще зʼїли сьогодні.'},
   'diet.logFood': {'en': 'Log food', 'ru': 'Записать еду', 'uk': 'Записати їжу'},
   'diet.eatenLine': {'en': 'Eaten: {eaten} of {target} kcal', 'ru': 'Съедено: {eaten} из {target} ккал', 'uk': 'Зʼїдено: {eaten} із {target} ккал'},
-  'diet.refreshPrices': {'en': 'Refresh live prices', 'ru': 'Обновить цены онлайн', 'uk': 'Оновити ціни онлайн'},
-  'diet.pricesUpdated': {'en': 'Live prices updated ({n} quotes: Novus · METRO · Auchan)', 'ru': 'Цены обновлены ({n} позиций: Novus · METRO · Auchan)', 'uk': 'Ціни оновлено ({n} позицій: Novus · METRO · Auchan)'},
-  'diet.pricesOffline': {'en': 'No connection — using offline prices', 'ru': 'Нет соединения — используются офлайн-цены', 'uk': 'Немає зʼєднання — використовуються офлайн-ціни'},
   'diet.swapMeal': {'en': 'Swap this meal', 'ru': 'Заменить блюдо', 'uk': 'Замінити страву'},
   'money.trend': {'en': 'Income vs expenses · 6 months', 'ru': 'Доходы и расходы · 6 месяцев', 'uk': 'Доходи та витрати · 6 місяців'},
   'money.byCategory': {'en': 'Spending by category', 'ru': 'Расходы по категориям', 'uk': 'Витрати за категоріями'},
@@ -962,7 +962,7 @@ const Map<String, Map<String, String>> _values = {
   'reminder.emptyHint': {'en': 'Add one below to get a daily nudge at the time you choose.', 'ru': 'Добавьте ниже, чтобы получать напоминание в выбранное время.', 'uk': 'Додайте нижче, щоб отримувати нагадування у вибраний час.'},
   'reminder.time': {'en': 'Time', 'ru': 'Время', 'uk': 'Час'},
   'reminder.customLabel': {'en': 'Reminder text', 'ru': 'Текст напоминания', 'uk': 'Текст нагадування'},
-  'reminder.fire.title': {'en': 'LifeOS reminder', 'ru': 'Напоминание LifeOS', 'uk': 'Нагадування LifeOS'},
+  'reminder.fire.title': {'en': 'Lumo reminder', 'ru': 'Напоминание Lumo', 'uk': 'Нагадування Lumo'},
   'reminder.kind.water': {'en': 'Drink water', 'ru': 'Выпить воды', 'uk': 'Випити води'},
   'reminder.kind.workout': {'en': 'Time to work out', 'ru': 'Пора на тренировку', 'uk': 'Час на тренування'},
   'reminder.kind.meds': {'en': 'Vitamins / meds', 'ru': 'Витамины / лекарства', 'uk': 'Вітаміни / ліки'},
@@ -1150,17 +1150,17 @@ const Map<String, Map<String, String>> _values = {
   'report.pushTitle': {'en': 'Your week in review', 'ru': 'Итоги недели', 'uk': 'Підсумки тижня'},
   'report.pushBody': {'en': 'Spent {spent} this week, most on {cat}. Tap to see the full report.', 'ru': 'За неделю потрачено {spent}, больше всего на {cat}. Нажмите, чтобы увидеть отчёт.', 'uk': 'За тиждень витрачено {spent}, найбільше на {cat}. Натисніть, щоб побачити звіт.'},
 
-  // --- LifeOS Wrapped -----------------------------------------------------
-  'wrapped.title': {'en': 'LifeOS Wrapped', 'ru': 'Итоги года', 'uk': 'Підсумки року'},
+  // --- Lumo Wrapped -----------------------------------------------------
+  'wrapped.title': {'en': 'Lumo Wrapped', 'ru': 'Итоги года', 'uk': 'Підсумки року'},
   'wrapped.moreSub': {
     'en': 'Your year in review',
     'ru': 'Твой год в цифрах',
     'uk': 'Твій рік у цифрах'
   },
   'wrapped.introTop': {
-    'en': 'Your year in LifeOS',
-    'ru': 'Твой год в LifeOS',
-    'uk': 'Твій рік у LifeOS'
+    'en': 'Your year in Lumo',
+    'ru': 'Твой год в Lumo',
+    'uk': 'Твій рік у Lumo'
   },
   'wrapped.introHint': {
     'en': 'tap or swipe to explore →',
@@ -1469,9 +1469,9 @@ const Map<String, Map<String, String>> _values = {
     'uk': 'Ти не знайдеш час — ти його створиш. Почни з одного маленького кроку просто зараз ⏳'
   },
   'coach.reply.motivate.4': {
-    'en': 'Every check-in in LifeOS is a vote for the person you\'re becoming 🌟',
-    'ru': 'Каждая отметка в LifeOS — это голос за того человека, которым ты становишься 🌟',
-    'uk': 'Кожна відмітка в LifeOS — це голос за ту людину, якою ти стаєш 🌟'
+    'en': 'Every check-in in Lumo is a vote for the person you\'re becoming 🌟',
+    'ru': 'Каждая отметка в Lumo — это голос за того человека, которым ты становишься 🌟',
+    'uk': 'Кожна відмітка в Lumo — це голос за ту людину, якою ти стаєш 🌟'
   },
   'coach.reply.unknown': {
     'en': 'I didn\'t quite get that 🤔 Try rephrasing, or tap a suggestion below — like "How was my week?".',
@@ -1522,7 +1522,7 @@ const Map<String, Map<String, String>> _values = {
   'ach.streak100.d': {'en': 'A 100-day streak', 'ru': 'Серия 100 дней', 'uk': 'Серія 100 днів'},
   'ach.steps10k.t': {'en': 'Marathoner', 'ru': 'Марафонец', 'uk': 'Марафонець'},
   'ach.steps10k.d': {'en': '10,000 steps in a day', 'ru': '10 000 шагов за день', 'uk': '10 000 кроків за день'},
-  'ach.tracked30.t': {'en': 'Month in LifeOS', 'ru': 'Месяц в LifeOS', 'uk': 'Місяць у LifeOS'},
+  'ach.tracked30.t': {'en': 'Month in Lumo', 'ru': 'Месяц в Lumo', 'uk': 'Місяць у Lumo'},
   'ach.tracked30.d': {'en': '30 days with entries', 'ru': '30 дней с записями', 'uk': '30 днів із записами'},
   'ach.score80.t': {'en': 'In great shape', 'ru': 'В отличной форме', 'uk': 'У чудовій формі'},
   'ach.score80.d': {'en': 'Reach Life Score 80+', 'ru': 'Life Score 80 и выше', 'uk': 'Life Score 80 і вище'},
@@ -1596,9 +1596,9 @@ const Map<String, Map<String, String>> _values = {
     'uk': 'Поки нічого показати'
   },
   'insight.empty': {
-    'en': 'Track your mood and health for a few days and LifeOS will start finding patterns.',
-    'ru': 'Отмечай настроение и здоровье несколько дней — и LifeOS начнёт находить закономерности.',
-    'uk': 'Відмічай настрій і здоров’я кілька днів — і LifeOS почне знаходити закономірності.'
+    'en': 'Track your mood and health for a few days and Lumo will start finding patterns.',
+    'ru': 'Отмечай настроение и здоровье несколько дней — и Lumo начнёт находить закономерности.',
+    'uk': 'Відмічай настрій і здоров’я кілька днів — і Lumo почне знаходити закономірності.'
   },
   'insight.disclaimer': {
     'en': 'These are observations from your own data, not medical advice.',
@@ -1665,9 +1665,9 @@ const Map<String, Map<String, String>> _values = {
   'onb.skip': {'en': 'Skip', 'ru': 'Пропустить', 'uk': 'Пропустити'},
   'onb.restore': {'en': 'Restore', 'ru': 'Восстановить', 'uk': 'Відновити'},
   'onb.restoreHint': {
-    'en': 'Paste a LifeOS backup to bring your data to this device.',
-    'ru': 'Вставь резервную копию LifeOS, чтобы перенести данные на это устройство.',
-    'uk': 'Встав резервну копію LifeOS, щоб перенести дані на цей пристрій.'
+    'en': 'Paste a Lumo backup to bring your data to this device.',
+    'ru': 'Вставь резервную копию Lumo, чтобы перенести данные на это устройство.',
+    'uk': 'Встав резервну копію Lumo, щоб перенести дані на цей пристрій.'
   },
   'onb.restoreDo': {'en': 'Restore data', 'ru': 'Восстановить данные', 'uk': 'Відновити дані'},
   'onb.restoreFail': {
@@ -1681,7 +1681,7 @@ const Map<String, Map<String, String>> _values = {
   'onb.1.title': {'en': 'The operating system for your life', 'ru': 'Операционная система твоей жизни', 'uk': 'Операційна система твого життя'},
   'onb.1.body': {'en': 'Money, health, food, habits and goals — finally in one place, working together.', 'ru': 'Финансы, здоровье, еда, привычки и цели — наконец в одном месте и работают вместе.', 'uk': 'Фінанси, здоровʼя, їжа, звички та цілі — нарешті в одному місці й працюють разом.'},
   'onb.2.title': {'en': 'One question, every day', 'ru': 'Один вопрос — каждый день', 'uk': 'Одне питання — щодня'},
-  'onb.2.body': {'en': 'Given everything it knows about you, LifeOS tells you what to focus on today.', 'ru': 'Зная о тебе всё, LifeOS подсказывает, на чём сосредоточиться сегодня.', 'uk': 'Знаючи про тебе все, LifeOS підказує, на чому зосередитися сьогодні.'},
+  'onb.2.body': {'en': 'Given everything it knows about you, Lumo tells you what to focus on today.', 'ru': 'Зная о тебе всё, Lumo подсказывает, на чём сосредоточиться сегодня.', 'uk': 'Знаючи про тебе все, Lumo підказує, на чому зосередитися сьогодні.'},
   'onb.3.title': {'en': 'Watch yourself grow', 'ru': 'Наблюдай, как ты растёшь', 'uk': 'Спостерігай, як ти зростаєш'},
   'onb.3.body': {'en': 'Streaks, trends and a life timeline turn small daily wins into a story over years.', 'ru': 'Серии, тренды и лента жизни превращают маленькие победы в историю на годы.', 'uk': 'Серії, тренди та стрічка життя перетворюють маленькі перемоги на історію на роки.'},
   'onb.setup.title': {'en': "Let's set you up", 'ru': 'Давай тебя настроим', 'uk': 'Давай тебе налаштуємо'},
@@ -1774,6 +1774,15 @@ const Map<String, Map<String, String>> _values = {
   // --- App lock (PIN) -----------------------------------------------------
   'sec.title': {'en': 'App lock', 'ru': 'Блокировка', 'uk': 'Блокування'},
   'sec.moreSub': {'en': 'Protect your data with a PIN', 'ru': 'Защитить данные PIN-кодом', 'uk': 'Захистити дані PIN-кодом'},
+  'privacy.title': {'en': 'Privacy', 'ru': 'Конфиденциальность', 'uk': 'Конфіденційність'},
+  'privacy.moreSub': {'en': 'How your data is handled', 'ru': 'Как обрабатываются данные', 'uk': 'Як обробляються дані'},
+  'privacy.body': {
+    'en': 'Lumo keeps your data on your device. By default nothing is sold, shared, or uploaded to any server.\n\nNo ads, and no third-party analytics or tracking.\n\nThe camera is used only for on-device receipt scanning (OCR) — photos are processed locally and never uploaded.\n\nCloud sync is optional. It runs only if you turn it on and sign in, and then your data is stored in your own cloud project.\n\nYou stay in control: export or erase all your data any time from More → Backup.',
+    'ru': 'Lumo хранит данные на твоём устройстве. По умолчанию ничего не продаётся, не передаётся и не отправляется на сервер.\n\nБез рекламы и без стороннего анализа или трекинга.\n\nКамера используется только для распознавания чеков на устройстве (OCR) — фото обрабатываются локально и никуда не загружаются.\n\nОблачная синхронизация — по желанию. Она работает, только если ты её включишь и войдёшь, и тогда данные хранятся в твоём собственном облачном проекте.\n\nТы контролируешь всё: в любой момент можно выгрузить или удалить все данные в разделе «Ещё → Резервная копия».',
+    'uk': 'Lumo зберігає дані на твоєму пристрої. За замовчуванням нічого не продається, не передається і не надсилається на сервер.\n\nБез реклами та без стороннього аналізу чи трекінгу.\n\nКамера використовується лише для розпізнавання чеків на пристрої (OCR) — фото обробляються локально і нікуди не завантажуються.\n\nХмарна синхронізація — за бажанням. Вона працює, лише якщо ти її увімкнеш і увійдеш, і тоді дані зберігаються у твоєму власному хмарному проєкті.\n\nТи контролюєш усе: будь-коли можна експортувати або видалити всі дані в розділі «Ще → Резервна копія».',
+  },
+  'oss.title': {'en': 'Open source licenses', 'ru': 'Открытые лицензии', 'uk': 'Відкриті ліцензії'},
+  'oss.moreSub': {'en': 'Fonts & libraries', 'ru': 'Шрифты и библиотеки', 'uk': 'Шрифти та бібліотеки'},
   'sec.intro': {'en': 'A 4-digit PIN is asked when you open the app. Stored hashed on this device only.', 'ru': '4-значный PIN спрашивается при открытии приложения. Хранится только на устройстве в виде хэша.', 'uk': '4-значний PIN запитується під час відкриття застосунку. Зберігається лише на пристрої у вигляді хешу.'},
   'sec.on': {'en': 'App lock is on', 'ru': 'Блокировка включена', 'uk': 'Блокування увімкнено'},
   'sec.off': {'en': 'App lock is off', 'ru': 'Блокировка выключена', 'uk': 'Блокування вимкнено'},
@@ -1787,7 +1796,7 @@ const Map<String, Map<String, String>> _values = {
   'sec.saved': {'en': 'PIN saved', 'ru': 'PIN сохранён', 'uk': 'PIN збережено'},
   'sec.disabled': {'en': 'App lock turned off', 'ru': 'Блокировка отключена', 'uk': 'Блокування вимкнено'},
   'lock.title': {'en': 'Enter PIN', 'ru': 'Введите PIN', 'uk': 'Введіть PIN'},
-  'lock.sub': {'en': 'LifeOS is locked', 'ru': 'LifeOS заблокирован', 'uk': 'LifeOS заблоковано'},
+  'lock.sub': {'en': 'Lumo is locked', 'ru': 'Lumo заблокирован', 'uk': 'Lumo заблоковано'},
   'lock.wrong': {'en': 'Wrong PIN, try again', 'ru': 'Неверный PIN, попробуйте снова', 'uk': 'Невірний PIN, спробуйте ще раз'},
 
   // --- More / Settings ----------------------------------------------------

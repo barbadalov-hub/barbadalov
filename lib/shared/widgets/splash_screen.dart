@@ -66,7 +66,7 @@ class _SplashScreenState extends State<SplashScreen>
                           colors: [Color(0xFF7BF7FF), Color(0xFF7B5CFF)],
                         ).createShader(r),
                         child: const Text(
-                          'LifeOS',
+                          'Lumo',
                           style: TextStyle(
                             fontSize: 40,
                             fontWeight: FontWeight.w900,

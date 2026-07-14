@@ -260,6 +260,24 @@ class MorePage extends ConsumerWidget {
           _tile(context, '🎨', context.tr('theme.title'),
               context.tr('theme.moreSub'), const AppearancePage()),
           _glass(ListTile(
+            leading: const Icon(Icons.privacy_tip_outlined, size: 26),
+            title: Text(context.tr('privacy.title')),
+            subtitle: Text(context.tr('privacy.moreSub')),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => _showPrivacySheet(context),
+          )),
+          _glass(ListTile(
+            leading: const Icon(Icons.description_outlined, size: 26),
+            title: Text(context.tr('oss.title')),
+            subtitle: Text(context.tr('oss.moreSub')),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => showLicensePage(
+              context: context,
+              applicationName: 'Lumo',
+              applicationVersion: '0.1.0',
+            ),
+          )),
+          _glass(ListTile(
             leading: const Icon(Icons.language),
             title: Text(context.tr('more.language')),
             subtitle: Text(_currentLanguageLabel(context, ref)),
@@ -338,4 +356,32 @@ class MorePage extends ConsumerWidget {
         padding: EdgeInsets.zero,
         child: tile,
       );
+}
+
+/// Compact privacy summary shown as a draggable bottom sheet (no full page),
+/// keeping the settings hub uncluttered. The full policy also ships in
+/// docs/PRIVACY.md for the store listing.
+void _showPrivacySheet(BuildContext context) {
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    showDragHandle: true,
+    builder: (ctx) => DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.68,
+      minChildSize: 0.4,
+      maxChildSize: 0.92,
+      builder: (ctx, controller) => ListView(
+        controller: controller,
+        padding: const EdgeInsets.fromLTRB(22, 0, 22, 28),
+        children: [
+          Text(ctx.tr('privacy.title'),
+              style: Theme.of(ctx).textTheme.headlineSmall),
+          const SizedBox(height: 12),
+          Text(ctx.tr('privacy.body'),
+              style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(height: 1.5)),
+        ],
+      ),
+    ),
+  );
 }

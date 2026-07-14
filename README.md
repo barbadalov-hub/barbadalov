@@ -150,8 +150,8 @@ lib/
   (`docs/FIREBASE.md`).
 - **Real device health data** — port + mock in place; add the `health` package on
   a phone (`docs/DEVICES.md`).
-- **Live UA grocery prices** — deployable Cloudflare Worker in `backend/`
-  (`backend/README.md`); the app degrades to an offline catalog without it.
+- **Grocery prices** — a curated, fully offline catalog of brand-free
+  approximate prices (no retailer is contacted).
 
 ---
 
@@ -161,3 +161,14 @@ lib/
 - `analysis_options.yaml` promotes `dead_code` / `unawaited_futures` to errors.
 - Pure use cases and engines are unit-tested without any I/O; there's a full-app
   boot smoke test and widget tests for the key screens.
+
+---
+
+## 📄 License
+
+Source code is released under the [MIT License](LICENSE) — © 2026 barbadalov.
+
+Bundled fonts keep their own licenses (Roboto — Apache-2.0; Noto Sans / Noto
+Color Emoji — SIL OFL-1.1; DejaVu symbols — Bitstream Vera); full texts ship in
+[`assets/licenses/`](assets/licenses/) and are listed in-app under **More →
+Open source licenses**. Privacy policy: [`docs/PRIVACY.md`](docs/PRIVACY.md).

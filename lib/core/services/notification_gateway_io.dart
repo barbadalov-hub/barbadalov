@@ -12,7 +12,7 @@ import 'package:timezone/timezone.dart' as tz;
 /// in-app unread badge is the "something arrived" signal instead.
 class NotificationGateway {
   static const _channelId = 'lifeos_default';
-  static const _channelName = 'LifeOS';
+  static const _channelName = 'Lumo';
   static const _channelDescription =
       'Finance alerts, budget warnings, habits and AI insights.';
 
@@ -34,7 +34,7 @@ class NotificationGateway {
       const android = AndroidInitializationSettings('@mipmap/ic_launcher');
       const darwin = DarwinInitializationSettings();
       const linux =
-          LinuxInitializationSettings(defaultActionName: 'Open LifeOS');
+          LinuxInitializationSettings(defaultActionName: 'Open Lumo');
       const settings = InitializationSettings(
         android: android,
         iOS: darwin,

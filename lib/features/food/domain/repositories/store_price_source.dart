@@ -32,10 +32,9 @@ class StoreQuote extends Equatable {
 
 /// Port for grocery price data — same pattern as `DeviceHealthSource`.
 ///
-/// АТБ/Сільпо publish no public price API (existing solutions on GitHub/DOU
-/// reverse-engineer the sites), so the default implementation is a curated
-/// local UAH catalog, and a real scraper/backend adapter can be swapped in
-/// behind this interface later. See docs/STORES.md.
+/// The default implementation is a curated, fully offline catalog of
+/// brand-free approximate prices; a different [StorePriceSource] can be swapped
+/// in behind this interface without touching the UI.
 abstract class StorePriceSource {
   List<Store> get stores;
 
