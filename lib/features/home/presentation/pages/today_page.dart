@@ -181,6 +181,7 @@ class _Greeting extends ConsumerWidget {
           tooltip: context.tr('tsec.customize'),
           onPressed: () => showModalBottomSheet<void>(
             context: context,
+            isScrollControlled: true,
             showDragHandle: true,
             builder: (_) => const _CustomizeSheet(),
           ),
@@ -201,72 +202,67 @@ class _Greeting extends ConsumerWidget {
 class _CustomizeSheet extends ConsumerWidget {
   const _CustomizeSheet();
 
+  /// Today's sections grouped into scannable segments, so the whole catalogue
+  /// is easy to browse instead of one long flat list. Every id in
+  /// [kTodaySections] appears in exactly one segment.
+  static const _segments = <(String, String, List<String>)>[
+    ('💰', 'tseg.finance', ['safeToSpend', 'budget']),
+    ('❤️', 'tseg.health', ['health', 'diet']),
+    ('🧠', 'tseg.mind', ['habits', 'tasks', 'streak']),
+    ('🎯', 'tseg.goals', ['goal', 'lifeWeeks', 'achievements']),
+    ('🤖', 'tseg.ai', ['ai', 'coachTip', 'lifeScore']),
+    ('✨', 'tseg.other', ['quickActions', 'quote', 'flashback', 'backup']),
+  ];
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final hidden = ref.watch(todayHiddenProvider);
-    final order = ref.watch(todayOrderProvider);
     final vis = ref.read(todayHiddenProvider.notifier);
-    final ord = ref.read(todayOrderProvider.notifier);
 
-    return SafeArea(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.85,
+      minChildSize: 0.5,
+      maxChildSize: 0.95,
+      builder: (context, controller) => ListView(
+        controller: controller,
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 4, 20, 4),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          Text(context.tr('tsec.title'),
+              style: Theme.of(context)
+                  .textTheme
+                  .titleLarge
+                  ?.copyWith(fontWeight: FontWeight.w800)),
+          const SizedBox(height: 2),
+          Text(context.tr('tsec.showHint'),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.outline,
+                  )),
+          for (final (emoji, titleKey, ids) in _segments) ...[
+            const SizedBox(height: 16),
+            Row(
               children: [
-                Text(context.tr('tsec.title'),
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleLarge
-                        ?.copyWith(fontWeight: FontWeight.w800)),
-                const SizedBox(height: 2),
-                Text(context.tr('tsec.reorderHint'),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.outline,
-                        )),
+                Text(emoji, style: const TextStyle(fontSize: 18)),
+                const SizedBox(width: 8),
+                Text(
+                  context.tr(titleKey),
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.3,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                ),
               ],
             ),
-          ),
-          ConstrainedBox(
-            constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.6),
-            child: ReorderableListView.builder(
-              shrinkWrap: true,
-              padding: const EdgeInsets.only(bottom: 12),
-              itemCount: order.length,
-              onReorder: (oldIndex, newIndex) {
-                // ReorderableListView reports newIndex in pre-removal terms;
-                // ord.reorder expects post-removal semantics.
-                if (newIndex > oldIndex) newIndex -= 1;
-                ord.reorder(oldIndex, newIndex);
-              },
-              itemBuilder: (context, index) {
-                final id = order[index];
-                return ListTile(
-                  key: ValueKey(id),
-                  dense: true,
-                  title: Text(context.tr(labelForSection(id))),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Switch(
-                        value: !hidden.contains(id),
-                        onChanged: (v) => vis.setVisible(id, v),
-                      ),
-                      ReorderableDragStartListener(
-                        index: index,
-                        child: Icon(Icons.drag_handle,
-                            color: Theme.of(context).colorScheme.outline),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
+            for (final id in ids)
+              SwitchListTile(
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                title: Text(context.tr(labelForSection(id))),
+                value: !hidden.contains(id),
+                onChanged: (v) => vis.setVisible(id, v),
+              ),
+          ],
         ],
       ),
     );

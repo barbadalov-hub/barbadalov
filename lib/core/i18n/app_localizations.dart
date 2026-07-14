@@ -1230,6 +1230,13 @@ const Map<String, Map<String, String>> _values = {
 
   // --- Today customization ------------------------------------------------
   'tsec.title': {'en': 'Customize home', 'ru': 'Настроить главный экран', 'uk': 'Налаштувати головний екран'},
+  'tsec.showHint': {'en': 'Turn the sections you want on your home screen on or off.', 'ru': 'Включай или выключай блоки, которые хочешь видеть на главном экране.', 'uk': 'Вмикай або вимикай блоки, які хочеш бачити на головному екрані.'},
+  'tseg.finance': {'en': 'Finance', 'ru': 'Финансы', 'uk': 'Фінанси'},
+  'tseg.health': {'en': 'Health & food', 'ru': 'Здоровье и еда', 'uk': 'Здоров’я та їжа'},
+  'tseg.mind': {'en': 'Mind', 'ru': 'Разум', 'uk': 'Розум'},
+  'tseg.goals': {'en': 'Goals', 'ru': 'Цели', 'uk': 'Цілі'},
+  'tseg.ai': {'en': 'AI & tips', 'ru': 'AI и советы', 'uk': 'AI та поради'},
+  'tseg.other': {'en': 'Other', 'ru': 'Разное', 'uk': 'Інше'},
   'tsec.reorderHint': {
     'en': 'Toggle to show/hide · drag to reorder',
     'ru': 'Переключай показ · тяни, чтобы менять порядок',
