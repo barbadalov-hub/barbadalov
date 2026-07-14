@@ -44,8 +44,17 @@ class _AnimatedBackdropState extends State<AnimatedBackdrop>
 
   @override
   Widget build(BuildContext context) {
+    final palette = _palette(widget.color);
     return Stack(
       children: [
+        // Base: a living aurora — a deep, section-tinted gradient with soft
+        // drifting colour clouds. This is what gives every section its own
+        // mood while keeping one cohesive, modern world.
+        Positioned.fill(
+          child: RepaintBoundary(
+            child: CustomPaint(painter: _AuroraPainter(_controller, palette)),
+          ),
+        ),
         if (widget.stars && widget.style != BackdropStyle.galaxy)
           Positioned.fill(
             child: RepaintBoundary(
@@ -71,6 +80,82 @@ class _AnimatedBackdropState extends State<AnimatedBackdrop>
       ],
     );
   }
+}
+
+/// Three harmonious hues around [base] (the section colour): the base plus two
+/// analogous neighbours, so the aurora reads as one family, not a rainbow.
+List<Color> _palette(Color base) {
+  final h = HSLColor.fromColor(base);
+  final sat = h.saturation.clamp(0.45, 0.85);
+  return [
+    h.withSaturation(sat).withLightness(0.55).toColor(),
+    HSLColor.fromAHSL(1, (h.hue + 34) % 360, sat, 0.52).toColor(),
+    HSLColor.fromAHSL(1, (h.hue - 30 + 360) % 360, (sat * 0.9), 0.5).toColor(),
+  ];
+}
+
+/// The signature layer: a deep gradient ground tinted toward the section
+/// colour, with a few big, soft, slowly breathing colour clouds drifting over
+/// it. Text stays readable because content sits on glass cards and the bottom
+/// fades back to near-black under the nav bar.
+class _AuroraPainter extends CustomPainter {
+  final Animation<double> t;
+  final List<Color> palette;
+  _AuroraPainter(this.t, this.palette) : super(repaint: t);
+
+  static const _base = Color(0xFF07030F);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+
+    // Ground: near-black, faintly tinted by the section hue at the top so the
+    // whole screen feels like it belongs to this section.
+    final topTint = Color.lerp(_base, palette[0], 0.16)!;
+    canvas.drawRect(
+      rect,
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [topTint, _base, const Color(0xFF050208)],
+          stops: const [0.0, 0.62, 1.0],
+        ).createShader(rect),
+    );
+
+    // Drifting aurora clouds — big, blurred, breathing radial glows.
+    const blobs = 4;
+    for (var i = 0; i < blobs; i++) {
+      final drift = t.value * 2 * math.pi * (0.12 + 0.06 * i);
+      final cx = size.width * (0.2 + 0.62 * _hash(i, 61)) +
+          math.cos(drift + i * 1.7) * size.width * 0.10;
+      // Keep clouds mostly in the upper two-thirds so the nav area stays calm.
+      final cy = size.height * (0.08 + 0.5 * _hash(i, 62)) +
+          math.sin(drift * 0.8 + i) * size.height * 0.05;
+      final r = size.shortestSide * (0.42 + 0.18 * _hash(i, 63)) *
+          (1 + 0.10 * math.sin(t.value * 2 * math.pi + i));
+      final color = palette[i % palette.length];
+      canvas.drawCircle(
+        Offset(cx, cy),
+        r,
+        Paint()
+          ..color = color.withValues(alpha: 0.13 + 0.05 * _hash(i, 64))
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 60),
+      );
+    }
+
+    // A soft top highlight for depth.
+    canvas.drawCircle(
+      Offset(size.width * 0.5, -size.height * 0.08),
+      size.width * 0.7,
+      Paint()
+        ..color = palette[0].withValues(alpha: 0.06)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 80),
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _AuroraPainter old) => false;
 }
 
 /// Deterministic pseudo-random per particle index (no per-frame allocation).
@@ -214,31 +299,10 @@ class _GalaxyPainter extends CustomPainter {
   final Color color;
   _GalaxyPainter(this.t, this.color) : super(repaint: t);
 
-  static const _nebulaColors = [
-    Color(0xFF7B5CFF), // violet
-    Color(0xFF2E7CF6), // deep blue
-    Color(0xFF19C2B8), // teal
-  ];
-
   @override
   void paint(Canvas canvas, Size size) {
-    // --- Nebula clouds: huge, blurred, slowly breathing radial glows.
-    for (var i = 0; i < 3; i++) {
-      final drift = t.value * 2 * math.pi * (0.15 + 0.1 * i);
-      final cx = size.width * (0.2 + 0.3 * i) + math.cos(drift + i) * 40;
-      final cy = size.height * (0.15 + 0.3 * _hash(i, 21)) +
-          math.sin(drift * 0.8 + i) * 30;
-      final r = size.shortestSide * (0.35 + 0.1 * _hash(i, 22)) *
-          (1 + 0.08 * math.sin(t.value * 2 * math.pi + i));
-      canvas.drawCircle(
-        Offset(cx, cy),
-        r,
-        Paint()
-          ..color = _nebulaColors[i].withValues(alpha: 0.055)
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 40),
-      );
-    }
-
+    // Nebula clouds now come from the shared aurora layer beneath; galaxy adds
+    // just the stars and a shooting star on top.
     // --- Stars: fixed positions, twinkling opacity, three depth layers.
     const count = 70;
     for (var i = 0; i < count; i++) {

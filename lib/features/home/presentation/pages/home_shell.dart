@@ -231,7 +231,7 @@ class MorePage extends ConsumerWidget {
       ),
       body: AnimatedBackdrop(
         style: BackdropStyle.galaxy,
-        color: const Color(0xFF7B5CFF),
+        color: const Color(0xFF4E63E6),
         child: ListView(
           padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
           children: [
