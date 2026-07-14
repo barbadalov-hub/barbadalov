@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lifeos/core/constants/app_constants.dart';
 import 'package:lifeos/core/devices/device_health_source.dart';
 import 'package:lifeos/core/services/health_score_service.dart';
 import 'package:lifeos/features/health/application/health_use_cases.dart';
@@ -20,7 +21,7 @@ final healthRepositoryProvider = Provider<HealthRepository>((ref) {
   const key = 'health.today';
   final today = DateTime(now.year, now.month, now.day);
 
-  // Seed a partial day so rings aren't empty on the very first launch.
+  // Demo day so rings aren't empty in screenshots; real accounts start at 0.
   final seed = HealthDay(
     date: today,
     steps: 4200,
@@ -28,7 +29,9 @@ final healthRepositoryProvider = Provider<HealthRepository>((ref) {
     sleepHours: 6.5,
     weightKg: 72,
   );
-  final stored = store.loadObject(key, HealthDay.fromJson, fallback: seed);
+  final stored = store.loadObject(key, HealthDay.fromJson,
+      fallback:
+          AppConstants.seedDemoData ? seed : HealthDay(date: today));
 
   // New day → archive the finished day into the rolling history (max 90) so
   // trends (steps, weight) can be charted, then reset counters (keep weight).

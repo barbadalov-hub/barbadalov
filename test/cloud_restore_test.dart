@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lifeos/core/constants/app_constants.dart';
 import 'package:lifeos/core/services/key_value_store.dart';
 import 'package:lifeos/features/money/domain/entities/category.dart';
 import 'package:lifeos/features/money/domain/entities/transaction.dart';
@@ -10,6 +11,9 @@ import 'package:lifeos/shared/models/money.dart';
 import 'package:lifeos/shared/providers/core_providers.dart';
 
 void main() {
+  // These tests exercise repositories against the built-in demo content.
+  setUp(() => AppConstants.seedDemoData = true);
+  tearDown(() => AppConstants.seedDemoData = false);
   test('InMemory store snapshot/putAll round-trips', () {
     final store = InMemoryKeyValueStore({'a': '1', 'b': '2'});
     final snap = store.snapshot();

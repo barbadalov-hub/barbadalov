@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lifeos/core/constants/app_constants.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:lifeos/core/services/clock.dart';
 import 'package:lifeos/features/health/presentation/pages/workouts_page.dart';
@@ -32,6 +33,9 @@ Widget _app(Widget home, {List<Override> overrides = const []}) => ProviderScope
     );
 
 void main() {
+  // The Money verdict test asserts against the built-in demo transactions.
+  setUp(() => AppConstants.seedDemoData = true);
+  tearDown(() => AppConstants.seedDemoData = false);
   setUp(() {
     // Tall viewport so long list screens lay out without overflow.
   });

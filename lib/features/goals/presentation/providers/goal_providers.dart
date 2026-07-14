@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lifeos/core/constants/app_constants.dart';
 import 'package:lifeos/features/goals/application/forecast_goal.dart';
 import 'package:lifeos/features/goals/application/goal_use_cases.dart';
 import 'package:lifeos/features/goals/data/goal_repository_impl.dart';
@@ -13,7 +14,9 @@ final goalRepositoryProvider = Provider<GoalRepository>((ref) {
   final store = ref.watch(jsonStoreProvider);
   const key = 'goals.list';
   final impl = GoalRepositoryImpl(
-    seed: store.loadList(key, Goal.fromJson, fallback: _defaultGoals(now)),
+    seed: store.loadList(key, Goal.fromJson,
+        fallback:
+            AppConstants.seedDemoData ? _defaultGoals(now) : const <Goal>[]),
     onChanged: (items) => store.saveList(key, items, (g) => g.toJson()),
   );
   ref.onDispose(impl.dispose);

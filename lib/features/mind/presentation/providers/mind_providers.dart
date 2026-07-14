@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lifeos/core/constants/app_constants.dart';
 import 'package:lifeos/features/mind/application/mind_use_cases.dart';
 import 'package:lifeos/features/mind/data/mind_repository_impl.dart';
 import 'package:lifeos/features/mind/domain/achievements.dart';
@@ -18,15 +19,17 @@ final mindRepositoryProvider = Provider<MindRepository>((ref) {
   // yesterday correctly shows as not-done today.
   final habits = [
     for (final h in store.loadList(habitsKey, Habit.fromJson,
-        fallback: _defaultHabits(now)))
+        fallback:
+            AppConstants.seedDemoData ? _defaultHabits(now) : const <Habit>[]))
       h.refreshedFor(now),
   ];
   final impl = MindRepositoryImpl(
     seedHabits: habits,
-    seedTasks:
-        store.loadList(tasksKey, DayTask.fromJson, fallback: _defaultTasks),
-    seedBooks:
-        store.loadList(booksKey, Book.fromJson, fallback: _defaultBooks),
+    seedTasks: store.loadList(tasksKey, DayTask.fromJson,
+        fallback:
+            AppConstants.seedDemoData ? _defaultTasks : const <DayTask>[]),
+    seedBooks: store.loadList(booksKey, Book.fromJson,
+        fallback: AppConstants.seedDemoData ? _defaultBooks : const <Book>[]),
     onHabitsChanged: (items) =>
         store.saveList(habitsKey, items, (h) => h.toJson()),
     onTasksChanged: (items) =>

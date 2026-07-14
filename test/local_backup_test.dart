@@ -2,12 +2,16 @@ import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lifeos/core/constants/app_constants.dart';
 import 'package:lifeos/core/services/key_value_store.dart';
 import 'package:lifeos/features/backup/presentation/providers/local_backup_provider.dart';
 import 'package:lifeos/features/money/presentation/providers/money_providers.dart';
 import 'package:lifeos/shared/providers/core_providers.dart';
 
 void main() {
+  // Exercises repository reload against the built-in demo content.
+  setUp(() => AppConstants.seedDemoData = true);
+  tearDown(() => AppConstants.seedDemoData = false);
   ProviderContainer withStore(InMemoryKeyValueStore store) {
     final c = ProviderContainer(
       overrides: [keyValueStoreProvider.overrideWithValue(store)],
