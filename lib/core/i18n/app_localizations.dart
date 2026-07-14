@@ -211,6 +211,8 @@ const Map<String, Map<String, String>> _values = {
   'money.available': {'en': 'Available', 'ru': 'Доступно', 'uk': 'Доступно'},
   'money.availableThisMonth': {'en': 'Available this month', 'ru': 'Доступно в этом месяце', 'uk': 'Доступно цього місяця'},
   'money.history': {'en': 'History', 'ru': 'История', 'uk': 'Історія'},
+  'money.analytics': {'en': 'Analytics', 'ru': 'Аналитика', 'uk': 'Аналітика'},
+  'money.analyticsSub': {'en': 'Trend · Categories · Comparison · Calendar', 'ru': 'Тренд · Категории · Сравнение · Календарь', 'uk': 'Тренд · Категорії · Порівняння · Календар'},
   'money.noTransactions': {'en': 'No transactions yet.', 'ru': 'Пока нет операций.', 'uk': 'Поки що немає операцій.'},
   'money.exportCsv': {'en': 'Export CSV', 'ru': 'Экспорт CSV', 'uk': 'Експорт CSV'},
   'money.search': {'en': 'Search transactions…', 'ru': 'Поиск операций…', 'uk': 'Пошук операцій…'},

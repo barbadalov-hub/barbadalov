@@ -111,13 +111,9 @@ class MoneyPage extends ConsumerWidget {
               const SizedBox(height: 12),
               const _FinanceTipCard(),
               const SizedBox(height: 12),
-              const _MonthlyTrendCard(),
-              const SizedBox(height: 12),
-              const _CategoryBreakdownCard(),
-              const SizedBox(height: 12),
-              const _MonthComparisonCard(),
-              const SizedBox(height: 12),
-              const _SpendingCalendarCard(),
+              // The four charts (trend, categories, comparison, calendar) live
+              // together in one popup so the main screen stays short.
+              _AnalyticsEntry(onTap: () => _showAnalyticsSheet(context)),
               const SizedBox(height: 16),
               Text(context.tr('money.history'),
                   style: Theme.of(context).textTheme.titleMedium),
@@ -148,6 +144,76 @@ class MoneyPage extends ConsumerWidget {
             downloaded ? 'money.csvDownloaded' : 'money.csvCopied')),
       ));
   }
+}
+
+/// Compact entry that opens all four money charts in one popup, keeping the
+/// main screen short.
+class _AnalyticsEntry extends StatelessWidget {
+  final VoidCallback onTap;
+  const _AnalyticsEntry({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return SectionCard(
+      onTap: onTap,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: Row(
+        children: [
+          const Text('📊', style: TextStyle(fontSize: 26)),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(context.tr('money.analytics'),
+                    style: Theme.of(context).textTheme.titleMedium),
+                Text(
+                  context.tr('money.analyticsSub'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
+                ),
+              ],
+            ),
+          ),
+          const Icon(Icons.chevron_right),
+        ],
+      ),
+    );
+  }
+}
+
+/// The four charts grouped into one scrollable popup.
+void _showAnalyticsSheet(BuildContext context) {
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    showDragHandle: true,
+    builder: (ctx) => DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.85,
+      minChildSize: 0.5,
+      maxChildSize: 0.95,
+      builder: (ctx, controller) => ListView(
+        controller: controller,
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+        children: [
+          Text(ctx.tr('money.analytics'),
+              style: Theme.of(ctx).textTheme.headlineSmall),
+          const SizedBox(height: 12),
+          const _MonthlyTrendCard(),
+          const SizedBox(height: 12),
+          const _CategoryBreakdownCard(),
+          const SizedBox(height: 12),
+          const _MonthComparisonCard(),
+          const SizedBox(height: 12),
+          const _SpendingCalendarCard(),
+        ],
+      ),
+    ),
+  );
 }
 
 class _BalanceHeader extends StatelessWidget {
