@@ -25,7 +25,7 @@ final healthRepositoryProvider = Provider<HealthRepository>((ref) {
   final seed = HealthDay(
     date: today,
     steps: 4200,
-    waterGlasses: 3,
+    waterMl: 750,
     sleepHours: 6.5,
     weightKg: 72,
   );

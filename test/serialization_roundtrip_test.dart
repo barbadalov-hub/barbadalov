@@ -74,7 +74,7 @@ void main() {
     final x = HealthDay(
       date: _d,
       steps: 8421,
-      waterGlasses: 6,
+      waterMl: 6 * 250,
       sleepHours: 7.5,
       weightKg: 72.3,
       stress: 3,

@@ -10,7 +10,7 @@ void main() {
     test('all three goals met scores 100', () {
       final s = service.scoreFor(HealthDay(
         date: date,
-        waterGlasses: 8,
+        waterMl: 8 * 250,
         steps: 10000,
         sleepHours: 8,
       ));
@@ -20,7 +20,7 @@ void main() {
     test('halfway to every goal scores 50', () {
       final s = service.scoreFor(HealthDay(
         date: date,
-        waterGlasses: 4,
+        waterMl: 4 * 250,
         steps: 5000,
         sleepHours: 4,
       ));
@@ -30,7 +30,7 @@ void main() {
     test('exceeding goals is capped at 100% per metric', () {
       final s = service.scoreFor(HealthDay(
         date: date,
-        waterGlasses: 20,
+        waterMl: 20 * 250,
         steps: 30000,
         sleepHours: 12,
       ));
@@ -45,7 +45,7 @@ void main() {
       // water full (100%), no steps (0%), half sleep (50%) -> (1+0+0.5)/3 -> 50.
       final s = service.scoreFor(HealthDay(
         date: date,
-        waterGlasses: 8,
+        waterMl: 8 * 250,
         steps: 0,
         sleepHours: 4,
       ));

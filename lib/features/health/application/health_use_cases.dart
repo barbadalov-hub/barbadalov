@@ -26,16 +26,22 @@ class LogHealth {
     this.onWeightLogged,
   });
 
-  void addWater({int glasses = 1, String userId = 'local'}) {
-    final next = _repository.today().waterGlasses + glasses;
-    _repository.update(_repository.today().copyWith(waterGlasses: next));
+  /// Adds [ml] millilitres of water to today. (A plain "+1 glass" is
+  /// [HealthDay.mlPerGlass] ml.)
+  void addWaterMl(int ml, {String userId = 'local'}) {
+    final next = _repository.today().waterMl + ml;
+    _repository.update(_repository.today().copyWith(waterMl: next));
     _publish(WaterLoggedEvent(
       id: _idService.newId(),
       userId: userId,
       occurredAt: _clock.now(),
-      value: next,
+      value: next, // total ml today
     ));
   }
+
+  /// Back-compat convenience: log whole glasses.
+  void addWater({int glasses = 1, String userId = 'local'}) =>
+      addWaterMl(glasses * HealthDay.mlPerGlass, userId: userId);
 
   void setSteps(int steps, {String userId = 'local'}) {
     _repository.update(_repository.today().copyWith(steps: steps));
