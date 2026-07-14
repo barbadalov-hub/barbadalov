@@ -6,6 +6,8 @@ import 'package:lifeos/features/health/presentation/providers/health_goals_provi
 import 'package:lifeos/features/health/presentation/providers/health_providers.dart';
 import 'package:lifeos/features/health/presentation/providers/vitals_provider.dart';
 import 'package:lifeos/features/health/presentation/pages/workouts_page.dart';
+import 'package:lifeos/features/health/domain/entities/health_day.dart';
+import 'package:lifeos/features/health/presentation/widgets/drink_sheet.dart';
 import 'package:lifeos/features/health/presentation/widgets/health_charts.dart';
 import 'package:lifeos/features/profile/presentation/providers/profile_providers.dart';
 import 'package:lifeos/shared/theme/app_theme.dart';
@@ -87,9 +89,9 @@ class HealthPage extends ConsumerWidget {
               children: [
                 _Ring(
                   label: context.tr('health.water'),
-                  value: day.waterGlasses.toDouble(),
-                  goal: goals.water.toDouble(),
-                  unit: context.tr('health.glasses'),
+                  value: day.waterMl.toDouble(),
+                  goal: (goals.water * HealthDay.mlPerGlass).toDouble(),
+                  unit: context.tr('drink.ml'),
                   color: const Color(0xFF3BA7FF),
                 ),
                 _Ring(
@@ -122,8 +124,8 @@ class HealthPage extends ConsumerWidget {
               children: [
                 ActionChip(
                   avatar: const Text('💧'),
-                  label: Text(context.tr('health.addGlass')),
-                  onPressed: () => log.addWater(),
+                  label: Text(context.tr('health.addWater')),
+                  onPressed: () => DrinkSheet.show(context),
                 ),
                 ActionChip(
                   avatar: const Text('👟'),

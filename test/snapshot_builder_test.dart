@@ -45,12 +45,12 @@ void main() {
         HealthDay(
             date: DateTime(2026, 7, 2),
             steps: 8000,
-            waterGlasses: 6,
+            waterMl: 6 * 250,
             sleepHours: 7),
         HealthDay(
             date: DateTime(2026, 7, 6),
             steps: 12000,
-            waterGlasses: 8,
+            waterMl: 8 * 250,
             sleepHours: 8),
       ],
       weights: [

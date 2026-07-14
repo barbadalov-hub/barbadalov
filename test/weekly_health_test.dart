@@ -8,7 +8,7 @@ HealthDay _day(int dayOfMonth, {int steps = 0, int water = 0, double sleep = 0})
     HealthDay(
       date: DateTime(2026, 1, dayOfMonth),
       steps: steps,
-      waterGlasses: water,
+      waterMl: water * 250,
       sleepHours: sleep,
     );
 

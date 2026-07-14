@@ -21,6 +21,7 @@ import 'package:lifeos/features/mind/domain/mood.dart';
 import 'package:lifeos/features/mind/presentation/pages/mind_page.dart';
 import 'package:lifeos/features/mind/presentation/pages/mood_journal_page.dart';
 import 'package:lifeos/features/mind/presentation/providers/mind_providers.dart';
+import 'package:lifeos/features/health/presentation/widgets/drink_sheet.dart';
 import 'package:lifeos/features/mind/domain/habit_consistency.dart';
 import 'package:lifeos/features/onboarding/presentation/pages/guide_page.dart';
 import 'package:lifeos/features/money/application/project_month_end.dart';
@@ -982,7 +983,7 @@ class _QuickActions extends ConsumerWidget {
       child: Row(
         children: [
           action('💧', context.tr('qa.water'),
-              () => ref.read(logHealthProvider).addWater()),
+              () => DrinkSheet.show(context)),
           action('💸', context.tr('qa.expense'),
               () => AddTransactionSheet.show(context)),
           action('✅', context.tr('qa.task'),
