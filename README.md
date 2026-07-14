@@ -170,4 +170,5 @@ Source code is released under the [MIT License](LICENSE) — © 2026 barbadalov.
 
 Bundled fonts keep their own licenses (Roboto — Apache-2.0; Noto Sans / Noto
 Color Emoji — SIL OFL-1.1; DejaVu symbols — Bitstream Vera); full texts ship in
-[`assets/licenses/`](assets/licenses/).
+[`assets/licenses/`](assets/licenses/) and are listed in-app under **More →
+Open source licenses**. Privacy policy: [`docs/PRIVACY.md`](docs/PRIVACY.md).

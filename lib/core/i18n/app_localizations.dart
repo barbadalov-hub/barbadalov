@@ -1774,6 +1774,15 @@ const Map<String, Map<String, String>> _values = {
   // --- App lock (PIN) -----------------------------------------------------
   'sec.title': {'en': 'App lock', 'ru': 'Блокировка', 'uk': 'Блокування'},
   'sec.moreSub': {'en': 'Protect your data with a PIN', 'ru': 'Защитить данные PIN-кодом', 'uk': 'Захистити дані PIN-кодом'},
+  'privacy.title': {'en': 'Privacy', 'ru': 'Конфиденциальность', 'uk': 'Конфіденційність'},
+  'privacy.moreSub': {'en': 'How your data is handled', 'ru': 'Как обрабатываются данные', 'uk': 'Як обробляються дані'},
+  'privacy.body': {
+    'en': 'Lumo keeps your data on your device. By default nothing is sold, shared, or uploaded to any server.\n\nNo ads, and no third-party analytics or tracking.\n\nThe camera is used only for on-device receipt scanning (OCR) — photos are processed locally and never uploaded.\n\nCloud sync is optional. It runs only if you turn it on and sign in, and then your data is stored in your own cloud project.\n\nYou stay in control: export or erase all your data any time from More → Backup.',
+    'ru': 'Lumo хранит данные на твоём устройстве. По умолчанию ничего не продаётся, не передаётся и не отправляется на сервер.\n\nБез рекламы и без стороннего анализа или трекинга.\n\nКамера используется только для распознавания чеков на устройстве (OCR) — фото обрабатываются локально и никуда не загружаются.\n\nОблачная синхронизация — по желанию. Она работает, только если ты её включишь и войдёшь, и тогда данные хранятся в твоём собственном облачном проекте.\n\nТы контролируешь всё: в любой момент можно выгрузить или удалить все данные в разделе «Ещё → Резервная копия».',
+    'uk': 'Lumo зберігає дані на твоєму пристрої. За замовчуванням нічого не продається, не передається і не надсилається на сервер.\n\nБез реклами та без стороннього аналізу чи трекінгу.\n\nКамера використовується лише для розпізнавання чеків на пристрої (OCR) — фото обробляються локально і нікуди не завантажуються.\n\nХмарна синхронізація — за бажанням. Вона працює, лише якщо ти її увімкнеш і увійдеш, і тоді дані зберігаються у твоєму власному хмарному проєкті.\n\nТи контролюєш усе: будь-коли можна експортувати або видалити всі дані в розділі «Ще → Резервна копія».',
+  },
+  'oss.title': {'en': 'Open source licenses', 'ru': 'Открытые лицензии', 'uk': 'Відкриті ліцензії'},
+  'oss.moreSub': {'en': 'Fonts & libraries', 'ru': 'Шрифты и библиотеки', 'uk': 'Шрифти та бібліотеки'},
   'sec.intro': {'en': 'A 4-digit PIN is asked when you open the app. Stored hashed on this device only.', 'ru': '4-значный PIN спрашивается при открытии приложения. Хранится только на устройстве в виде хэша.', 'uk': '4-значний PIN запитується під час відкриття застосунку. Зберігається лише на пристрої у вигляді хешу.'},
   'sec.on': {'en': 'App lock is on', 'ru': 'Блокировка включена', 'uk': 'Блокування увімкнено'},
   'sec.off': {'en': 'App lock is off', 'ru': 'Блокировка выключена', 'uk': 'Блокування вимкнено'},
