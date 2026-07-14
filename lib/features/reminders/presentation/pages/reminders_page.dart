@@ -34,6 +34,7 @@ class RemindersPage extends ConsumerWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'fab-reminders',
         onPressed: () => _addReminder(context, ref),
         icon: const Icon(Icons.add_alert),
         label: Text(context.tr('reminder.add')),

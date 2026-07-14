@@ -89,6 +89,7 @@ class MoneyPage extends ConsumerWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'fab-money',
         onPressed: () => AddTransactionSheet.show(context),
         icon: const Icon(Icons.add),
         label: Text(context.tr('common.add')),

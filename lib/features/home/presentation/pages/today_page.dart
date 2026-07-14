@@ -22,6 +22,7 @@ import 'package:lifeos/features/mind/presentation/pages/mind_page.dart';
 import 'package:lifeos/features/mind/presentation/pages/mood_journal_page.dart';
 import 'package:lifeos/features/mind/presentation/providers/mind_providers.dart';
 import 'package:lifeos/features/mind/domain/habit_consistency.dart';
+import 'package:lifeos/features/onboarding/presentation/pages/guide_page.dart';
 import 'package:lifeos/features/money/application/project_month_end.dart';
 import 'package:lifeos/features/money/domain/entities/budget.dart';
 import 'package:lifeos/features/money/presentation/widgets/add_transaction_sheet.dart';
@@ -169,6 +170,11 @@ class _Greeting extends ConsumerWidget {
                       )),
             ],
           ),
+        ),
+        IconButton(
+          icon: const Icon(Icons.help_outline),
+          tooltip: context.tr('tour.title'),
+          onPressed: () => GuidePage.open(context),
         ),
         IconButton(
           icon: const Icon(Icons.tune),

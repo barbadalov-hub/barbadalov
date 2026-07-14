@@ -5,7 +5,6 @@ import 'package:lifeos/core/i18n/locale_controller.dart';
 import 'package:lifeos/features/ai/presentation/pages/ai_page.dart';
 import 'package:lifeos/features/backup/presentation/pages/backup_page.dart';
 import 'package:lifeos/features/cloud/presentation/pages/account_page.dart';
-import 'package:lifeos/features/cloud/presentation/providers/cloud_providers.dart';
 import 'package:lifeos/features/food/presentation/pages/diet_page.dart';
 import 'package:lifeos/features/food/presentation/pages/food_page.dart';
 import 'package:lifeos/features/food/presentation/providers/expiry_alert_provider.dart';
@@ -14,7 +13,6 @@ import 'package:lifeos/features/money/presentation/providers/recurring_providers
 import 'package:lifeos/features/history/presentation/pages/history_page.dart';
 import 'package:lifeos/features/history/presentation/providers/history_providers.dart';
 import 'package:lifeos/features/lifeweeks/presentation/pages/life_weeks_page.dart';
-import 'package:lifeos/features/achievements/domain/achievement.dart';
 import 'package:lifeos/features/achievements/presentation/pages/achievements_page.dart';
 import 'package:lifeos/features/achievements/presentation/providers/achievements_providers.dart';
 import 'package:lifeos/features/appearance/presentation/pages/appearance_page.dart';
@@ -36,10 +34,10 @@ import 'package:lifeos/features/search/presentation/pages/command_palette.dart';
 import 'package:lifeos/features/mind/presentation/pages/mind_page.dart';
 import 'package:lifeos/features/mind/presentation/pages/mood_journal_page.dart';
 import 'package:lifeos/features/monetization/presentation/pages/pro_page.dart';
-import 'package:lifeos/features/monetization/presentation/providers/pro_providers.dart';
 import 'package:lifeos/features/money/presentation/pages/money_page.dart';
 import 'package:lifeos/features/notifications/presentation/pages/notifications_page.dart';
 import 'package:lifeos/features/notifications/presentation/providers/notification_providers.dart';
+import 'package:lifeos/features/onboarding/presentation/pages/guide_page.dart';
 import 'package:lifeos/features/reminders/presentation/pages/reminders_page.dart';
 import 'package:lifeos/features/security/presentation/pages/security_settings_page.dart';
 import 'package:lifeos/shared/widgets/animated_backdrop.dart';
@@ -128,13 +126,96 @@ class _HomeShellState extends ConsumerState<HomeShell> {
   }
 }
 
-/// Hub for the remaining modules (Food, Mind, AI, Notifications) + settings.
+/// Hub for everything outside the four primary tabs. Kept compact: the ~20
+/// modules are grouped into a handful of categories, each opening a bottom
+/// sheet — so the hub reads as a short, scannable list instead of a long wall
+/// of tiles. The tutorial sits on top as its own card.
 class MorePage extends ConsumerWidget {
   const MorePage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final unread = ref.watch(unreadCountProvider);
+    final sex = ref.watch(profileProvider)?.sex;
+    final wellnessEmoji = sex == Sex.female ? '🌸' : '⚡';
+    final wellnessTitle = context.tr(sex == null
+        ? 'wellness.title'
+        : sex == Sex.female
+            ? 'cycle.title'
+            : 'vitality.title');
+
+    // Push a full page from a More entry.
+    _MoreEntry page(String emoji, String title, Widget target,
+            {Widget? trailing}) =>
+        _MoreEntry(
+          emoji: emoji,
+          title: title,
+          trailing: trailing,
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => target),
+          ),
+        );
+
+    final cats = <_MoreCat>[
+      _MoreCat('🧑', context.tr('moreCat.you'), [
+        page('👤', context.tr('profile.title'), const ProfilePage()),
+        page(wellnessEmoji, wellnessTitle, const WellnessPage()),
+      ]),
+      _MoreCat('🥗', context.tr('moreCat.food'), [
+        page('🥦', context.tr('diet.title'), const DietPage()),
+        page('🍎', context.tr('more.food'), const FoodPage()),
+      ]),
+      _MoreCat('🧠', context.tr('moreCat.mind'), [
+        page('🧠', context.tr('mind.title'), const MindPage()),
+        page('📔', context.tr('mood.title'), const MoodJournalPage()),
+      ]),
+      _MoreCat('🤖', context.tr('moreCat.ai'), [
+        page('🤖', context.tr('ai.title'), const AiPage()),
+        page('💬', context.tr('coach.title'), const CoachPage()),
+      ]),
+      _MoreCat('🔔', context.tr('moreCat.signals'), [
+        page('🔔', context.tr('notif.title'), const NotificationsPage(),
+            trailing: unread > 0 ? Badge(label: Text('$unread')) : null),
+        page('⏰', context.tr('reminder.title'), const RemindersPage()),
+      ], badge: unread),
+      _MoreCat('📊', context.tr('moreCat.progress'), [
+        page('📊', context.tr('report.title'), const ReportPage()),
+        page('📜', context.tr('hist.title'), const HistoryPage()),
+        page('⏳', context.tr('weeks.title'), const LifeWeeksPage()),
+        page('✨', context.tr('wrapped.title'), const WrappedPage()),
+        page('🔮', context.tr('insight.title'), const InsightsPage()),
+        page('🏅', context.tr('ach.title'), const AchievementsPage()),
+      ]),
+      _MoreCat('🔐', context.tr('moreCat.account'), [
+        page('☁️', context.tr('cloud.title'), const AccountPage()),
+        page('💾', context.tr('backup.title'), const BackupPage()),
+        page('🔒', context.tr('sec.title'), const SecuritySettingsPage()),
+        page('⭐', context.tr('pro.title'), const ProPage()),
+      ]),
+      _MoreCat('⚙️', context.tr('moreCat.settings'), [
+        page('🎨', context.tr('theme.title'), const AppearancePage()),
+        _MoreEntry(
+          emoji: '🌐',
+          title: context.tr('more.language'),
+          onTap: () => _pickLanguage(context, ref),
+        ),
+        _MoreEntry(
+          emoji: '🔏',
+          title: context.tr('privacy.title'),
+          onTap: () => _showPrivacySheet(context),
+        ),
+        _MoreEntry(
+          emoji: '📄',
+          title: context.tr('oss.title'),
+          onTap: () => showLicensePage(
+            context: context,
+            applicationName: 'Lumo',
+            applicationVersion: '0.1.0',
+          ),
+        ),
+      ]),
+    ];
+
     return Scaffold(
       appBar: AppBar(
         title: Text(context.tr('nav.more')),
@@ -152,147 +233,15 @@ class MorePage extends ConsumerWidget {
         style: BackdropStyle.galaxy,
         color: const Color(0xFF7B5CFF),
         child: ListView(
-        padding: const EdgeInsets.only(top: 10, bottom: 24),
-        children: [
-          _tile(context, '👤', context.tr('profile.title'),
-              context.tr('more.profileSub'), const ProfilePage()),
-          Builder(builder: (context) {
-            final sex = ref.watch(profileProvider)?.sex;
-            final isFemale = sex == Sex.female;
-            return _tile(
-              context,
-              isFemale ? '🌸' : '⚡',
-              context.tr(sex == null
-                  ? 'wellness.title'
-                  : isFemale
-                      ? 'cycle.title'
-                      : 'vitality.title'),
-              context.tr('wellness.moreSub'),
-              const WellnessPage(),
-            );
-          }),
-          _tile(context, '🥦', context.tr('diet.title'),
-              context.tr('more.dietSub'), const DietPage()),
-          _tile(context, '🥗', context.tr('more.food'),
-              context.tr('more.foodSub'), const FoodPage()),
-          _tile(context, '🧠', context.tr('mind.title'),
-              context.tr('more.mindSub'), const MindPage()),
-          _tile(context, '📔', context.tr('mood.title'),
-              context.tr('mood.moreSub'), const MoodJournalPage()),
-          _tile(context, '🤖', context.tr('ai.title'),
-              context.tr('more.aiSub'), const AiPage()),
-          _tile(context, '💬', context.tr('coach.title'),
-              context.tr('coach.moreSub'), const CoachPage()),
-          _tile(
-            context,
-            '🔔',
-            context.tr('notif.title'),
-            unread > 0
-                ? context.trp('more.notifUnread', {'n': unread})
-                : context.tr('more.notifAllRead'),
-            const NotificationsPage(),
-            trailing: unread > 0
-                ? Badge(label: Text('$unread'))
-                : const Icon(Icons.chevron_right),
-          ),
-          _tile(context, '⏰', context.tr('reminder.title'),
-              context.tr('reminder.moreSub'), const RemindersPage()),
-          _tile(context, '📊', context.tr('report.title'),
-              context.tr('report.moreSub'), const ReportPage()),
-          _tile(context, '📜', context.tr('hist.title'),
-              context.tr('hist.moreSub'), const HistoryPage()),
-          _tile(context, '⏳', context.tr('weeks.title'),
-              context.tr('weeks.moreSub'), const LifeWeeksPage()),
-          _tile(context, '✨', context.tr('wrapped.title'),
-              context.tr('wrapped.moreSub'), const WrappedPage()),
-          _tile(context, '🔮', context.tr('insight.title'),
-              context.tr('insight.moreSub'), const InsightsPage()),
-          _tile(
-            context,
-            '🏅',
-            context.tr('ach.title'),
-            context.trp('ach.unlockedOf', {
-              'n': ref.watch(achievementsUnlockedProvider),
-              'total': const AchievementEngine().total,
-            }),
-            const AchievementsPage(),
-          ),
-          const SizedBox(height: 6),
-          _glass(Builder(builder: (context) {
-            final status = ref.watch(cloudSyncStatusProvider);
-            final email = ref.watch(accountEmailProvider);
-            return ListTile(
-              leading: Icon(
-                status.configured ? Icons.cloud_done : Icons.cloud_off,
-                size: 26,
-              ),
-              title: Text(context.tr('cloud.title')),
-              subtitle: Text(
-                !status.configured
-                    ? context.tr('cloud.notConfigured')
-                    : email ??
-                        context.trp('cloud.status', {
-                          'ok': status.synced,
-                          'fail': status.failed,
-                        }),
-              ),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(builder: (_) => const AccountPage()),
-              ),
-            );
-          })),
-          _tile(context, '💾', context.tr('backup.title'),
-              context.tr('backup.moreSub'), const BackupPage()),
-          _tile(context, '🔒', context.tr('sec.title'),
-              context.tr('sec.moreSub'), const SecuritySettingsPage()),
-          _glass(ListTile(
-            leading: const Text('⭐', style: TextStyle(fontSize: 26)),
-            title: Text(context.tr('pro.title')),
-            subtitle: Text(ref.watch(isProProvider)
-                ? context.tr('more.proActive')
-                : context.tr('more.proFree')),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(builder: (_) => const ProPage()),
-            ),
-          )),
-          _tile(context, '🎨', context.tr('theme.title'),
-              context.tr('theme.moreSub'), const AppearancePage()),
-          _glass(ListTile(
-            leading: const Icon(Icons.privacy_tip_outlined, size: 26),
-            title: Text(context.tr('privacy.title')),
-            subtitle: Text(context.tr('privacy.moreSub')),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => _showPrivacySheet(context),
-          )),
-          _glass(ListTile(
-            leading: const Icon(Icons.description_outlined, size: 26),
-            title: Text(context.tr('oss.title')),
-            subtitle: Text(context.tr('oss.moreSub')),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => showLicensePage(
-              context: context,
-              applicationName: 'Lumo',
-              applicationVersion: '0.1.0',
-            ),
-          )),
-          _glass(ListTile(
-            leading: const Icon(Icons.language),
-            title: Text(context.tr('more.language')),
-            subtitle: Text(_currentLanguageLabel(context, ref)),
-            onTap: () => _pickLanguage(context, ref),
-          )),
-        ],
+          padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
+          children: [
+            const _GuideCard(),
+            const SizedBox(height: 10),
+            for (final cat in cats) _CategoryCard(cat: cat),
+          ],
         ),
       ),
     );
-  }
-
-  String _currentLanguageLabel(BuildContext context, WidgetRef ref) {
-    final locale = ref.watch(localeProvider);
-    if (locale == null) return context.tr('lang.system');
-    return context.tr('lang.${locale.languageCode}');
   }
 
   Future<void> _pickLanguage(BuildContext context, WidgetRef ref) async {
@@ -325,37 +274,113 @@ class MorePage extends ConsumerWidget {
       child: Text(label),
     );
   }
+}
 
-  Widget _tile(
-    BuildContext context,
-    String emoji,
-    String title,
-    String subtitle,
-    Widget page, {
-    Widget? trailing,
-  }) {
+/// One selectable module inside a category sheet.
+class _MoreEntry {
+  final String emoji;
+  final String title;
+  final Widget? trailing;
+  final VoidCallback onTap;
+  const _MoreEntry({
+    required this.emoji,
+    required this.title,
+    required this.onTap,
+    this.trailing,
+  });
+}
+
+/// A group of related modules, surfaced as a single card that opens a sheet.
+class _MoreCat {
+  final String emoji;
+  final String title;
+  final List<_MoreEntry> items;
+  final int badge;
+  const _MoreCat(this.emoji, this.title, this.items, {this.badge = 0});
+}
+
+/// Prominent, always-first entry that opens the full app tutorial.
+class _GuideCard extends StatelessWidget {
+  const _GuideCard();
+
+  @override
+  Widget build(BuildContext context) {
     return GlassCard(
-      margin: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+      margin: const EdgeInsets.fromLTRB(0, 0, 0, 10),
       padding: EdgeInsets.zero,
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute<void>(builder: (_) => page),
-      ),
+      onTap: () => GuidePage.open(context),
       child: ListTile(
-        leading: Text(emoji, style: const TextStyle(fontSize: 26)),
-        title: Text(title),
-        subtitle: Text(subtitle),
-        trailing: trailing ?? const Icon(Icons.chevron_right),
+        leading: const Text('🎓', style: TextStyle(fontSize: 26)),
+        title: Text(context.tr('tour.title')),
+        subtitle: Text(context.tr('tour.moreSub')),
+        trailing: const Icon(Icons.chevron_right),
+      ),
+    );
+  }
+}
+
+/// A category row. Tapping it opens a compact bottom sheet with the modules
+/// inside — so the hub stays short and each group is one tap away.
+class _CategoryCard extends StatelessWidget {
+  final _MoreCat cat;
+  const _CategoryCard({required this.cat});
+
+  @override
+  Widget build(BuildContext context) {
+    final subtitle = cat.items.map((e) => e.title).join(' · ');
+    Widget leading = Text(cat.emoji, style: const TextStyle(fontSize: 26));
+    if (cat.badge > 0) {
+      leading = Badge(label: Text('${cat.badge}'), child: leading);
+    }
+    return GlassCard(
+      margin: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+      padding: EdgeInsets.zero,
+      onTap: () => _open(context),
+      child: ListTile(
+        leading: leading,
+        title: Text(cat.title),
+        subtitle:
+            Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis),
+        trailing: const Icon(Icons.chevron_right),
       ),
     );
   }
 
-  /// Frames an arbitrary settings [tile] in the same glass card the module
-  /// tiles use, so the whole hub reads as one consistent surface.
-  Widget _glass(Widget tile) => GlassCard(
-        margin: const EdgeInsets.fromLTRB(12, 0, 12, 10),
-        padding: EdgeInsets.zero,
-        child: tile,
-      );
+  void _open(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetCtx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+              child: Row(
+                children: [
+                  Text(cat.emoji, style: const TextStyle(fontSize: 22)),
+                  const SizedBox(width: 10),
+                  Text(cat.title,
+                      style: Theme.of(sheetCtx).textTheme.titleLarge),
+                ],
+              ),
+            ),
+            for (final e in cat.items)
+              ListTile(
+                leading: Text(e.emoji, style: const TextStyle(fontSize: 24)),
+                title: Text(e.title),
+                trailing: e.trailing ?? const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.of(sheetCtx).pop();
+                  e.onTap();
+                },
+              ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 /// Compact privacy summary shown as a draggable bottom sheet (no full page),

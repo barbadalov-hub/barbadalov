@@ -20,6 +20,7 @@ class RecurringPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(context.tr('recurring.title'))),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'fab-recurring',
         onPressed: () => _addSheet(context, ref),
         icon: const Icon(Icons.add),
         label: Text(context.tr('recurring.add')),

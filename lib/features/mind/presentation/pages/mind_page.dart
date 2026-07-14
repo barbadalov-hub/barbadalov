@@ -27,6 +27,7 @@ class MindPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(context.tr('mind.title'))),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'fab-mind',
         onPressed: () => _addTaskDialog(context, ref),
         icon: const Icon(Icons.add_task),
         label: Text(context.tr('mind.task')),

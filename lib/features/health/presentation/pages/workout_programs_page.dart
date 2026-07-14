@@ -21,6 +21,7 @@ class ProgramDetailPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(context.tr(program.nameKey))),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'fab-workouts',
         onPressed: () {
           ref.read(logHealthProvider).completeWorkout('program-${program.id}');
           ScaffoldMessenger.of(context)
