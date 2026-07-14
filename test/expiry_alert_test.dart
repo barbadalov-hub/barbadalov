@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lifeos/core/constants/app_constants.dart';
 import 'package:lifeos/core/services/key_value_store.dart';
 import 'package:lifeos/features/food/presentation/providers/expiry_alert_provider.dart';
 import 'package:lifeos/features/food/presentation/providers/food_providers.dart';
@@ -7,6 +8,9 @@ import 'package:lifeos/features/notifications/presentation/providers/notificatio
 import 'package:lifeos/shared/providers/core_providers.dart';
 
 void main() {
+  // Relies on the built-in demo pantry (milk 2d, bread 1d) to expire.
+  setUp(() => AppConstants.seedDemoData = true);
+  tearDown(() => AppConstants.seedDemoData = false);
   test('expiring pantry items raise notifications, once each (deduped)',
       () async {
     final store = InMemoryKeyValueStore();

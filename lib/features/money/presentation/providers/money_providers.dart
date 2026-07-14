@@ -29,7 +29,8 @@ final moneyLocalDataSourceProvider = Provider<MoneyLocalDataSource>((ref) {
     seed: store.loadList(
       key,
       Transaction.fromJson,
-      fallback: _seedForMonth(now),
+      fallback:
+          AppConstants.seedDemoData ? _seedForMonth(now) : const <Transaction>[],
     ),
     onChanged: (items) => store.saveList(key, items, (t) => t.toJson()),
   );

@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lifeos/core/constants/app_constants.dart';
 import 'package:lifeos/features/food/application/food_use_cases.dart';
 import 'package:lifeos/features/food/data/food_repository_impl.dart';
 import 'package:lifeos/features/food/domain/entities/food_item.dart';
@@ -23,17 +24,21 @@ final foodRepositoryProvider = Provider<FoodRepository>((ref) {
     seedPantry: store.loadList(
       pantryKey,
       FoodItem.fromJson,
-      fallback: _defaultPantry(now),
+      fallback:
+          AppConstants.seedDemoData ? _defaultPantry(now) : const <FoodItem>[],
     ),
     seedShopping: store.loadList(
       shoppingKey,
       ShoppingItem.fromJson,
-      fallback: _defaultShopping,
+      fallback: AppConstants.seedDemoData
+          ? _defaultShopping
+          : const <ShoppingItem>[],
     ),
     seedRecipes: store.loadList(
       recipesKey,
       Recipe.fromJson,
-      fallback: _defaultRecipes,
+      fallback:
+          AppConstants.seedDemoData ? _defaultRecipes : const <Recipe>[],
     ),
     seedMealPlan: store.loadObject(
       mealPlanKey,

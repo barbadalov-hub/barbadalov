@@ -8,6 +8,13 @@ class AppConstants {
   static const String appName = 'Lumo';
   static const String defaultCurrency = 'USD';
 
+  /// When false, every account starts with **zero activity** — no sample
+  /// transactions, goals, health logs, pantry, habits, tasks or books. Each
+  /// person enters their own data. Kept as a (non-const) field so flipping it
+  /// to true restores the demo content for screenshots/testing without any
+  /// dead-code warnings.
+  static bool seedDemoData = false;
+
   // --- MoneyOS business rules --------------------------------------------
   /// Minimum share of income automatically set aside as reserve (10%).
   static const double minReserveRate = 0.10;
