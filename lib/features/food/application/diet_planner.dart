@@ -28,6 +28,7 @@ class DietPlanner {
     required int proteinTargetG,
     int seed = 0,
     Map<MealSlot, int> slotOffsets = const {},
+    String? dietId,
   }) {
     final snackSubsets = _snackSubsets(MealCatalog.snacks);
     final scored = <(double, List<MealOption>)>[];
@@ -41,7 +42,8 @@ class DietPlanner {
             final kcalMiss = (total.kcal - targetKcal).abs().toDouble();
             final proteinMiss =
                 (proteinTargetG - total.proteinG).clamp(0, 1 << 31).toDouble();
-            scored.add((kcalMiss + 2 * proteinMiss, meals));
+            scored.add(
+                (kcalMiss + 2 * proteinMiss + _dietTerm(dietId, total), meals));
           }
         }
       }
@@ -73,6 +75,15 @@ class DietPlanner {
       total: meals.fold(NutritionFacts.zero, (s, m) => s + m.nutrition),
     );
   }
+
+  /// A soft bias toward dishes that suit the chosen diet. Positive numbers are
+  /// penalties (worse fit). Timing-only diets (fasting) and generally balanced
+  /// ones don't change dish selection.
+  double _dietTerm(String? dietId, NutritionFacts t) => switch (dietId) {
+        'lowCarb' => t.carbsG * 2.0, // prefer lower-carb days
+        'highProtein' => -t.proteinG * 1.5, // reward more protein
+        _ => 0.0,
+      };
 
   MealOption _swapped(MealOption meal, int offset) {
     if (offset == 0 || meal.slot == MealSlot.snack) return meal;

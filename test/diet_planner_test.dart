@@ -33,6 +33,27 @@ void main() {
       };
       expect(ids.length, greaterThan(1)); // menus rotate day to day
     });
+
+    test('low-carb diet biases the week toward fewer carbs on average', () {
+      var plainCarbs = 0;
+      var lowCarbs = 0;
+      for (var s = 0; s < 7; s++) {
+        plainCarbs +=
+            planner.plan(targetKcal: 2000, proteinTargetG: 120, seed: s).total.carbsG;
+        lowCarbs += planner
+            .plan(targetKcal: 2000, proteinTargetG: 120, seed: s, dietId: 'lowCarb')
+            .total
+            .carbsG;
+      }
+      expect(lowCarbs, lessThan(plainCarbs));
+    });
+
+    test('high-protein diet biases the day toward more protein', () {
+      final plain = planner.plan(targetKcal: 2000, proteinTargetG: 120, seed: 1);
+      final high = planner.plan(
+          targetKcal: 2000, proteinTargetG: 120, seed: 1, dietId: 'highProtein');
+      expect(high.total.proteinG, greaterThanOrEqualTo(plain.total.proteinG));
+    });
   });
 
   group('MealCostCalculator (UA stores)', () {

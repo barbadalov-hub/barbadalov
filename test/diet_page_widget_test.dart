@@ -62,7 +62,16 @@ void main() {
     expect(find.textContaining('Ціль:'), findsOneWidget);
     expect(find.textContaining('ккал'), findsWidgets);
 
-    // The day-tabbed menu lists the main meals by slot.
+    // The full menu now lives behind one entry that opens the meal-plan page.
+    final menuEntry = find.text('Меню харчування');
+    expect(menuEntry, findsOneWidget);
+    await tester.tap(menuEntry);
+    // The meal-plan page has an animated backdrop that never settles → use
+    // fixed pumps to let the route transition finish.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    // The meal-plan page lists the main meals by slot.
     expect(find.textContaining('Сніданок'), findsWidgets);
     expect(find.textContaining('Обід'), findsWidgets);
     expect(find.textContaining('Вечеря'), findsWidgets);
