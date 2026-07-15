@@ -23,6 +23,12 @@ class DayPlan extends Equatable {
 class DietPlanner {
   const DietPlanner();
 
+  // Each slot's share of the day's calories (two snacks fill the rest).
+  static const _bShare = 0.28;
+  static const _lShare = 0.32;
+  static const _dShare = 0.28;
+  static const _sShare = 0.06; // per snack, ×2
+
   DayPlan plan({
     required int targetKcal,
     required int proteinTargetG,
@@ -30,28 +36,32 @@ class DietPlanner {
     Map<MealSlot, int> slotOffsets = const {},
     String? dietId,
   }) {
-    final snackSubsets = _snackSubsets(MealCatalog.snacks);
-    final scored = <(double, List<MealOption>)>[];
-
-    for (final b in MealCatalog.breakfasts) {
-      for (final l in MealCatalog.lunches) {
-        for (final d in MealCatalog.dinners) {
-          for (final snacks in snackSubsets) {
-            final meals = [b, l, d, ...snacks];
-            final total = meals.fold(NutritionFacts.zero, (s, m) => s + m.nutrition);
-            final kcalMiss = (total.kcal - targetKcal).abs().toDouble();
-            final proteinMiss =
-                (proteinTargetG - total.proteinG).clamp(0, 1 << 31).toDouble();
-            scored.add(
-                (kcalMiss + 2 * proteinMiss + _dietTerm(dietId, total), meals));
-          }
-        }
-      }
+    // Pick each slot independently against a per-slot calorie budget — O(n) in
+    // the catalog size, so it scales to a large menu (the old full-combination
+    // search was O(breakfasts × lunches × dinners × 2^snacks)).
+    MealOption bestFor(List<MealOption> options, double budget, int rot) {
+      final ranked = [...options]
+        ..sort((a, b) => _slotScore(a, budget, dietId)
+            .compareTo(_slotScore(b, budget, dietId)));
+      final topN = ranked.length < 5 ? ranked.length : 5;
+      return ranked[rot.abs() % topN];
     }
 
-    scored.sort((a, b) => a.$1.compareTo(b.$1));
-    // Rotate among the 5 best fits for day-to-day variety.
-    var pick = scored[seed.abs() % 5].$2;
+    final b = bestFor(MealCatalog.breakfasts, targetKcal * _bShare, seed);
+    final l = bestFor(MealCatalog.lunches, targetKcal * _lShare, seed);
+    final d = bestFor(MealCatalog.dinners, targetKcal * _dShare, seed);
+
+    // Two distinct snacks near the snack budget.
+    final snacksRanked = [...MealCatalog.snacks]
+      ..sort((a, b) => _slotScore(a, targetKcal * _sShare, dietId)
+          .compareTo(_slotScore(b, targetKcal * _sShare, dietId)));
+    final snackPicks = <MealOption>[];
+    for (var i = 0; snackPicks.length < 2 && i < snacksRanked.length; i++) {
+      final s = snacksRanked[(seed.abs() + i) % snacksRanked.length];
+      if (!snackPicks.contains(s)) snackPicks.add(s);
+    }
+
+    var pick = [b, l, d, ...snackPicks];
 
     // Manual per-slot swaps ("другой завтрак"): rotate that slot through the
     // catalog while keeping the rest of the day.
@@ -76,11 +86,18 @@ class DietPlanner {
     );
   }
 
+  /// Fitness of one dish for a slot: nearness to the slot's calorie budget,
+  /// a mild protein preference, and the chosen-diet bias. Lower is better.
+  double _slotScore(MealOption m, double budget, String? dietId) =>
+      (m.nutrition.kcal - budget).abs() -
+      m.nutrition.proteinG * 0.4 +
+      _dietTerm(dietId, m.nutrition);
+
   /// A soft bias toward dishes that suit the chosen diet. Positive numbers are
   /// penalties (worse fit). Timing-only diets (fasting) and generally balanced
   /// ones don't change dish selection.
   double _dietTerm(String? dietId, NutritionFacts t) => switch (dietId) {
-        'lowCarb' => t.carbsG * 2.0, // prefer lower-carb days
+        'lowCarb' => t.carbsG * 2.0, // prefer lower-carb dishes
         'highProtein' => -t.proteinG * 1.5, // reward more protein
         _ => 0.0,
       };
@@ -96,18 +113,6 @@ class DietPlanner {
     final index = options.indexWhere((m) => m.id == meal.id);
     if (index == -1) return meal;
     return options[(index + offset) % options.length];
-  }
-
-  /// All subsets of the snack list with 0–2 items.
-  List<List<MealOption>> _snackSubsets(List<MealOption> snacks) {
-    final subsets = <List<MealOption>>[[]];
-    for (var i = 0; i < snacks.length; i++) {
-      subsets.add([snacks[i]]);
-      for (var j = i + 1; j < snacks.length; j++) {
-        subsets.add([snacks[i], snacks[j]]);
-      }
-    }
-    return subsets;
   }
 }
 
