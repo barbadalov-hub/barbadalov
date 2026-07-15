@@ -4,6 +4,8 @@ import 'package:lifeos/core/i18n/locale_controller.dart';
 import 'package:lifeos/core/services/notification_gateway.dart';
 import 'package:lifeos/features/mind/presentation/providers/mood_providers.dart';
 import 'package:lifeos/features/money/presentation/providers/money_providers.dart';
+import 'package:lifeos/features/profile/domain/entities/user_profile.dart';
+import 'package:lifeos/features/profile/presentation/providers/profile_providers.dart';
 import 'package:lifeos/features/reminders/domain/entities/reminder.dart';
 import 'package:lifeos/features/reminders/domain/reminder_suggester.dart';
 import 'package:lifeos/features/reports/presentation/providers/report_providers.dart';
@@ -134,6 +136,7 @@ final reminderSuggestionsProvider = Provider<List<ReminderKind>>((ref) {
       lastMood != null && now.difference(lastMood).inDays <= 3;
 
   final existing = {for (final r in ref.watch(remindersProvider)) r.kind};
+  final goal = ref.watch(profileProvider)?.goal;
 
   return suggestReminderKinds(
     ReminderSuggestionInputs(
@@ -141,6 +144,7 @@ final reminderSuggestionsProvider = Provider<List<ReminderKind>>((ref) {
       avgWater: report.avgWater,
       moodLoggedRecently: moodRecent,
       overBudget: budget.isOverspent,
+      weightLossGoal: goal == FitnessGoal.lose,
     ),
     existing,
   );

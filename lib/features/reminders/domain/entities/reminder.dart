@@ -4,6 +4,7 @@ import 'package:equatable/equatable.dart';
 /// phones (even when the app is closed) and shows in the in-app feed elsewhere.
 enum ReminderKind {
   water('reminder.kind.water', '💧', 10, 0),
+  meal('reminder.kind.meal', '🍽️', 13, 0),
   workout('reminder.kind.workout', '🏋️', 18, 0),
   meds('reminder.kind.meds', '💊', 9, 0),
   budget('reminder.kind.budget', '💸', 20, 0),

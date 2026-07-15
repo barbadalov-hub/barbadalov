@@ -44,6 +44,21 @@ class DrinkSheet extends ConsumerWidget {
     _Drink('🍵', 'drink.tea', 200, 2),
   ];
 
+  // Popular soft/other drinks. Calories are typical values for the shown
+  // serving; the custom estimator below derives kcal from ml for anything else.
+  static const _soft = <_Drink>[
+    _Drink('🥤', 'drink.cola', 330, 139),
+    _Drink('🧃', 'drink.juice', 250, 110),
+    _Drink('🥛', 'drink.milk', 250, 130),
+    _Drink('🥛', 'drink.kefir', 250, 100),
+    _Drink('🍫', 'drink.cocoa', 250, 190),
+    _Drink('🥤', 'drink.smoothie', 300, 180),
+    _Drink('⚡', 'drink.energy', 250, 113),
+    _Drink('🧉', 'drink.kompot', 250, 90),
+    _Drink('🍺', 'drink.beer', 500, 215),
+    _Drink('🍷', 'drink.wine', 150, 125),
+  ];
+
   void _log(BuildContext context, WidgetRef ref, String name, int ml,
       int kcal) {
     if (ml > 0) ref.read(logHealthProvider).addWaterMl(ml);
@@ -103,6 +118,21 @@ class DrinkSheet extends ConsumerWidget {
             runSpacing: 10,
             children: [
               for (final d in _beverages)
+                _DrinkChip(
+                  drink: d,
+                  onTap: () =>
+                      _log(context, ref, context.tr(d.labelKey), d.ml, d.kcal),
+                ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          _header(context, '🥤', context.tr('drink.soft')),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              for (final d in _soft)
                 _DrinkChip(
                   drink: d,
                   onTap: () =>
@@ -212,7 +242,9 @@ class _CustomChip extends StatelessWidget {
   }
 }
 
-/// Custom drink input: millilitres (required) plus optional name and calories.
+/// Custom drink input: pick a beverage type and enter millilitres — the
+/// calories are estimated automatically (typical kcal per 100 ml for that
+/// type) and can still be overridden by hand.
 class _CustomDrinkDialog extends StatefulWidget {
   const _CustomDrinkDialog();
 
@@ -221,9 +253,24 @@ class _CustomDrinkDialog extends StatefulWidget {
 }
 
 class _CustomDrinkDialogState extends State<_CustomDrinkDialog> {
+  /// (i18n label, kcal per 100 ml) for common beverage families.
+  static const _types = <(String, int)>[
+    ('drink.type.water', 0),
+    ('drink.type.tea', 1),
+    ('drink.type.coffee', 2),
+    ('drink.type.juice', 45),
+    ('drink.type.soda', 42),
+    ('drink.type.milk', 52),
+    ('drink.type.beer', 43),
+    ('drink.type.wine', 83),
+    ('drink.type.other', 40),
+  ];
+
   final _name = TextEditingController();
   final _ml = TextEditingController();
   final _kcal = TextEditingController();
+  int _typeIndex = 0;
+  bool _kcalEdited = false;
 
   @override
   void dispose() {
@@ -233,31 +280,63 @@ class _CustomDrinkDialogState extends State<_CustomDrinkDialog> {
     super.dispose();
   }
 
+  /// Re-estimate calories from ml × the type's density, unless the user has
+  /// typed their own calorie value.
+  void _recalc() {
+    if (_kcalEdited) return;
+    final ml = int.tryParse(_ml.text.trim()) ?? 0;
+    final per100 = _types[_typeIndex].$2;
+    final kcal = (ml * per100 / 100).round();
+    _kcal.text = kcal == 0 ? '' : '$kcal';
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(context.tr('drink.custom')),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            controller: _name,
-            decoration: InputDecoration(labelText: context.tr('drink.name')),
-          ),
-          const SizedBox(height: 10),
-          TextField(
-            controller: _ml,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(labelText: context.tr('drink.mlLabel')),
-          ),
-          const SizedBox(height: 10),
-          TextField(
-            controller: _kcal,
-            keyboardType: TextInputType.number,
-            decoration:
-                InputDecoration(labelText: context.tr('drink.kcalLabel')),
-          ),
-        ],
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _name,
+              decoration: InputDecoration(labelText: context.tr('drink.name')),
+            ),
+            const SizedBox(height: 10),
+            DropdownButtonFormField<int>(
+              initialValue: _typeIndex,
+              isExpanded: true,
+              decoration: InputDecoration(labelText: context.tr('drink.type')),
+              items: [
+                for (var i = 0; i < _types.length; i++)
+                  DropdownMenuItem(
+                      value: i, child: Text(context.tr(_types[i].$1))),
+              ],
+              onChanged: (v) {
+                if (v == null) return;
+                setState(() => _typeIndex = v);
+                _recalc();
+              },
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _ml,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(labelText: context.tr('drink.mlLabel')),
+              onChanged: (_) => _recalc(),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _kcal,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: context.tr('drink.kcalLabel'),
+                helperText: context.tr('drink.kcalAuto'),
+              ),
+              onChanged: (_) => _kcalEdited = true,
+            ),
+          ],
+        ),
       ),
       actions: [
         TextButton(
@@ -270,7 +349,7 @@ class _CustomDrinkDialogState extends State<_CustomDrinkDialog> {
             if (ml <= 0) return;
             final kcal = int.tryParse(_kcal.text.trim()) ?? 0;
             final name = _name.text.trim().isEmpty
-                ? context.tr('drink.customName')
+                ? context.tr(_types[_typeIndex].$1)
                 : _name.text.trim();
             Navigator.pop(context, (name, ml, kcal));
           },

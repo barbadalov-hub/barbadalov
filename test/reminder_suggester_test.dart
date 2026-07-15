@@ -55,5 +55,27 @@ void main() {
       );
       expect(s, isNot(contains(ReminderKind.sleep)));
     });
+
+    test('weight-loss goal suggests meal + water even when hydration is fine', () {
+      final s = suggestReminderKinds(
+        const ReminderSuggestionInputs(
+          avgSleep: 8,
+          avgWater: 8, // already well hydrated
+          moodLoggedRecently: true,
+          weightLossGoal: true,
+        ),
+        {},
+      );
+      expect(s, contains(ReminderKind.meal));
+      expect(s, contains(ReminderKind.water));
+    });
+
+    test('weight-loss suggestions skip kinds already added', () {
+      final s = suggestReminderKinds(
+        const ReminderSuggestionInputs(avgWater: 8, weightLossGoal: true),
+        {ReminderKind.meal, ReminderKind.water},
+      );
+      expect(s, isEmpty);
+    });
   });
 }
