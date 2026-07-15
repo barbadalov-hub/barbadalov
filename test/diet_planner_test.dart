@@ -48,11 +48,24 @@ void main() {
       expect(lowCarbs, lessThan(plainCarbs));
     });
 
-    test('high-protein diet biases the day toward more protein', () {
-      final plain = planner.plan(targetKcal: 2000, proteinTargetG: 120, seed: 1);
-      final high = planner.plan(
-          targetKcal: 2000, proteinTargetG: 120, seed: 1, dietId: 'highProtein');
-      expect(high.total.proteinG, greaterThanOrEqualTo(plain.total.proteinG));
+    test('high-protein diet biases the week toward more protein on average', () {
+      var plainProtein = 0;
+      var highProtein = 0;
+      for (var s = 0; s < 7; s++) {
+        plainProtein += planner
+            .plan(targetKcal: 2000, proteinTargetG: 120, seed: s)
+            .total
+            .proteinG;
+        highProtein += planner
+            .plan(
+                targetKcal: 2000,
+                proteinTargetG: 120,
+                seed: s,
+                dietId: 'highProtein')
+            .total
+            .proteinG;
+      }
+      expect(highProtein, greaterThan(plainProtein));
     });
   });
 

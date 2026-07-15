@@ -59,6 +59,32 @@ class MealCatalog {
       ],
       nutrition: NutritionFacts(kcal: 360, proteinG: 25, fatG: 24, carbsG: 8),
     ),
+    MealOption(
+      id: 'protein_pancakes',
+      slot: MealSlot.breakfast,
+      emoji: '🥞',
+      nameKey: 'meal.protein_pancakes',
+      ingredients: [
+        IngredientPortion('oats', 50, PortionUnit.g),
+        IngredientPortion('eggs', 2, PortionUnit.pcs),
+        IngredientPortion('banana', 1, PortionUnit.pcs),
+        IngredientPortion('cottage_cheese', 100, PortionUnit.g),
+      ],
+      nutrition: NutritionFacts(kcal: 430, proteinG: 30, fatG: 13, carbsG: 48),
+    ),
+    MealOption(
+      id: 'veggie_scramble',
+      slot: MealSlot.breakfast,
+      emoji: '🍳',
+      nameKey: 'meal.veggie_scramble',
+      ingredients: [
+        IngredientPortion('eggs', 3, PortionUnit.pcs),
+        IngredientPortion('tomatoes', 100, PortionUnit.g),
+        IngredientPortion('cheese', 30, PortionUnit.g),
+        IngredientPortion('onion', 30, PortionUnit.g),
+      ],
+      nutrition: NutritionFacts(kcal: 340, proteinG: 24, fatG: 23, carbsG: 9),
+    ),
   ];
 
   static const lunches = <MealOption>[
@@ -103,6 +129,32 @@ class MealCatalog {
       ],
       nutrition: NutritionFacts(kcal: 500, proteinG: 38, fatG: 10, carbsG: 62),
     ),
+    MealOption(
+      id: 'chicken_pasta',
+      slot: MealSlot.lunch,
+      emoji: '🍗',
+      nameKey: 'meal.chicken_pasta',
+      ingredients: [
+        IngredientPortion('chicken', 150, PortionUnit.g),
+        IngredientPortion('pasta', 80, PortionUnit.g),
+        IngredientPortion('tomatoes', 100, PortionUnit.g),
+        IngredientPortion('cheese', 20, PortionUnit.g),
+      ],
+      nutrition: NutritionFacts(kcal: 560, proteinG: 45, fatG: 14, carbsG: 62),
+    ),
+    MealOption(
+      id: 'lentil_soup',
+      slot: MealSlot.lunch,
+      emoji: '🍲',
+      nameKey: 'meal.lentil_soup',
+      ingredients: [
+        IngredientPortion('lentils', 90, PortionUnit.g),
+        IngredientPortion('carrots', 60, PortionUnit.g),
+        IngredientPortion('onion', 50, PortionUnit.g),
+        IngredientPortion('potatoes', 100, PortionUnit.g),
+      ],
+      nutrition: NutritionFacts(kcal: 420, proteinG: 24, fatG: 4, carbsG: 74),
+    ),
   ];
 
   static const dinners = <MealOption>[
@@ -145,6 +197,32 @@ class MealCatalog {
       ],
       nutrition: NutritionFacts(kcal: 330, proteinG: 30, fatG: 12, carbsG: 22),
     ),
+    MealOption(
+      id: 'beef_veg',
+      slot: MealSlot.dinner,
+      emoji: '🥗',
+      nameKey: 'meal.beef_veg',
+      ingredients: [
+        IngredientPortion('beef', 150, PortionUnit.g),
+        IngredientPortion('carrots', 80, PortionUnit.g),
+        IngredientPortion('onion', 50, PortionUnit.g),
+        IngredientPortion('tomatoes', 100, PortionUnit.g),
+      ],
+      nutrition: NutritionFacts(kcal: 430, proteinG: 38, fatG: 22, carbsG: 18),
+    ),
+    MealOption(
+      id: 'shrimp_salad',
+      slot: MealSlot.dinner,
+      emoji: '🐟',
+      nameKey: 'meal.shrimp_salad',
+      ingredients: [
+        IngredientPortion('shrimp', 150, PortionUnit.g),
+        IngredientPortion('cucumbers', 150, PortionUnit.g),
+        IngredientPortion('tomatoes', 100, PortionUnit.g),
+        IngredientPortion('cheese', 20, PortionUnit.g),
+      ],
+      nutrition: NutritionFacts(kcal: 300, proteinG: 32, fatG: 12, carbsG: 12),
+    ),
   ];
 
   static const snacks = <MealOption>[
@@ -179,6 +257,27 @@ class MealCatalog {
         IngredientPortion('banana', 1, PortionUnit.pcs),
       ],
       nutrition: NutritionFacts(kcal: 105, proteinG: 1, fatG: 0, carbsG: 27),
+    ),
+    MealOption(
+      id: 'cottage_berries',
+      slot: MealSlot.snack,
+      emoji: '🥣',
+      nameKey: 'meal.cottage_berries',
+      ingredients: [
+        IngredientPortion('cottage_cheese', 150, PortionUnit.g),
+        IngredientPortion('berries', 80, PortionUnit.g),
+      ],
+      nutrition: NutritionFacts(kcal: 200, proteinG: 22, fatG: 6, carbsG: 16),
+    ),
+    MealOption(
+      id: 'kefir_snack',
+      slot: MealSlot.snack,
+      emoji: '🥛',
+      nameKey: 'meal.kefir_snack',
+      ingredients: [
+        IngredientPortion('kefir', 300, PortionUnit.ml),
+      ],
+      nutrition: NutritionFacts(kcal: 150, proteinG: 9, fatG: 6, carbsG: 15),
     ),
   ];
 
