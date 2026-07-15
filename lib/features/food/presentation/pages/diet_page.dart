@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
+import 'package:lifeos/features/food/domain/diet_catalog.dart';
 import 'package:lifeos/features/food/domain/entities/nutrition.dart';
+import 'package:lifeos/features/profile/domain/entities/user_profile.dart';
 import 'package:lifeos/features/food/presentation/providers/diet_providers.dart';
 import 'package:lifeos/features/food/presentation/providers/food_providers.dart';
 import 'package:lifeos/features/profile/presentation/providers/profile_providers.dart';
 import 'package:lifeos/features/profile/presentation/pages/profile_page.dart';
 import 'package:lifeos/shared/models/money.dart';
+import 'package:lifeos/shared/providers/core_providers.dart';
 import 'package:lifeos/shared/theme/app_theme.dart';
 import 'package:lifeos/shared/widgets/animated_backdrop.dart';
 import 'package:lifeos/shared/widgets/gradient_card.dart';
@@ -28,6 +32,12 @@ class DietPage extends ConsumerWidget {
       appBar: AppBar(
         title: Text(context.tr('diet.title')),
         actions: [
+          if (assessment != null)
+            IconButton(
+              icon: const Icon(Icons.spa_outlined),
+              tooltip: context.tr('diet.plansTitle'),
+              onPressed: () => _DietPlansSheet.show(context),
+            ),
           if (plan != null) ...[
             IconButton(
               icon: const Icon(Icons.add_shopping_cart),
@@ -135,6 +145,8 @@ class DietPage extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
+                _ChooseDietCard(onTap: () => _DietPlansSheet.show(context)),
+                const SizedBox(height: 12),
                 const _MacroRings(),
                 const SizedBox(height: 12),
                 const _RemainingCard(),
@@ -143,10 +155,8 @@ class DietPage extends ConsumerWidget {
                 const SizedBox(height: 12),
                 const _DayCostCard(),
                 const SizedBox(height: 12),
-                for (final meal in plan.meals) ...[
-                  _MealCard(meal: meal),
-                  const SizedBox(height: 10),
-                ],
+                const _WeekMenuSection(),
+                const SizedBox(height: 12),
                 Text(
                   context.tr('diet.approx'),
                   textAlign: TextAlign.center,
@@ -404,6 +414,361 @@ class _DayCostCard extends ConsumerWidget {
   }
 }
 
+/// Prompt to open the diets catalog — "pick a diet to reach your shape".
+class _ChooseDietCard extends StatelessWidget {
+  final VoidCallback onTap;
+  const _ChooseDietCard({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return SectionCard(
+      onTap: onTap,
+      color: LifeColors.mind.withValues(alpha: 0.12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: Row(
+        children: [
+          const Text('🎯', style: TextStyle(fontSize: 26)),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(context.tr('diet.chooseTitle'),
+                    style: Theme.of(context).textTheme.titleMedium),
+                Text(context.tr('diet.chooseSub'),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.outline,
+                        )),
+              ],
+            ),
+          ),
+          const Icon(Icons.chevron_right),
+        ],
+      ),
+    );
+  }
+}
+
+/// Popular doctor-backed diets ranked for the user, ideal athletic reference
+/// metrics, and today's water + home-exercise guidance — all in one popup.
+class _DietPlansSheet extends ConsumerWidget {
+  const _DietPlansSheet();
+
+  static Future<void> show(BuildContext context) => showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        showDragHandle: true,
+        builder: (_) => const _DietPlansSheet(),
+      );
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profile = ref.watch(profileProvider);
+    final a = ref.watch(assessmentProvider);
+    if (profile == null || a == null) return const SizedBox.shrink();
+
+    final glasses = (a.waterLiters * 4).round(); // 250 ml per glass
+    final ranked = recommendDiets(profile, highWhrRisk: a.whrHighRisk);
+    final athleticBodyFat = profile.sex == Sex.male ? '10–15%' : '18–24%';
+
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.85,
+      minChildSize: 0.5,
+      maxChildSize: 0.95,
+      builder: (context, controller) => ListView(
+        controller: controller,
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
+        children: [
+          Text(context.tr('diet.plansTitle'),
+              style: Theme.of(context).textTheme.headlineSmall),
+          const SizedBox(height: 12),
+
+          // Ideal athletic reference.
+          SectionCard(
+            color: LifeColors.finance.withValues(alpha: 0.12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('🏆 ${context.tr('diet.idealTitle')}',
+                    style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 8),
+                _stat(context, context.tr('diet.idealWeight'),
+                    '${a.idealWeightKg.toStringAsFixed(1)} kg'),
+                _stat(context, context.tr('diet.athleticBodyFat'),
+                    athleticBodyFat),
+                _stat(context, context.tr('diet.targetKcalRow'),
+                    '${a.targetKcal} ${context.tr('diet.kcal')}'),
+                _stat(context, context.tr('diet.waterRow'),
+                    context.trp('diet.glasses', {'n': glasses})),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // Today's home-exercise guidance, tuned to a desk job.
+          SectionCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('🏠 ${context.tr('diet.homeTitle')}',
+                    style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 4),
+                Text(
+                  context.tr(
+                      profile.deskJob ? 'diet.homeDesk' : 'diet.homeActive'),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
+                ),
+                const SizedBox(height: 8),
+                _bullet(context, '🌅', context.tr('diet.morning')),
+                _bullet(context, '🌆', context.tr('diet.evening')),
+                _bullet(context, '🏃', context.tr('diet.cardio')),
+                _bullet(context, '🩹', context.tr('diet.injury')),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          Text(context.tr('diet.recommendedTitle'),
+              style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 8),
+          for (var i = 0; i < ranked.length; i++)
+            _DietPlanCard(plan: ranked[i], recommended: i == 0),
+          const SizedBox(height: 16),
+          _SeasonalVitaminsCard(month: ref.watch(clockProvider).now().month),
+        ],
+      ),
+    );
+  }
+
+  Widget _stat(BuildContext context, String label, String value) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 3),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(label),
+            Text(value, style: const TextStyle(fontWeight: FontWeight.w700)),
+          ],
+        ),
+      );
+
+  Widget _bullet(BuildContext context, String emoji, String text) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('$emoji  '),
+            Expanded(child: Text(text)),
+          ],
+        ),
+      );
+}
+
+class _DietPlanCard extends StatelessWidget {
+  final DietPlan plan;
+  final bool recommended;
+  const _DietPlanCard({required this.plan, required this.recommended});
+
+  @override
+  Widget build(BuildContext context) {
+    return SectionCard(
+      color: recommended ? LifeColors.mind.withValues(alpha: 0.12) : null,
+      onTap: () => _DietDetailSheet.show(context, plan),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(plan.emoji, style: const TextStyle(fontSize: 24)),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(context.tr(plan.nameKey),
+                    style: Theme.of(context).textTheme.titleMedium),
+              ),
+              if (recommended)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: LifeColors.mind,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(context.tr('diet.recommended'),
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700)),
+                ),
+              const SizedBox(width: 4),
+              const Icon(Icons.chevron_right),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(context.tr(plan.summaryKey),
+              style: Theme.of(context).textTheme.bodyMedium),
+          const SizedBox(height: 6),
+          Text(context.tr('diet.tapForDetails'),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Theme.of(context).colorScheme.primary,
+                  )),
+        ],
+      ),
+    );
+  }
+}
+
+/// The full breakdown of one diet: how it works, pros, cons and tips.
+class _DietDetailSheet {
+  static Future<void> show(BuildContext context, DietPlan plan) =>
+      showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        showDragHandle: true,
+        builder: (_) => DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.85,
+          minChildSize: 0.5,
+          maxChildSize: 0.95,
+          builder: (ctx, controller) => ListView(
+            controller: controller,
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
+            children: [
+              Row(
+                children: [
+                  Text(plan.emoji, style: const TextStyle(fontSize: 28)),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(ctx.tr(plan.nameKey),
+                        style: Theme.of(ctx).textTheme.headlineSmall),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Text(ctx.tr(plan.summaryKey),
+                  style: Theme.of(ctx).textTheme.bodyMedium),
+              const SizedBox(height: 16),
+              _heading(ctx, ctx.tr('diet.howTitle')),
+              const SizedBox(height: 6),
+              Text(ctx.tr(plan.howKey),
+                  style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(height: 1.4)),
+              const SizedBox(height: 16),
+              _heading(ctx, '✅ ${ctx.tr('diet.pros')}'),
+              const SizedBox(height: 6),
+              for (final k in plan.proKeys)
+                _bulletRow(ctx, '+', ctx.tr(k), const Color(0xFF2E9E6B)),
+              const SizedBox(height: 12),
+              _heading(ctx, '⚠️ ${ctx.tr('diet.cons')}'),
+              const SizedBox(height: 6),
+              for (final k in plan.conKeys)
+                _bulletRow(ctx, '−', ctx.tr(k), LifeColors.goals),
+              const SizedBox(height: 16),
+              _heading(ctx, '💡 ${ctx.tr('diet.howToStart')}'),
+              const SizedBox(height: 6),
+              Text(ctx.tr(plan.tipsKey),
+                  style: Theme.of(ctx).textTheme.bodyMedium),
+              const SizedBox(height: 16),
+              Text(ctx.tr('diet.notAdvice'),
+                  style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(ctx).colorScheme.outline,
+                      )),
+            ],
+          ),
+        ),
+      );
+
+  static Widget _heading(BuildContext ctx, String text) => Text(text,
+      style: Theme.of(ctx)
+          .textTheme
+          .titleMedium
+          ?.copyWith(fontWeight: FontWeight.w800));
+
+  static Widget _bulletRow(
+          BuildContext ctx, String mark, String text, Color color) =>
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 3),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('$mark  ',
+                style: TextStyle(color: color, fontWeight: FontWeight.w900)),
+            Expanded(child: Text(text)),
+          ],
+        ),
+      );
+}
+
+/// Seasonal vitamin guidance — which vitamins tend to run low each season,
+/// with the current season highlighted.
+class _SeasonalVitaminsCard extends StatelessWidget {
+  final int month;
+  const _SeasonalVitaminsCard({required this.month});
+
+  @override
+  Widget build(BuildContext context) {
+    final current = currentSeasonId(month);
+    return SectionCard(
+      color: LifeColors.finance.withValues(alpha: 0.12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('💊 ${context.tr('vit.title')}',
+              style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 4),
+          Text(context.tr('vit.sub'),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.outline,
+                  )),
+          const SizedBox(height: 10),
+          for (final v in kSeasonalVitamins)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 5),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('${v.emoji}  ', style: const TextStyle(fontSize: 16)),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(context.tr(v.nameKey),
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w700)),
+                            if (v.id == current) ...[
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 6, vertical: 1),
+                                decoration: BoxDecoration(
+                                  color: LifeColors.finance,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(context.tr('vit.now'),
+                                    style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w700)),
+                              ),
+                            ],
+                          ],
+                        ),
+                        Text(context.tr(v.bodyKey),
+                            style: Theme.of(context).textTheme.bodySmall),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
 class _NoProfile extends StatelessWidget {
   final VoidCallback onOpen;
   const _NoProfile({required this.onOpen});
@@ -434,9 +799,141 @@ class _NoProfile extends StatelessWidget {
   }
 }
 
+/// The week's menu as day tabs; each meal opens in a detail popup. Day 0 is
+/// today (interactive); the rest are a read-only preview of the coming days.
+class _WeekMenuSection extends ConsumerWidget {
+  const _WeekMenuSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final week = ref.watch(weekPlanProvider);
+    if (week == null || week.isEmpty) return const SizedBox.shrink();
+    final sel = ref.watch(selectedDietDayProvider).clamp(0, week.length - 1);
+    final now = ref.watch(clockProvider).now();
+    final day = week[sel];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(context.tr('diet.weekMenu'),
+            style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              for (var i = 0; i < week.length; i++)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: ChoiceChip(
+                    label: Text(_dayLabel(context, now, i)),
+                    selected: sel == i,
+                    onSelected: (_) => ref
+                        .read(selectedDietDayProvider.notifier)
+                        .state = i,
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
+        for (final meal in day.meals) ...[
+          _MealTile(meal: meal, today: sel == 0),
+          const SizedBox(height: 8),
+        ],
+      ],
+    );
+  }
+
+  String _dayLabel(BuildContext context, DateTime now, int i) {
+    if (i == 0) return context.tr('diet.today');
+    final d = now.add(Duration(days: i));
+    return DateFormat.E(Localizations.localeOf(context).languageCode).format(d);
+  }
+}
+
+/// A compact meal row inside a day tab. Tapping opens the full detail popup.
+class _MealTile extends ConsumerWidget {
+  final MealOption meal;
+  final bool today;
+  const _MealTile({required this.meal, required this.today});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final eaten = today && ref.watch(eatenMealsProvider).contains(meal.id);
+    return SectionCard(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      onTap: () => _MealDetailSheet.show(context, meal, today: today),
+      child: Row(
+        children: [
+          Text(meal.emoji, style: const TextStyle(fontSize: 24)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(context.tr('diet.slot.${meal.slot.name}'),
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Theme.of(context).colorScheme.outline,
+                        )),
+                Text(context.tr(meal.nameKey),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          decoration:
+                              eaten ? TextDecoration.lineThrough : null,
+                        )),
+              ],
+            ),
+          ),
+          Text('${meal.nutrition.kcal} ${context.tr('diet.kcal')}',
+              style: Theme.of(context).textTheme.bodySmall),
+          const SizedBox(width: 6),
+          Icon(eaten ? Icons.check_circle : Icons.chevron_right,
+              size: 20,
+              color: eaten ? const Color(0xFF2E9E6B) : null),
+        ],
+      ),
+    );
+  }
+}
+
+/// A single meal's full detail (ingredients, nutrition, cost) in a popup.
+class _MealDetailSheet {
+  static Future<void> show(BuildContext context, MealOption meal,
+          {required bool today}) =>
+      showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        showDragHandle: true,
+        builder: (_) => DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.7,
+          minChildSize: 0.4,
+          maxChildSize: 0.95,
+          builder: (ctx, controller) => ListView(
+            controller: controller,
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+            children: [
+              Text(ctx.tr('diet.slot.${meal.slot.name}'),
+                  style: Theme.of(ctx).textTheme.labelMedium?.copyWith(
+                        color: Theme.of(ctx).colorScheme.outline,
+                      )),
+              Text(ctx.tr(meal.nameKey),
+                  style: Theme.of(ctx).textTheme.headlineSmall),
+              const SizedBox(height: 12),
+              _MealCard(meal: meal, readOnly: !today),
+            ],
+          ),
+        ),
+      );
+}
+
 class _MealCard extends ConsumerWidget {
   final MealOption meal;
-  const _MealCard({required this.meal});
+
+  /// Future days are read-only: no eaten checkbox and no per-slot swap (those
+  /// act on *today's* plan only).
+  final bool readOnly;
+  const _MealCard({required this.meal, this.readOnly = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -452,11 +949,12 @@ class _MealCard extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Checkbox(
-                value: isEaten,
-                onChanged: (_) =>
-                    ref.read(eatenMealsProvider.notifier).toggle(meal.id),
-              ),
+              if (!readOnly)
+                Checkbox(
+                  value: isEaten,
+                  onChanged: (_) =>
+                      ref.read(eatenMealsProvider.notifier).toggle(meal.id),
+                ),
               Text(meal.emoji, style: const TextStyle(fontSize: 24)),
               const SizedBox(width: 10),
               Expanded(
@@ -472,7 +970,7 @@ class _MealCard extends ConsumerWidget {
                   ],
                 ),
               ),
-              if (meal.slot != MealSlot.snack)
+              if (!readOnly && meal.slot != MealSlot.snack)
                 IconButton(
                   icon: const Icon(Icons.swap_horiz, size: 20),
                   tooltip: context.tr('diet.swapMeal'),

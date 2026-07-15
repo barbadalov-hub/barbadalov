@@ -62,18 +62,27 @@ void main() {
     expect(find.textContaining('Ціль:'), findsOneWidget);
     expect(find.textContaining('ккал'), findsWidgets);
 
-    // The menu covers the main meals with localized dish names.
+    // The day-tabbed menu lists the main meals by slot.
     expect(find.textContaining('Сніданок'), findsWidgets);
     expect(find.textContaining('Обід'), findsWidgets);
     expect(find.textContaining('Вечеря'), findsWidgets);
 
-    // Brand-free price tiers are visible ("Де купити · від ₴… в Магазин 1").
-    expect(find.textContaining('Де купити'), findsWidgets);
-    expect(find.textContaining('Магазин 1'), findsWidgets);
-
-    // Expanding a meal shows all three anonymous price tiers with totals.
-    await tester.tap(find.textContaining('Де купити').first);
+    // Tapping a meal opens its detail popup with brand-free store prices.
+    final breakfast = find.text('Сніданок').first;
+    await tester.ensureVisible(breakfast);
+    await tester.pump();
+    await tester.tap(breakfast);
+    await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
+    expect(find.textContaining('Де купити'), findsWidgets);
+
+    // Expanding it shows all three anonymous price tiers with totals.
+    final whereToBuy = find.textContaining('Де купити').first;
+    await tester.ensureVisible(whereToBuy);
+    await tester.pump();
+    await tester.tap(whereToBuy);
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.textContaining('Магазин 1'), findsWidgets);
     expect(find.textContaining('Магазин 2'), findsWidgets);
     expect(find.textContaining('Магазин 3'), findsWidgets);
   });
