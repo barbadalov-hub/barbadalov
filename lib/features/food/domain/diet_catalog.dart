@@ -19,6 +19,16 @@ class DietPlan {
   /// A longer "how it works" breakdown.
   String get howKey => 'diet.plan.$id.how';
 
+  /// Origin / who devised it.
+  String get historyKey => 'diet.plan.$id.history';
+
+  /// What leading doctors / dietitians say about it.
+  String get expertKey => 'diet.plan.$id.expert';
+
+  /// Who should avoid it or use it only under medical supervision
+  /// (e.g. gastritis, ulcer, kidney disease, pregnancy).
+  String get contraKey => 'diet.plan.$id.contra';
+
   /// Three upsides and three downsides (i18n keys).
   List<String> get proKeys =>
       ['diet.plan.$id.pro1', 'diet.plan.$id.pro2', 'diet.plan.$id.pro3'];

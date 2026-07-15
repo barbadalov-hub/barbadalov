@@ -654,6 +654,16 @@ class _DietDetailSheet {
               Text(ctx.tr(plan.howKey),
                   style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(height: 1.4)),
               const SizedBox(height: 16),
+              _heading(ctx, '📜 ${ctx.tr('diet.history')}'),
+              const SizedBox(height: 6),
+              Text(ctx.tr(plan.historyKey),
+                  style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(height: 1.4)),
+              const SizedBox(height: 16),
+              _heading(ctx, '🩺 ${ctx.tr('diet.expert')}'),
+              const SizedBox(height: 6),
+              Text(ctx.tr(plan.expertKey),
+                  style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(height: 1.4)),
+              const SizedBox(height: 16),
               _heading(ctx, '✅ ${ctx.tr('diet.pros')}'),
               const SizedBox(height: 6),
               for (final k in plan.proKeys)
@@ -663,6 +673,26 @@ class _DietDetailSheet {
               const SizedBox(height: 6),
               for (final k in plan.conKeys)
                 _bulletRow(ctx, '−', ctx.tr(k), LifeColors.goals),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: LifeColors.health.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _heading(ctx, '⛔ ${ctx.tr('diet.contra')}'),
+                    const SizedBox(height: 6),
+                    Text(ctx.tr(plan.contraKey),
+                        style: Theme.of(ctx)
+                            .textTheme
+                            .bodyMedium
+                            ?.copyWith(height: 1.4)),
+                  ],
+                ),
+              ),
               const SizedBox(height: 16),
               _heading(ctx, '💡 ${ctx.tr('diet.howToStart')}'),
               const SizedBox(height: 6),
