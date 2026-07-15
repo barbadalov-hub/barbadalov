@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
+import 'package:lifeos/features/food/domain/diet_catalog.dart';
 import 'package:lifeos/features/food/domain/entities/nutrition.dart';
+import 'package:lifeos/features/profile/domain/entities/user_profile.dart';
 import 'package:lifeos/features/food/presentation/providers/diet_providers.dart';
 import 'package:lifeos/features/food/presentation/providers/food_providers.dart';
 import 'package:lifeos/features/profile/presentation/providers/profile_providers.dart';
@@ -28,6 +30,12 @@ class DietPage extends ConsumerWidget {
       appBar: AppBar(
         title: Text(context.tr('diet.title')),
         actions: [
+          if (assessment != null)
+            IconButton(
+              icon: const Icon(Icons.spa_outlined),
+              tooltip: context.tr('diet.plansTitle'),
+              onPressed: () => _DietPlansSheet.show(context),
+            ),
           if (plan != null) ...[
             IconButton(
               icon: const Icon(Icons.add_shopping_cart),
@@ -134,6 +142,8 @@ class DietPage extends ConsumerWidget {
                     ],
                   ),
                 ),
+                const SizedBox(height: 12),
+                _ChooseDietCard(onTap: () => _DietPlansSheet.show(context)),
                 const SizedBox(height: 12),
                 const _MacroRings(),
                 const SizedBox(height: 12),
@@ -398,6 +408,206 @@ class _DayCostCard extends ConsumerWidget {
           Text('≈ ${Money(total, currency: 'UAH').format()}',
               style: const TextStyle(
                   fontWeight: FontWeight.w800, fontSize: 16)),
+        ],
+      ),
+    );
+  }
+}
+
+/// Prompt to open the diets catalog — "pick a diet to reach your shape".
+class _ChooseDietCard extends StatelessWidget {
+  final VoidCallback onTap;
+  const _ChooseDietCard({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return SectionCard(
+      onTap: onTap,
+      color: LifeColors.mind.withValues(alpha: 0.12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: Row(
+        children: [
+          const Text('🎯', style: TextStyle(fontSize: 26)),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(context.tr('diet.chooseTitle'),
+                    style: Theme.of(context).textTheme.titleMedium),
+                Text(context.tr('diet.chooseSub'),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.outline,
+                        )),
+              ],
+            ),
+          ),
+          const Icon(Icons.chevron_right),
+        ],
+      ),
+    );
+  }
+}
+
+/// Popular doctor-backed diets ranked for the user, ideal athletic reference
+/// metrics, and today's water + home-exercise guidance — all in one popup.
+class _DietPlansSheet extends ConsumerWidget {
+  const _DietPlansSheet();
+
+  static Future<void> show(BuildContext context) => showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        showDragHandle: true,
+        builder: (_) => const _DietPlansSheet(),
+      );
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profile = ref.watch(profileProvider);
+    final a = ref.watch(assessmentProvider);
+    if (profile == null || a == null) return const SizedBox.shrink();
+
+    final glasses = (a.waterLiters * 4).round(); // 250 ml per glass
+    final ranked = recommendDiets(profile, highWhrRisk: a.whrHighRisk);
+    final athleticBodyFat = profile.sex == Sex.male ? '10–15%' : '18–24%';
+
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.85,
+      minChildSize: 0.5,
+      maxChildSize: 0.95,
+      builder: (context, controller) => ListView(
+        controller: controller,
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
+        children: [
+          Text(context.tr('diet.plansTitle'),
+              style: Theme.of(context).textTheme.headlineSmall),
+          const SizedBox(height: 12),
+
+          // Ideal athletic reference.
+          SectionCard(
+            color: LifeColors.finance.withValues(alpha: 0.12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('🏆 ${context.tr('diet.idealTitle')}',
+                    style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 8),
+                _stat(context, context.tr('diet.idealWeight'),
+                    '${a.idealWeightKg.toStringAsFixed(1)} kg'),
+                _stat(context, context.tr('diet.athleticBodyFat'),
+                    athleticBodyFat),
+                _stat(context, context.tr('diet.targetKcalRow'),
+                    '${a.targetKcal} ${context.tr('diet.kcal')}'),
+                _stat(context, context.tr('diet.waterRow'),
+                    context.trp('diet.glasses', {'n': glasses})),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // Today's home-exercise guidance, tuned to a desk job.
+          SectionCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('🏠 ${context.tr('diet.homeTitle')}',
+                    style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 4),
+                Text(
+                  context.tr(
+                      profile.deskJob ? 'diet.homeDesk' : 'diet.homeActive'),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
+                ),
+                const SizedBox(height: 8),
+                _bullet(context, '🌅', context.tr('diet.morning')),
+                _bullet(context, '🌆', context.tr('diet.evening')),
+                _bullet(context, '🏃', context.tr('diet.cardio')),
+                _bullet(context, '🩹', context.tr('diet.injury')),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          Text(context.tr('diet.recommendedTitle'),
+              style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 8),
+          for (var i = 0; i < ranked.length; i++)
+            _DietPlanCard(plan: ranked[i], recommended: i == 0),
+        ],
+      ),
+    );
+  }
+
+  Widget _stat(BuildContext context, String label, String value) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 3),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(label),
+            Text(value, style: const TextStyle(fontWeight: FontWeight.w700)),
+          ],
+        ),
+      );
+
+  Widget _bullet(BuildContext context, String emoji, String text) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('$emoji  '),
+            Expanded(child: Text(text)),
+          ],
+        ),
+      );
+}
+
+class _DietPlanCard extends StatelessWidget {
+  final DietPlan plan;
+  final bool recommended;
+  const _DietPlanCard({required this.plan, required this.recommended});
+
+  @override
+  Widget build(BuildContext context) {
+    return SectionCard(
+      color: recommended ? LifeColors.mind.withValues(alpha: 0.12) : null,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(plan.emoji, style: const TextStyle(fontSize: 24)),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(context.tr(plan.nameKey),
+                    style: Theme.of(context).textTheme.titleMedium),
+              ),
+              if (recommended)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: LifeColors.mind,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(context.tr('diet.recommended'),
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700)),
+                ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(context.tr(plan.summaryKey),
+              style: Theme.of(context).textTheme.bodyMedium),
+          const SizedBox(height: 6),
+          Text('💡 ${context.tr(plan.tipsKey)}',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.outline,
+                  )),
         ],
       ),
     );
