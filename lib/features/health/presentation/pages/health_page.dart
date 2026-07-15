@@ -112,9 +112,7 @@ class HealthPage extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
             const _StreaksCard(),
-            const SizedBox(height: 12),
-            const _WeekSummaryCard(),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
             Text(context.tr('health.log'),
                 style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
@@ -145,68 +143,20 @@ class HealthPage extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 12),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Text('⚖️', style: TextStyle(fontSize: 22)),
-              title: Text(context.tr('health.weight')),
-              subtitle: Text(context.tr('health.weightTapHint'),
-                  style: Theme.of(context).textTheme.bodySmall),
-              trailing: Text(
-                day.weightKg == null
-                    ? '—'
-                    : '${day.weightKg!.toStringAsFixed(1)} kg',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              onTap: () => _weightDialog(context, ref, day.weightKg),
+            _HealthEntry(
+              emoji: '🩺',
+              title: context.tr('health.metrics'),
+              subtitle: context.tr('health.metricsSub'),
+              onTap: () => _MetricsSheet.show(context),
             ),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Text('💓', style: TextStyle(fontSize: 22)),
-              title: Text(context.tr('health.heartRate')),
-              trailing: Text(
-                day.heartRate == null
-                    ? '—'
-                    : '${day.heartRate} ${context.tr('health.bpm')}',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
+            const SizedBox(height: 12),
+            _HealthEntry(
+              emoji: '📈',
+              title: context.tr('health.trends'),
+              subtitle: context.tr('health.trendsSub'),
+              onTap: () => _TrendsSheet.show(context),
             ),
-            const SizedBox(height: 8),
-            const _VitalsCard(),
-            const SizedBox(height: 8),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Text('🎧', style: TextStyle(fontSize: 22)),
-              title: Text(context.tr('health.headphones')),
-              subtitle: day.listeningMinutes >= 120
-                  ? Text(context.tr('health.listeningWarn'),
-                      style: const TextStyle(color: LifeColors.goals))
-                  : null,
-              trailing: Text(
-                '${day.listeningMinutes} ${context.tr('health.min')}',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(context.tr('health.stress'),
-                style: Theme.of(context).textTheme.titleSmall),
-            const SizedBox(height: 6),
-            Row(
-              children: [
-                for (var i = 1; i <= 5; i++)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 6),
-                    child: ChoiceChip(
-                      label: Text('$i'),
-                      selected: day.stress == i,
-                      onSelected: (_) => log.logStress(i),
-                    ),
-                  ),
-                const SizedBox(width: 6),
-                Text(context.tr('health.stressHint'),
-                    style: Theme.of(context).textTheme.bodySmall),
-              ],
-            ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             SectionCard(
               padding: const EdgeInsets.all(14),
               onTap: () => Navigator.of(context).push(
@@ -237,11 +187,6 @@ class HealthPage extends ConsumerWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 12),
-            const WeightTrendCard(),
-            const StepsWeekCard(),
-            const WaterWeekCard(),
-            const SleepWeekCard(),
             const SizedBox(height: 12),
             Text(
               context.tr('health.deviceHint'),
@@ -290,6 +235,205 @@ class HealthPage extends ConsumerWidget {
               ctx.tr('health.deviceNote'),
               style: Theme.of(ctx).textTheme.bodySmall,
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Edit the daily step/water/sleep goals.
+  Future<void> _goalsDialog(
+      BuildContext context, WidgetRef ref, HealthGoalSet current) async {
+    final steps = TextEditingController(text: '${current.steps}');
+    final water = TextEditingController(text: '${current.water}');
+    final sleep = TextEditingController(
+        text: current.sleep == current.sleep.roundToDouble()
+            ? '${current.sleep.round()}'
+            : current.sleep.toString());
+    Widget field(TextEditingController c, String label) => Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: TextField(
+            controller: c,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))
+            ],
+            decoration:
+                InputDecoration(labelText: label, border: const OutlineInputBorder()),
+          ),
+        );
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(ctx.tr('health.editGoals')),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            field(steps, ctx.tr('health.steps')),
+            field(water, ctx.tr('health.glasses')),
+            field(sleep, '${ctx.tr('health.sleep')} (h)'),
+          ],
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(ctx.tr('common.cancel'))),
+          FilledButton(
+            onPressed: () {
+              double d(String s) =>
+                  double.tryParse(s.replaceAll(',', '.')) ?? 0;
+              final next = HealthGoalSet(
+                steps: d(steps.text).round().clamp(1000, 100000),
+                water: d(water.text).round().clamp(1, 30),
+                sleep: d(sleep.text).clamp(3, 14),
+              );
+              ref.read(healthGoalsProvider.notifier).save(next);
+              Navigator.pop(ctx);
+            },
+            child: Text(ctx.tr('common.save')),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Compact entry card that opens a grouped detail popup, keeping the main
+/// Health screen short (same pattern as Money's analytics entry).
+class _HealthEntry extends StatelessWidget {
+  final String emoji;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+  const _HealthEntry({
+    required this.emoji,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SectionCard(
+      onTap: onTap,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: Row(
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 26)),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: Theme.of(context).textTheme.titleMedium),
+                Text(
+                  subtitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
+                ),
+              ],
+            ),
+          ),
+          const Icon(Icons.chevron_right),
+        ],
+      ),
+    );
+  }
+}
+
+/// "Body & vitals" popup: weight, resting heart rate, blood pressure,
+/// headphones and stress — grouped so the main screen stays short.
+class _MetricsSheet extends ConsumerWidget {
+  const _MetricsSheet();
+
+  static Future<void> show(BuildContext context) => showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        showDragHandle: true,
+        builder: (_) => const _MetricsSheet(),
+      );
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final day = ref.watch(todayHealthProvider).valueOrNull;
+    final log = ref.read(logHealthProvider);
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.7,
+      minChildSize: 0.4,
+      maxChildSize: 0.95,
+      builder: (context, controller) => ListView(
+        controller: controller,
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
+        children: [
+          Text(context.tr('health.metrics'),
+              style: Theme.of(context).textTheme.headlineSmall),
+          const SizedBox(height: 8),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Text('⚖️', style: TextStyle(fontSize: 22)),
+            title: Text(context.tr('health.weight')),
+            subtitle: Text(context.tr('health.weightTapHint'),
+                style: Theme.of(context).textTheme.bodySmall),
+            trailing: Text(
+              day?.weightKg == null
+                  ? '—'
+                  : '${day!.weightKg!.toStringAsFixed(1)} kg',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            onTap: () => _weightDialog(context, ref, day?.weightKg),
+          ),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Text('💓', style: TextStyle(fontSize: 22)),
+            title: Text(context.tr('health.heartRate')),
+            trailing: Text(
+              day?.heartRate == null
+                  ? '—'
+                  : '${day!.heartRate} ${context.tr('health.bpm')}',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const _VitalsCard(),
+          const SizedBox(height: 8),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Text('🎧', style: TextStyle(fontSize: 22)),
+            title: Text(context.tr('health.headphones')),
+            subtitle: (day?.listeningMinutes ?? 0) >= 120
+                ? Text(context.tr('health.listeningWarn'),
+                    style: const TextStyle(color: LifeColors.goals))
+                : null,
+            trailing: Text(
+              '${day?.listeningMinutes ?? 0} ${context.tr('health.min')}',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(context.tr('health.stress'),
+              style: Theme.of(context).textTheme.titleSmall),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              for (var i = 1; i <= 5; i++)
+                Padding(
+                  padding: const EdgeInsets.only(right: 6),
+                  child: ChoiceChip(
+                    label: Text('$i'),
+                    selected: day?.stress == i,
+                    onSelected: (_) => log.logStress(i),
+                  ),
+                ),
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(context.tr('health.stressHint'),
+                    style: Theme.of(context).textTheme.bodySmall),
+              ),
+            ],
           ),
         ],
       ),
@@ -347,58 +491,40 @@ class HealthPage extends ConsumerWidget {
         ));
     }
   }
+}
 
-  /// Edit the daily step/water/sleep goals.
-  Future<void> _goalsDialog(
-      BuildContext context, WidgetRef ref, HealthGoalSet current) async {
-    final steps = TextEditingController(text: '${current.steps}');
-    final water = TextEditingController(text: '${current.water}');
-    final sleep = TextEditingController(
-        text: current.sleep == current.sleep.roundToDouble()
-            ? '${current.sleep.round()}'
-            : current.sleep.toString());
-    Widget field(TextEditingController c, String label) => Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          child: TextField(
-            controller: c,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))
-            ],
-            decoration:
-                InputDecoration(labelText: label, border: const OutlineInputBorder()),
-          ),
-        );
-    await showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(ctx.tr('health.editGoals')),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            field(steps, ctx.tr('health.steps')),
-            field(water, ctx.tr('health.glasses')),
-            field(sleep, '${ctx.tr('health.sleep')} (h)'),
-          ],
-        ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: Text(ctx.tr('common.cancel'))),
-          FilledButton(
-            onPressed: () {
-              double d(String s) =>
-                  double.tryParse(s.replaceAll(',', '.')) ?? 0;
-              final next = HealthGoalSet(
-                steps: d(steps.text).round().clamp(1000, 100000),
-                water: d(water.text).round().clamp(1, 30),
-                sleep: d(sleep.text).clamp(3, 14),
-              );
-              ref.read(healthGoalsProvider.notifier).save(next);
-              Navigator.pop(ctx);
-            },
-            child: Text(ctx.tr('common.save')),
-          ),
+/// "Trends" popup: the week summary plus the four trend charts (weight, steps,
+/// water, sleep).
+class _TrendsSheet extends StatelessWidget {
+  const _TrendsSheet();
+
+  static Future<void> show(BuildContext context) => showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        showDragHandle: true,
+        builder: (_) => const _TrendsSheet(),
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.85,
+      minChildSize: 0.5,
+      maxChildSize: 0.95,
+      builder: (context, controller) => ListView(
+        controller: controller,
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+        children: [
+          Text(context.tr('health.trends'),
+              style: Theme.of(context).textTheme.headlineSmall),
+          const SizedBox(height: 12),
+          const _WeekSummaryCard(),
+          const SizedBox(height: 12),
+          const WeightTrendCard(),
+          const StepsWeekCard(),
+          const WaterWeekCard(),
+          const SleepWeekCard(),
         ],
       ),
     );

@@ -40,6 +40,7 @@ import 'package:lifeos/features/notifications/presentation/providers/notificatio
 import 'package:lifeos/features/onboarding/presentation/pages/guide_page.dart';
 import 'package:lifeos/features/reminders/presentation/pages/reminders_page.dart';
 import 'package:lifeos/features/security/presentation/pages/security_settings_page.dart';
+import 'package:lifeos/shared/theme/app_theme.dart';
 import 'package:lifeos/shared/widgets/animated_backdrop.dart';
 import 'package:lifeos/shared/widgets/glass_card.dart';
 
@@ -78,12 +79,24 @@ class _HomeShellState extends ConsumerState<HomeShell> {
     // App-level unread badge (Telegram-style): visible from any tab so you
     // never miss that "something arrived", even away from the notifications hub.
     final unread = ref.watch(unreadCountProvider);
+    // Each tab tints the selection pill with its screen's pillar colour, so the
+    // nav bar feels tied to wherever you are.
+    const pillars = [
+      Color(0xFF3BA7FF), // Today
+      LifeColors.finance, // Money
+      LifeColors.health, // Health
+      LifeColors.goals, // Goals
+      LifeColors.mind, // More
+    ];
+    final accent = pillars[index];
     return Scaffold(
       body: IndexedStack(index: index, children: _pages),
       bottomNavigationBar: NavigationBar(
         selectedIndex: index,
         onDestinationSelected: (i) =>
             ref.read(homeTabProvider.notifier).state = i,
+        indicatorColor: accent.withValues(alpha: 0.20),
+        surfaceTintColor: Colors.transparent,
         destinations: [
           NavigationDestination(
             icon: const Icon(Icons.today_outlined),
