@@ -1,6 +1,11 @@
 include: package:flutter_lints/flutter.yaml
 
 analyzer:
+  # `native/` holds native-app-only code staged for a future phone build. It
+  # references phone-only packages that aren't in the web pubspec, so it is
+  # excluded from analysis until it's wired in (see native/README.md).
+  exclude:
+    - native/**
   language:
     strict-casts: true
     strict-raw-types: true

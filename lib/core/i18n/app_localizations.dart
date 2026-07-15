@@ -645,6 +645,8 @@ const Map<String, Map<String, String>> _values = {
   'diet.noProfile': {'en': 'Fill in your profile (height, weight, activity) and the dietitian will build a menu for your goal.', 'ru': 'Заполните профиль (рост, вес, активность) — и диетолог соберёт меню под вашу цель.', 'uk': 'Заповніть профіль (зріст, вага, активність) — і дієтолог збере меню під вашу ціль.'},
   'diet.openProfile': {'en': 'Open profile', 'ru': 'Открыть профиль', 'uk': 'Відкрити профіль'},
   'diet.approx': {'en': 'Prices are approximate, per standard pack.', 'ru': 'Цены ориентировочные, за стандартную упаковку.', 'uk': 'Ціни орієнтовні, за стандартну упаковку.'},
+  'diet.weekMenu': {'en': 'Menu by day', 'ru': 'Меню по дням', 'uk': 'Меню за днями'},
+  'diet.today': {'en': 'Today', 'ru': 'Сегодня', 'uk': 'Сьогодні'},
   'diet.plansTitle': {'en': 'Diets & recommendations', 'ru': 'Диеты и рекомендации', 'uk': 'Дієти та рекомендації'},
   'diet.chooseTitle': {'en': 'Pick a diet to reach your shape', 'ru': 'Выберите диету, чтобы прийти к форме', 'uk': 'Оберіть дієту, щоб прийти у форму'},
   'diet.chooseSub': {'en': 'Doctor-backed plans matched to your goal', 'ru': 'Проверенные врачами планы под вашу цель', 'uk': 'Перевірені лікарями плани під вашу мету'},

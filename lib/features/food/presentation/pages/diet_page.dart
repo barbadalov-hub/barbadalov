@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:lifeos/features/food/domain/diet_catalog.dart';
 import 'package:lifeos/features/food/domain/entities/nutrition.dart';
@@ -9,6 +10,7 @@ import 'package:lifeos/features/food/presentation/providers/food_providers.dart'
 import 'package:lifeos/features/profile/presentation/providers/profile_providers.dart';
 import 'package:lifeos/features/profile/presentation/pages/profile_page.dart';
 import 'package:lifeos/shared/models/money.dart';
+import 'package:lifeos/shared/providers/core_providers.dart';
 import 'package:lifeos/shared/theme/app_theme.dart';
 import 'package:lifeos/shared/widgets/animated_backdrop.dart';
 import 'package:lifeos/shared/widgets/gradient_card.dart';
@@ -153,10 +155,8 @@ class DietPage extends ConsumerWidget {
                 const SizedBox(height: 12),
                 const _DayCostCard(),
                 const SizedBox(height: 12),
-                for (final meal in plan.meals) ...[
-                  _MealCard(meal: meal),
-                  const SizedBox(height: 10),
-                ],
+                const _WeekMenuSection(),
+                const SizedBox(height: 12),
                 Text(
                   context.tr('diet.approx'),
                   textAlign: TextAlign.center,
@@ -644,9 +644,141 @@ class _NoProfile extends StatelessWidget {
   }
 }
 
+/// The week's menu as day tabs; each meal opens in a detail popup. Day 0 is
+/// today (interactive); the rest are a read-only preview of the coming days.
+class _WeekMenuSection extends ConsumerWidget {
+  const _WeekMenuSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final week = ref.watch(weekPlanProvider);
+    if (week == null || week.isEmpty) return const SizedBox.shrink();
+    final sel = ref.watch(selectedDietDayProvider).clamp(0, week.length - 1);
+    final now = ref.watch(clockProvider).now();
+    final day = week[sel];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(context.tr('diet.weekMenu'),
+            style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              for (var i = 0; i < week.length; i++)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: ChoiceChip(
+                    label: Text(_dayLabel(context, now, i)),
+                    selected: sel == i,
+                    onSelected: (_) => ref
+                        .read(selectedDietDayProvider.notifier)
+                        .state = i,
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
+        for (final meal in day.meals) ...[
+          _MealTile(meal: meal, today: sel == 0),
+          const SizedBox(height: 8),
+        ],
+      ],
+    );
+  }
+
+  String _dayLabel(BuildContext context, DateTime now, int i) {
+    if (i == 0) return context.tr('diet.today');
+    final d = now.add(Duration(days: i));
+    return DateFormat.E(Localizations.localeOf(context).languageCode).format(d);
+  }
+}
+
+/// A compact meal row inside a day tab. Tapping opens the full detail popup.
+class _MealTile extends ConsumerWidget {
+  final MealOption meal;
+  final bool today;
+  const _MealTile({required this.meal, required this.today});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final eaten = today && ref.watch(eatenMealsProvider).contains(meal.id);
+    return SectionCard(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      onTap: () => _MealDetailSheet.show(context, meal, today: today),
+      child: Row(
+        children: [
+          Text(meal.emoji, style: const TextStyle(fontSize: 24)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(context.tr('diet.slot.${meal.slot.name}'),
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Theme.of(context).colorScheme.outline,
+                        )),
+                Text(context.tr(meal.nameKey),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          decoration:
+                              eaten ? TextDecoration.lineThrough : null,
+                        )),
+              ],
+            ),
+          ),
+          Text('${meal.nutrition.kcal} ${context.tr('diet.kcal')}',
+              style: Theme.of(context).textTheme.bodySmall),
+          const SizedBox(width: 6),
+          Icon(eaten ? Icons.check_circle : Icons.chevron_right,
+              size: 20,
+              color: eaten ? const Color(0xFF2E9E6B) : null),
+        ],
+      ),
+    );
+  }
+}
+
+/// A single meal's full detail (ingredients, nutrition, cost) in a popup.
+class _MealDetailSheet {
+  static Future<void> show(BuildContext context, MealOption meal,
+          {required bool today}) =>
+      showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        showDragHandle: true,
+        builder: (_) => DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.7,
+          minChildSize: 0.4,
+          maxChildSize: 0.95,
+          builder: (ctx, controller) => ListView(
+            controller: controller,
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+            children: [
+              Text(ctx.tr('diet.slot.${meal.slot.name}'),
+                  style: Theme.of(ctx).textTheme.labelMedium?.copyWith(
+                        color: Theme.of(ctx).colorScheme.outline,
+                      )),
+              Text(ctx.tr(meal.nameKey),
+                  style: Theme.of(ctx).textTheme.headlineSmall),
+              const SizedBox(height: 12),
+              _MealCard(meal: meal, readOnly: !today),
+            ],
+          ),
+        ),
+      );
+}
+
 class _MealCard extends ConsumerWidget {
   final MealOption meal;
-  const _MealCard({required this.meal});
+
+  /// Future days are read-only: no eaten checkbox and no per-slot swap (those
+  /// act on *today's* plan only).
+  final bool readOnly;
+  const _MealCard({required this.meal, this.readOnly = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -662,11 +794,12 @@ class _MealCard extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Checkbox(
-                value: isEaten,
-                onChanged: (_) =>
-                    ref.read(eatenMealsProvider.notifier).toggle(meal.id),
-              ),
+              if (!readOnly)
+                Checkbox(
+                  value: isEaten,
+                  onChanged: (_) =>
+                      ref.read(eatenMealsProvider.notifier).toggle(meal.id),
+                ),
               Text(meal.emoji, style: const TextStyle(fontSize: 24)),
               const SizedBox(width: 10),
               Expanded(
@@ -682,7 +815,7 @@ class _MealCard extends ConsumerWidget {
                   ],
                 ),
               ),
-              if (meal.slot != MealSlot.snack)
+              if (!readOnly && meal.slot != MealSlot.snack)
                 IconButton(
                   icon: const Icon(Icons.swap_horiz, size: 20),
                   tooltip: context.tr('diet.swapMeal'),

@@ -40,6 +40,36 @@ final dayPlanProvider = Provider<DayPlan?>((ref) {
       );
 });
 
+/// Which day of the upcoming week the diet menu is showing (0 = today … 6).
+final selectedDietDayProvider = StateProvider<int>((ref) => 0);
+
+/// A 7-day menu starting today. Each day is a target-fitting plan with its own
+/// seed, so the week varies day to day. Null until the profile is filled in.
+final weekPlanProvider = Provider<List<DayPlan>?>((ref) {
+  final assessment = ref.watch(assessmentProvider);
+  if (assessment == null) return null;
+  final now = ref.watch(clockProvider).now();
+  final dayOfYear = now.difference(DateTime(now.year)).inDays;
+  final shuffle = ref.watch(dietShuffleProvider);
+  final planner = ref.watch(dietPlannerProvider);
+  return [
+    for (var i = 0; i < 7; i++)
+      i == 0
+          // Day 0 mirrors today's plan (respects per-slot swaps).
+          ? planner.plan(
+              targetKcal: assessment.targetKcal,
+              proteinTargetG: assessment.proteinG,
+              seed: dayOfYear + shuffle,
+              slotOffsets: ref.watch(slotSwapProvider),
+            )
+          : planner.plan(
+              targetKcal: assessment.targetKcal,
+              proteinTargetG: assessment.proteinG,
+              seed: dayOfYear + shuffle + i,
+            ),
+  ];
+});
+
 /// Meal ids the user has marked as eaten **today**. Persisted with the date so
 /// the checklist resets on a new day; toggling publishes a `meal_eaten` event.
 class EatenMealsController extends Notifier<Set<String>> {
