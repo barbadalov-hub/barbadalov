@@ -48,6 +48,14 @@ void main() {
         expect(plan.howKey, 'diet.plan.${plan.id}.how');
       }
     });
+
+    test('every plan exposes history, expert and contraindication keys', () {
+      for (final plan in kDietPlans) {
+        expect(plan.historyKey, 'diet.plan.${plan.id}.history');
+        expect(plan.expertKey, 'diet.plan.${plan.id}.expert');
+        expect(plan.contraKey, 'diet.plan.${plan.id}.contra');
+      }
+    });
   });
 
   group('currentSeasonId', () {
