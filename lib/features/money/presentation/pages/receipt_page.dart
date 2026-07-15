@@ -108,18 +108,23 @@ class _ReceiptPageState extends ConsumerState<ReceiptPage> {
   Future<void> _save() async {
     _applyRules();
     final add = ref.read(addTransactionProvider);
-    final groups = _receipt.byCategory;
-    for (final (category, amount) in groups) {
-      if (!amount.isPositive) continue;
+    // Save one expense **per item** — so each product keeps its own name and
+    // price, and the money history can drill into a category to show exactly
+    // what was bought (and how much) rather than a single lumped total.
+    var count = 0;
+    for (final item in _items) {
+      if (!item.price.isPositive) continue;
       await add.call(
-        amount: amount,
+        amount: item.price,
         type: TransactionType.expense,
-        categoryId: category.id,
-        note: context.tr('receipt.noteFromReceipt'),
+        categoryId: item.categoryId,
+        note: item.name.trim().isEmpty
+            ? context.tr('receipt.noteFromReceipt')
+            : item.name.trim(),
       );
+      count++;
     }
     if (!mounted) return;
-    final count = groups.where((g) => g.$2.isPositive).length;
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
