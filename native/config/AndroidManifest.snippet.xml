@@ -1,0 +1,20 @@
+<!-- STAGED — merge into android/app/src/main/AndroidManifest.xml (as children of
+     <manifest>, above <application>) when activating the native build.
+     See native/README.md and the `health` package README for Health Connect. -->
+
+<!-- Live pedometer + activity recognition -->
+<uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+
+<!-- Camera for receipt scanning -->
+<uses-permission android:name="android.permission.CAMERA" />
+<uses-feature android:name="android.hardware.camera" android:required="false" />
+
+<!-- Local reminder notifications (Android 13+) -->
+<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+<!-- Health Connect read permissions (steps / sleep / heart rate).
+     The `health` package also needs the <queries> + Health Connect
+     permission-rationale activity from its README. -->
+<uses-permission android:name="android.permission.health.READ_STEPS" />
+<uses-permission android:name="android.permission.health.READ_SLEEP" />
+<uses-permission android:name="android.permission.health.READ_HEART_RATE" />

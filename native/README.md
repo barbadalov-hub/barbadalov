@@ -35,7 +35,7 @@ permission strings are required.
 ### 1. Dependencies (`pubspec.yaml`)
 ```yaml
   health: ^10.2.0        # HealthKit / Google Fit / Health Connect
-  pedometer: ^4.0.2      # live step stream (optional)
+  pedometer: ^4.0.2      # live step stream
 ```
 
 ### 2. Real device health source
@@ -48,21 +48,25 @@ permission strings are required.
   seams). The rest of the sync flow (`SyncDeviceHealth`, the Health screen's
   sync button, the device picker) is unchanged.
 
-### 3. iOS config (`ios/Runner/Info.plist`)
-```xml
-<key>NSHealthShareUsageDescription</key>   <string>Read steps, sleep and heart rate to fill your health rings.</string>
-<key>NSHealthUpdateUsageDescription</key>  <string>Save workouts you log.</string>
-<key>NSMotionUsageDescription</key>        <string>Count your steps.</string>
-<key>NSCameraUsageDescription</key>        <string>Scan receipts.</string>
-```
+### 3. Live pedometer (optional but nice)
+- Copy `native/lib/core/sensors/pedometer_source.dart` →
+  `lib/core/sensors/pedometer_source.dart`.
+- Wire its `stream` to `LogHealth.setSteps` (debounced, e.g. once a minute),
+  backing the midnight-baseline callbacks with `keyValueStoreProvider`. This
+  keeps the Today step ring ticking live while the app is open; HealthKit still
+  provides the authoritative daily total on sync.
+
+### 4. iOS config (`ios/Runner/Info.plist`)
+- Paste `native/config/ios-Info.plist.snippet.xml` into the top-level `<dict>`.
 - Xcode → Signing & Capabilities → **+ HealthKit**.
 - Notifications permission is requested at runtime by the existing gateway.
 
-### 4. Android config
-- `android/app/src/main/AndroidManifest.xml`: `ACTIVITY_RECOGNITION`, and Health
-  Connect permissions per the `health` package README.
+### 5. Android config
+- Merge `native/config/AndroidManifest.snippet.xml` into
+  `android/app/src/main/AndroidManifest.xml`, plus the Health Connect
+  `<queries>` block from the `health` package README.
 
-### 5. Build
+### 6. Build
 - `flutter build ipa` / open in Xcode with the Apple Developer account, install
   on device. `flutter build apk` for Android.
 

@@ -1,0 +1,20 @@
+<!-- STAGED — paste these keys into ios/Runner/Info.plist (inside the top-level
+     <dict>) when activating the native build. See native/README.md.
+     Wording is user-facing: keep it honest and specific. -->
+
+<key>NSHealthShareUsageDescription</key>
+<string>Lumo reads your steps, sleep and heart rate to fill your health rings automatically.</string>
+
+<key>NSHealthUpdateUsageDescription</key>
+<string>Lumo saves workouts you complete back to Apple Health.</string>
+
+<key>NSMotionUsageDescription</key>
+<string>Lumo counts your steps while the app is open.</string>
+
+<key>NSCameraUsageDescription</key>
+<string>Lumo scans your receipts to itemise your spending.</string>
+
+<key>NSPhotoLibraryUsageDescription</key>
+<string>Lumo reads a receipt photo you pick from your library.</string>
+
+<!-- Also in Xcode → Signing & Capabilities: add the HealthKit capability. -->
