@@ -40,5 +40,30 @@ void main() {
       final b = recommendDiets(_profile(FitnessGoal.maintain));
       expect(a.map((d) => d.id).toList(), b.map((d) => d.id).toList());
     });
+
+    test('every plan exposes three pros and three cons', () {
+      for (final plan in kDietPlans) {
+        expect(plan.proKeys.length, 3);
+        expect(plan.conKeys.length, 3);
+        expect(plan.howKey, 'diet.plan.${plan.id}.how');
+      }
+    });
+  });
+
+  group('currentSeasonId', () {
+    test('maps months to meteorological seasons', () {
+      expect(currentSeasonId(1), 'winter');
+      expect(currentSeasonId(12), 'winter');
+      expect(currentSeasonId(4), 'spring');
+      expect(currentSeasonId(7), 'summer');
+      expect(currentSeasonId(10), 'autumn');
+    });
+
+    test('every season id has a catalog entry', () {
+      final ids = {for (final v in kSeasonalVitamins) v.id};
+      for (var m = 1; m <= 12; m++) {
+        expect(ids, contains(currentSeasonId(m)));
+      }
+    });
   });
 }

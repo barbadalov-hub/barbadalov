@@ -15,6 +15,41 @@ class DietPlan {
   String get nameKey => 'diet.plan.$id.name';
   String get summaryKey => 'diet.plan.$id.summary';
   String get tipsKey => 'diet.plan.$id.tips';
+
+  /// A longer "how it works" breakdown.
+  String get howKey => 'diet.plan.$id.how';
+
+  /// Three upsides and three downsides (i18n keys).
+  List<String> get proKeys =>
+      ['diet.plan.$id.pro1', 'diet.plan.$id.pro2', 'diet.plan.$id.pro3'];
+  List<String> get conKeys =>
+      ['diet.plan.$id.con1', 'diet.plan.$id.con2', 'diet.plan.$id.con3'];
+}
+
+/// General, seasonal vitamin guidance — educational, not a prescription.
+/// Shown alongside the diets so the user knows what tends to run low when.
+class SeasonalVitamins {
+  final String id; // winter | spring | summer | autumn
+  final String emoji;
+  const SeasonalVitamins(this.id, this.emoji);
+
+  String get nameKey => 'vit.$id.name';
+  String get bodyKey => 'vit.$id.body';
+}
+
+const kSeasonalVitamins = <SeasonalVitamins>[
+  SeasonalVitamins('winter', '❄️'),
+  SeasonalVitamins('spring', '🌱'),
+  SeasonalVitamins('summer', '☀️'),
+  SeasonalVitamins('autumn', '🍂'),
+];
+
+/// Meteorological season id for a month (northern hemisphere).
+String currentSeasonId(int month) {
+  if (month == 12 || month <= 2) return 'winter';
+  if (month <= 5) return 'spring';
+  if (month <= 8) return 'summer';
+  return 'autumn';
 }
 
 /// The built-in catalog of well-known diets. Kept deliberately mainstream and

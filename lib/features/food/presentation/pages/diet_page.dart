@@ -536,6 +536,8 @@ class _DietPlansSheet extends ConsumerWidget {
           const SizedBox(height: 8),
           for (var i = 0; i < ranked.length; i++)
             _DietPlanCard(plan: ranked[i], recommended: i == 0),
+          const SizedBox(height: 16),
+          _SeasonalVitaminsCard(month: ref.watch(clockProvider).now().month),
         ],
       ),
     );
@@ -573,6 +575,7 @@ class _DietPlanCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return SectionCard(
       color: recommended ? LifeColors.mind.withValues(alpha: 0.12) : null,
+      onTap: () => _DietDetailSheet.show(context, plan),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -598,16 +601,168 @@ class _DietPlanCard extends StatelessWidget {
                           fontSize: 11,
                           fontWeight: FontWeight.w700)),
                 ),
+              const SizedBox(width: 4),
+              const Icon(Icons.chevron_right),
             ],
           ),
           const SizedBox(height: 6),
           Text(context.tr(plan.summaryKey),
               style: Theme.of(context).textTheme.bodyMedium),
           const SizedBox(height: 6),
-          Text('💡 ${context.tr(plan.tipsKey)}',
+          Text(context.tr('diet.tapForDetails'),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Theme.of(context).colorScheme.primary,
+                  )),
+        ],
+      ),
+    );
+  }
+}
+
+/// The full breakdown of one diet: how it works, pros, cons and tips.
+class _DietDetailSheet {
+  static Future<void> show(BuildContext context, DietPlan plan) =>
+      showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        showDragHandle: true,
+        builder: (_) => DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.85,
+          minChildSize: 0.5,
+          maxChildSize: 0.95,
+          builder: (ctx, controller) => ListView(
+            controller: controller,
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
+            children: [
+              Row(
+                children: [
+                  Text(plan.emoji, style: const TextStyle(fontSize: 28)),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(ctx.tr(plan.nameKey),
+                        style: Theme.of(ctx).textTheme.headlineSmall),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Text(ctx.tr(plan.summaryKey),
+                  style: Theme.of(ctx).textTheme.bodyMedium),
+              const SizedBox(height: 16),
+              _heading(ctx, ctx.tr('diet.howTitle')),
+              const SizedBox(height: 6),
+              Text(ctx.tr(plan.howKey),
+                  style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(height: 1.4)),
+              const SizedBox(height: 16),
+              _heading(ctx, '✅ ${ctx.tr('diet.pros')}'),
+              const SizedBox(height: 6),
+              for (final k in plan.proKeys)
+                _bulletRow(ctx, '+', ctx.tr(k), const Color(0xFF2E9E6B)),
+              const SizedBox(height: 12),
+              _heading(ctx, '⚠️ ${ctx.tr('diet.cons')}'),
+              const SizedBox(height: 6),
+              for (final k in plan.conKeys)
+                _bulletRow(ctx, '−', ctx.tr(k), LifeColors.goals),
+              const SizedBox(height: 16),
+              _heading(ctx, '💡 ${ctx.tr('diet.howToStart')}'),
+              const SizedBox(height: 6),
+              Text(ctx.tr(plan.tipsKey),
+                  style: Theme.of(ctx).textTheme.bodyMedium),
+              const SizedBox(height: 16),
+              Text(ctx.tr('diet.notAdvice'),
+                  style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(ctx).colorScheme.outline,
+                      )),
+            ],
+          ),
+        ),
+      );
+
+  static Widget _heading(BuildContext ctx, String text) => Text(text,
+      style: Theme.of(ctx)
+          .textTheme
+          .titleMedium
+          ?.copyWith(fontWeight: FontWeight.w800));
+
+  static Widget _bulletRow(
+          BuildContext ctx, String mark, String text, Color color) =>
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 3),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('$mark  ',
+                style: TextStyle(color: color, fontWeight: FontWeight.w900)),
+            Expanded(child: Text(text)),
+          ],
+        ),
+      );
+}
+
+/// Seasonal vitamin guidance — which vitamins tend to run low each season,
+/// with the current season highlighted.
+class _SeasonalVitaminsCard extends StatelessWidget {
+  final int month;
+  const _SeasonalVitaminsCard({required this.month});
+
+  @override
+  Widget build(BuildContext context) {
+    final current = currentSeasonId(month);
+    return SectionCard(
+      color: LifeColors.finance.withValues(alpha: 0.12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('💊 ${context.tr('vit.title')}',
+              style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 4),
+          Text(context.tr('vit.sub'),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.outline,
                   )),
+          const SizedBox(height: 10),
+          for (final v in kSeasonalVitamins)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 5),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('${v.emoji}  ', style: const TextStyle(fontSize: 16)),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(context.tr(v.nameKey),
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w700)),
+                            if (v.id == current) ...[
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 6, vertical: 1),
+                                decoration: BoxDecoration(
+                                  color: LifeColors.finance,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(context.tr('vit.now'),
+                                    style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w700)),
+                              ),
+                            ],
+                          ],
+                        ),
+                        Text(context.tr(v.bodyKey),
+                            style: Theme.of(context).textTheme.bodySmall),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );
