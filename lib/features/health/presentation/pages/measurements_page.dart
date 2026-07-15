@@ -3,7 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:lifeos/features/health/domain/entities/measurement.dart';
+import 'package:lifeos/features/health/domain/measurement_targets.dart';
 import 'package:lifeos/features/health/presentation/providers/measurement_providers.dart';
+import 'package:lifeos/features/health/presentation/widgets/body_silhouette.dart';
 import 'package:lifeos/features/profile/domain/entities/user_profile.dart';
 import 'package:lifeos/features/profile/presentation/providers/profile_providers.dart';
 import 'package:lifeos/shared/theme/app_theme.dart';
@@ -27,6 +29,8 @@ class MeasurementsPage extends ConsumerWidget {
           children: [
             Text(context.tr('meas.intro'),
                 style: Theme.of(context).textTheme.bodySmall),
+            const SizedBox(height: 12),
+            const BodyShapeCard(),
             const SizedBox(height: 12),
             for (final field in MeasurementField.values)
               _FieldCard(field: field, series: measurementSeries(all, field)),
@@ -54,6 +58,11 @@ class _FieldCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final latest = series.isNotEmpty ? series.last.cm : null;
     final delta = series.length >= 2 ? series.last.cm - series.first.cm : null;
+    final profile = ref.watch(profileProvider);
+    final target = profile == null ? null : measurementTarget(field, profile);
+    final overMax = profile != null &&
+        latest != null &&
+        overHealthyMax(field, profile, latest);
     return SectionCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -88,6 +97,24 @@ class _FieldCard extends ConsumerWidget {
                 color: delta <= 0 ? const Color(0xFF2E9E6B) : LifeColors.health,
               ),
             ),
+          ],
+          if (target != null) ...[
+            const SizedBox(height: 2),
+            Text(
+              context.trp('meas.target', {'n': _fmt(target.idealCm)}),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
+            ),
+            if (overMax)
+              Text(
+                context.trp('meas.overHealthy',
+                    {'n': _fmt(target.healthyMaxCm!)}),
+                style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: LifeColors.health),
+              ),
           ],
           if (series.length >= 2) ...[
             const SizedBox(height: 10),
