@@ -462,39 +462,112 @@ class _CategoryBreakdownCard extends ConsumerWidget {
               style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 10),
           for (final (category, amount) in items)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: Row(
-                children: [
-                  Text(category.emoji),
-                  const SizedBox(width: 8),
-                  SizedBox(
-                    width: 110,
-                    child: Text(context.tr('cat.${category.id}'),
-                        overflow: TextOverflow.ellipsis),
-                  ),
-                  Expanded(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value: total == 0 ? 0 : amount.minorUnits / total,
-                        minHeight: 8,
-                        backgroundColor: Theme.of(context)
-                            .colorScheme
-                            .surfaceContainerHighest,
+            InkWell(
+              onTap: () => _showCategoryItems(context, ref, category),
+              borderRadius: BorderRadius.circular(8),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    Text(category.emoji),
+                    const SizedBox(width: 8),
+                    SizedBox(
+                      width: 110,
+                      child: Text(context.tr('cat.${category.id}'),
+                          overflow: TextOverflow.ellipsis),
+                    ),
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: LinearProgressIndicator(
+                          value: total == 0 ? 0 : amount.minorUnits / total,
+                          minHeight: 8,
+                          backgroundColor: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(amount.format(),
-                      style: const TextStyle(fontWeight: FontWeight.w600)),
-                ],
+                    const SizedBox(width: 8),
+                    Text(amount.format(),
+                        style: const TextStyle(fontWeight: FontWeight.w600)),
+                    const Icon(Icons.chevron_right, size: 18),
+                  ],
+                ),
               ),
             ),
         ],
       ),
     );
   }
+}
+
+/// Drill-down: this month's individual expenses in one category (e.g. every
+/// food item bought and its price), newest-largest first. This is what turns
+/// "Food — $42" into "Milk $1.20 · Bread $0.80 · …".
+void _showCategoryItems(BuildContext context, WidgetRef ref, Category category) {
+  final now = ref.read(clockProvider).now();
+  final all = ref.read(transactionsProvider).valueOrNull ?? const [];
+  final items = [
+    for (final t in all)
+      if (t.isExpense &&
+          t.categoryId == category.id &&
+          t.date.year == now.year &&
+          t.date.month == now.month)
+        t,
+  ]..sort((a, b) => b.amount.minorUnits.compareTo(a.amount.minorUnits));
+  final total = items.fold(0, (s, t) => s + t.amount.minorUnits);
+
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    showDragHandle: true,
+    builder: (ctx) => DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.6,
+      minChildSize: 0.4,
+      maxChildSize: 0.92,
+      builder: (ctx, controller) => ListView(
+        controller: controller,
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+        children: [
+          Row(
+            children: [
+              Text(category.emoji, style: const TextStyle(fontSize: 24)),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(ctx.tr('cat.${category.id}'),
+                    style: Theme.of(ctx).textTheme.headlineSmall),
+              ),
+              Text(Money(total).format(),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w800, fontSize: 16)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          if (items.isEmpty)
+            Text(ctx.tr('money.categoryEmpty'),
+                style: Theme.of(ctx).textTheme.bodyMedium)
+          else
+            for (final t in items)
+              ListTile(
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                title: Text(
+                  t.note.trim().isEmpty
+                      ? ctx.tr('cat.${t.categoryId}')
+                      : t.note,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                subtitle: Text(DateFormat.MMMd().format(t.date)),
+                trailing: Text(t.amount.format(),
+                    style: const TextStyle(fontWeight: FontWeight.w700)),
+              ),
+        ],
+      ),
+    ),
+  );
 }
 
 /// This month vs. last month, with the category that moved the most.

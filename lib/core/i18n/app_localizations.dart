@@ -623,6 +623,8 @@ const Map<String, Map<String, String>> _values = {
   'diet.swapMeal': {'en': 'Swap this meal', 'ru': 'Заменить блюдо', 'uk': 'Замінити страву'},
   'money.trend': {'en': 'Income vs expenses · 6 months', 'ru': 'Доходы и расходы · 6 месяцев', 'uk': 'Доходи та витрати · 6 місяців'},
   'money.byCategory': {'en': 'Spending by category', 'ru': 'Расходы по категориям', 'uk': 'Витрати за категоріями'},
+  'money.scanReceipt': {'en': 'Scan a receipt', 'ru': 'Сканировать чек', 'uk': 'Сканувати чек'},
+  'money.categoryEmpty': {'en': 'No expenses in this category this month', 'ru': 'В этой категории пока нет трат за месяц', 'uk': 'У цій категорії поки немає витрат за місяць'},
   'health.connectDevice': {'en': 'Connect a device', 'ru': 'Подключить устройство', 'uk': 'Підключити пристрій'},
   'health.deviceNote': {
     'en': 'Real pairing (HealthKit / Google Fit) activates on the phone app; on desktop the sync is simulated.',

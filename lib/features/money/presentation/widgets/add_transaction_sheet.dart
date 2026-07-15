@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:lifeos/features/money/domain/entities/category.dart';
 import 'package:lifeos/features/money/domain/entities/transaction.dart';
+import 'package:lifeos/features/money/presentation/pages/receipt_page.dart';
 import 'package:lifeos/features/money/presentation/providers/money_providers.dart';
 import 'package:lifeos/shared/models/money.dart';
 
@@ -133,6 +134,19 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
             selected: {_type},
             onSelectionChanged: (s) => _onTypeChanged(s.first),
           ),
+          if (_type == TransactionType.expense) ...[
+            const SizedBox(height: 10),
+            OutlinedButton.icon(
+              onPressed: () {
+                final nav = Navigator.of(context);
+                nav.pop();
+                nav.push(MaterialPageRoute<void>(
+                    builder: (_) => const ReceiptPage()));
+              },
+              icon: const Icon(Icons.receipt_long),
+              label: Text(context.tr('money.scanReceipt')),
+            ),
+          ],
           const SizedBox(height: 16),
           TextField(
             controller: _amountController,
