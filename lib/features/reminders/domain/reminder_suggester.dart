@@ -6,12 +6,14 @@ class ReminderSuggestionInputs {
   final double avgWater; // glasses/day
   final bool moodLoggedRecently; // any mood entry in the last few days
   final bool overBudget;
+  final bool weightLossGoal; // profile goal is "lose weight"
 
   const ReminderSuggestionInputs({
     this.avgSleep = 0,
     this.avgWater = 0,
     this.moodLoggedRecently = true,
     this.overBudget = false,
+    this.weightLossGoal = false,
   });
 }
 
@@ -28,7 +30,10 @@ List<ReminderKind> suggestReminderKinds(
 
   consider(ReminderKind.sleep, i.avgSleep > 0 && i.avgSleep < 7);
   consider(ReminderKind.budget, i.overBudget);
-  consider(ReminderKind.water, i.avgWater < 6);
+  // On a weight-loss plan, staying hydrated and eating on schedule both help,
+  // so nudge those even if water intake already looks fine.
+  consider(ReminderKind.water, i.avgWater < 6 || i.weightLossGoal);
+  consider(ReminderKind.meal, i.weightLossGoal);
   consider(ReminderKind.checkin, !i.moodLoggedRecently);
   return out;
 }

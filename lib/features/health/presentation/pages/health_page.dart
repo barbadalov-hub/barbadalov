@@ -157,6 +157,13 @@ class HealthPage extends ConsumerWidget {
               onTap: () => _TrendsSheet.show(context),
             ),
             const SizedBox(height: 12),
+            _HealthEntry(
+              emoji: '🌙',
+              title: context.tr('sleep.tipsTitle'),
+              subtitle: context.tr('sleep.tipsSub'),
+              onTap: () => _SleepTipsSheet.show(context),
+            ),
+            const SizedBox(height: 12),
             SectionCard(
               padding: const EdgeInsets.all(14),
               onTap: () => Navigator.of(context).push(
@@ -527,6 +534,80 @@ class _TrendsSheet extends StatelessWidget {
           const SleepWeekCard(),
         ],
       ),
+    );
+  }
+}
+
+/// "Healthy sleep" popup: pre-sleep exercises + evening-nutrition advice.
+/// Static, curated guidance (no tracking) so it works on every platform.
+class _SleepTipsSheet extends StatelessWidget {
+  const _SleepTipsSheet();
+
+  static Future<void> show(BuildContext context) => showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        showDragHandle: true,
+        builder: (_) => const _SleepTipsSheet(),
+      );
+
+  static const _exercises = ['sleep.ex1', 'sleep.ex2', 'sleep.ex3', 'sleep.ex4'];
+  static const _nutrition = ['sleep.nu1', 'sleep.nu2', 'sleep.nu3', 'sleep.nu4'];
+
+  @override
+  Widget build(BuildContext context) {
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.7,
+      minChildSize: 0.4,
+      maxChildSize: 0.95,
+      builder: (context, controller) => ListView(
+        controller: controller,
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
+        children: [
+          Text(context.tr('sleep.tipsTitle'),
+              style: Theme.of(context).textTheme.headlineSmall),
+          const SizedBox(height: 4),
+          Text(context.tr('sleep.tipsIntro'),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.outline,
+                  )),
+          const SizedBox(height: 16),
+          _section(context, '🧘', context.tr('sleep.exercises'), _exercises),
+          const SizedBox(height: 16),
+          _section(context, '🍽️', context.tr('sleep.nutrition'), _nutrition),
+        ],
+      ),
+    );
+  }
+
+  Widget _section(
+      BuildContext context, String emoji, String title, List<String> keys) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(emoji, style: const TextStyle(fontSize: 18)),
+            const SizedBox(width: 8),
+            Text(title,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    )),
+          ],
+        ),
+        const SizedBox(height: 8),
+        for (final k in keys)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 5),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('•  '),
+                Expanded(child: Text(context.tr(k))),
+              ],
+            ),
+          ),
+      ],
     );
   }
 }
