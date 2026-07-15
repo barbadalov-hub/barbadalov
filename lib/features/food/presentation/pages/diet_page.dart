@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:lifeos/features/food/domain/diet_catalog.dart';
 import 'package:lifeos/features/food/domain/entities/nutrition.dart';
+import 'package:lifeos/features/food/domain/recipe_catalog.dart';
 import 'package:lifeos/features/profile/domain/entities/user_profile.dart';
 import 'package:lifeos/features/food/presentation/providers/diet_providers.dart';
 import 'package:lifeos/features/food/presentation/providers/food_providers.dart';
@@ -949,12 +950,156 @@ class _MealDetailSheet {
                       )),
               Text(ctx.tr(meal.nameKey),
                   style: Theme.of(ctx).textTheme.headlineSmall),
+              if (today && meal.slot != MealSlot.snack)
+                Consumer(
+                  builder: (c, ref, _) => Align(
+                    alignment: Alignment.centerLeft,
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        ref.read(slotSwapProvider.notifier).update((m) => {
+                              ...m,
+                              meal.slot: (m[meal.slot] ?? 0) + 1,
+                            });
+                        Navigator.of(c).maybePop();
+                      },
+                      icon: const Icon(Icons.casino_outlined),
+                      label: Text(c.tr('diet.otherDish')),
+                    ),
+                  ),
+                ),
               const SizedBox(height: 12),
               _MealCard(meal: meal, readOnly: !today),
+              _RecipeSection(mealId: meal.id),
             ],
           ),
         ),
       );
+}
+
+/// Recipe with selectable cooking methods, numbered timed steps and a
+/// "what each ingredient adds" section.
+class _RecipeSection extends StatefulWidget {
+  final String mealId;
+  const _RecipeSection({required this.mealId});
+
+  @override
+  State<_RecipeSection> createState() => _RecipeSectionState();
+}
+
+class _RecipeSectionState extends State<_RecipeSection> {
+  int _method = 0;
+
+  List<String> _lines(BuildContext context, String key) => context
+      .tr(key)
+      .split('\n')
+      .map((s) => s.trim())
+      .where((s) => s.isNotEmpty)
+      .toList();
+
+  @override
+  Widget build(BuildContext context) {
+    final recipe = recipeFor(widget.mealId);
+    if (recipe == null) return const SizedBox.shrink();
+    final idx = _method.clamp(0, recipe.methods.length - 1);
+    final method = recipe.methods[idx];
+    final steps = _lines(context, recipe.stepsKey(method.id));
+    final flavor = _lines(context, recipe.flavorKey);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Divider(height: 28),
+        Row(
+          children: [
+            const Icon(Icons.restaurant_menu, size: 20),
+            const SizedBox(width: 8),
+            Text(context.tr('recipe.title'),
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.w800)),
+          ],
+        ),
+        if (recipe.methods.length > 1) ...[
+          const SizedBox(height: 8),
+          Text(context.tr('recipe.chooseMethod'),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.outline,
+                  )),
+          const SizedBox(height: 6),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (var i = 0; i < recipe.methods.length; i++)
+                ChoiceChip(
+                  label: Text(context.tr(recipe.methods[i].labelKey)),
+                  selected: idx == i,
+                  onSelected: (_) => setState(() => _method = i),
+                ),
+            ],
+          ),
+        ],
+        const SizedBox(height: 12),
+        for (var i = 0; i < steps.length; i++)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 24,
+                  height: 24,
+                  alignment: Alignment.center,
+                  decoration: const BoxDecoration(
+                    color: LifeColors.finance,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text('${i + 1}',
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800)),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                    child: Text(steps[i],
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium
+                            ?.copyWith(height: 1.35))),
+              ],
+            ),
+          ),
+        if (flavor.isNotEmpty) ...[
+          const SizedBox(height: 14),
+          Text(context.tr('recipe.flavor'),
+              style: Theme.of(context)
+                  .textTheme
+                  .titleSmall
+                  ?.copyWith(fontWeight: FontWeight.w800)),
+          const SizedBox(height: 6),
+          for (final f in flavor)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 3),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('•  '),
+                  Expanded(child: Text(f)),
+                ],
+              ),
+            ),
+        ],
+        const SizedBox(height: 12),
+        Text(context.tr('recipe.chefNote'),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.outline,
+                  fontStyle: FontStyle.italic,
+                )),
+      ],
+    );
+  }
 }
 
 class _MealCard extends ConsumerWidget {
