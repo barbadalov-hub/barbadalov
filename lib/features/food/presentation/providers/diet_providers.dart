@@ -37,35 +37,65 @@ final dayPlanProvider = Provider<DayPlan?>((ref) {
         proteinTargetG: assessment.proteinG,
         seed: dayOfYear + shuffle,
         slotOffsets: ref.watch(slotSwapProvider),
+        dietId: ref.watch(selectedDietProvider),
       );
 });
 
-/// Which day of the upcoming week the diet menu is showing (0 = today … 6).
+/// Which day of the selected week the diet menu is showing (0 … 6).
 final selectedDietDayProvider = StateProvider<int>((ref) => 0);
 
-/// A 7-day menu starting today. Each day is a target-fitting plan with its own
-/// seed, so the week varies day to day. Null until the profile is filled in.
+/// Which upcoming week the menu is showing (0 = this week … 3).
+final selectedMenuWeekProvider = StateProvider<int>((ref) => 0);
+
+/// The diet the user picked from the catalog (id, e.g. 'lowCarb'), persisted.
+/// Empty string means "none / balanced". Biases the planner's dish choice.
+class SelectedDietController extends Notifier<String?> {
+  static const _key = 'diet.selected';
+
+  @override
+  String? build() {
+    final v = ref.watch(keyValueStoreProvider).getString(_key);
+    return (v == null || v.isEmpty) ? null : v;
+  }
+
+  void select(String? id) {
+    ref.read(keyValueStoreProvider).setString(_key, id ?? '');
+    state = (id == null || id.isEmpty) ? null : id;
+  }
+}
+
+final selectedDietProvider =
+    NotifierProvider<SelectedDietController, String?>(SelectedDietController.new);
+
+/// A 7-day menu for the selected week. Each day is a target-fitting plan with
+/// its own seed (and biased by the chosen diet), so the week varies day to day.
+/// Null until the profile is filled in.
 final weekPlanProvider = Provider<List<DayPlan>?>((ref) {
   final assessment = ref.watch(assessmentProvider);
   if (assessment == null) return null;
   final now = ref.watch(clockProvider).now();
   final dayOfYear = now.difference(DateTime(now.year)).inDays;
   final shuffle = ref.watch(dietShuffleProvider);
+  final week = ref.watch(selectedMenuWeekProvider);
+  final dietId = ref.watch(selectedDietProvider);
   final planner = ref.watch(dietPlannerProvider);
+  final base = dayOfYear + shuffle + week * 7;
   return [
     for (var i = 0; i < 7; i++)
-      i == 0
-          // Day 0 mirrors today's plan (respects per-slot swaps).
+      (week == 0 && i == 0)
+          // Today mirrors the live plan (respects per-slot swaps).
           ? planner.plan(
               targetKcal: assessment.targetKcal,
               proteinTargetG: assessment.proteinG,
               seed: dayOfYear + shuffle,
               slotOffsets: ref.watch(slotSwapProvider),
+              dietId: dietId,
             )
           : planner.plan(
               targetKcal: assessment.targetKcal,
               proteinTargetG: assessment.proteinG,
-              seed: dayOfYear + shuffle + i,
+              seed: base + i,
+              dietId: dietId,
             ),
   ];
 });

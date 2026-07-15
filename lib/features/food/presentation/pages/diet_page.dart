@@ -156,7 +156,11 @@ class DietPage extends ConsumerWidget {
                 const SizedBox(height: 12),
                 const _DayCostCard(),
                 const SizedBox(height: 12),
-                const _WeekMenuSection(),
+                _MenuEntry(
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(builder: (_) => const MenuPage()),
+                  ),
+                ),
                 const SizedBox(height: 12),
                 Text(
                   context.tr('diet.approx'),
@@ -567,15 +571,20 @@ class _DietPlansSheet extends ConsumerWidget {
       );
 }
 
-class _DietPlanCard extends StatelessWidget {
+class _DietPlanCard extends ConsumerWidget {
   final DietPlan plan;
   final bool recommended;
   const _DietPlanCard({required this.plan, required this.recommended});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isSelected = ref.watch(selectedDietProvider) == plan.id;
     return SectionCard(
-      color: recommended ? LifeColors.mind.withValues(alpha: 0.12) : null,
+      color: isSelected
+          ? LifeColors.finance.withValues(alpha: 0.14)
+          : recommended
+              ? LifeColors.mind.withValues(alpha: 0.12)
+              : null,
       onTap: () => _DietDetailSheet.show(context, plan),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -588,7 +597,21 @@ class _DietPlanCard extends StatelessWidget {
                 child: Text(context.tr(plan.nameKey),
                     style: Theme.of(context).textTheme.titleMedium),
               ),
-              if (recommended)
+              if (isSelected)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: LifeColors.finance,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(context.tr('diet.selectedBadge'),
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700)),
+                )
+              else if (recommended)
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -649,6 +672,38 @@ class _DietDetailSheet {
               const SizedBox(height: 10),
               Text(ctx.tr(plan.summaryKey),
                   style: Theme.of(ctx).textTheme.bodyMedium),
+              const SizedBox(height: 12),
+              Consumer(
+                builder: (c, ref, _) {
+                  final selected = ref.watch(selectedDietProvider) == plan.id;
+                  return SizedBox(
+                    width: double.infinity,
+                    child: selected
+                        ? OutlinedButton.icon(
+                            onPressed: () => ref
+                                .read(selectedDietProvider.notifier)
+                                .select(null),
+                            icon: const Icon(Icons.check_circle),
+                            label: Text(c.tr('diet.selectedTapToClear')),
+                          )
+                        : FilledButton.icon(
+                            onPressed: () {
+                              ref
+                                  .read(selectedDietProvider.notifier)
+                                  .select(plan.id);
+                              ScaffoldMessenger.of(c)
+                                ..hideCurrentSnackBar()
+                                ..showSnackBar(SnackBar(
+                                    content: Text(c.trp('diet.dietChosen', {
+                                  'diet': c.tr(plan.nameKey),
+                                }))));
+                            },
+                            icon: const Icon(Icons.restaurant),
+                            label: Text(c.tr('diet.selectThis')),
+                          ),
+                  );
+                },
+              ),
               const SizedBox(height: 16),
               _heading(ctx, ctx.tr('diet.howTitle')),
               const SizedBox(height: 6),
@@ -830,8 +885,114 @@ class _NoProfile extends StatelessWidget {
   }
 }
 
-/// The week's menu as day tabs; each meal opens in a detail popup. Day 0 is
-/// today (interactive); the rest are a read-only preview of the coming days.
+/// Compact entry that opens the full weeks → days → meals menu in one place.
+class _MenuEntry extends ConsumerWidget {
+  final VoidCallback onTap;
+  const _MenuEntry({required this.onTap});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final dietId = ref.watch(selectedDietProvider);
+    final sub = dietId == null
+        ? context.tr('menu.sub')
+        : context.trp('diet.menuForDiet',
+            {'diet': context.tr('diet.plan.$dietId.name')});
+    return SectionCard(
+      onTap: onTap,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: Row(
+        children: [
+          const Icon(Icons.restaurant_menu, size: 26),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(context.tr('menu.title'),
+                    style: Theme.of(context).textTheme.titleMedium),
+                Text(sub,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.outline,
+                        )),
+              ],
+            ),
+          ),
+          const Icon(Icons.chevron_right),
+        ],
+      ),
+    );
+  }
+}
+
+/// The whole menu in one place: pick a week, then a day, then a meal (which
+/// opens its recipe). Adapts to the selected diet.
+class MenuPage extends ConsumerWidget {
+  const MenuPage({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final dietId = ref.watch(selectedDietProvider);
+    return Scaffold(
+      appBar: AppBar(title: Text(context.tr('menu.title'))),
+      body: AnimatedBackdrop(
+        style: BackdropStyle.orbs,
+        color: LifeColors.finance,
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            if (dietId != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Text(
+                  context.trp('diet.menuForDiet',
+                      {'diet': context.tr('diet.plan.$dietId.name')}),
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
+              ),
+            const _WeekSelector(),
+            const SizedBox(height: 12),
+            const _WeekMenuSection(),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Four-week selector row.
+class _WeekSelector extends ConsumerWidget {
+  const _WeekSelector();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final sel = ref.watch(selectedMenuWeekProvider);
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          for (var w = 0; w < 4; w++)
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: ChoiceChip(
+                label: Text(context.trp('menu.week', {'n': w + 1})),
+                selected: sel == w,
+                onSelected: (_) =>
+                    ref.read(selectedMenuWeekProvider.notifier).state = w,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The selected week's menu as day tabs; each meal opens in a detail popup.
+/// Today (week 0, day 0) is interactive; the rest are a read-only preview.
 class _WeekMenuSection extends ConsumerWidget {
   const _WeekMenuSection();
 
@@ -839,16 +1000,15 @@ class _WeekMenuSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final week = ref.watch(weekPlanProvider);
     if (week == null || week.isEmpty) return const SizedBox.shrink();
+    final weekIdx = ref.watch(selectedMenuWeekProvider);
     final sel = ref.watch(selectedDietDayProvider).clamp(0, week.length - 1);
     final now = ref.watch(clockProvider).now();
     final day = week[sel];
+    final isToday = weekIdx == 0 && sel == 0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(context.tr('diet.weekMenu'),
-            style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 8),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
@@ -857,7 +1017,7 @@ class _WeekMenuSection extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: ChoiceChip(
-                    label: Text(_dayLabel(context, now, i)),
+                    label: Text(_dayLabel(context, now, weekIdx, i)),
                     selected: sel == i,
                     onSelected: (_) => ref
                         .read(selectedDietDayProvider.notifier)
@@ -869,16 +1029,16 @@ class _WeekMenuSection extends ConsumerWidget {
         ),
         const SizedBox(height: 10),
         for (final meal in day.meals) ...[
-          _MealTile(meal: meal, today: sel == 0),
+          _MealTile(meal: meal, today: isToday),
           const SizedBox(height: 8),
         ],
       ],
     );
   }
 
-  String _dayLabel(BuildContext context, DateTime now, int i) {
-    if (i == 0) return context.tr('diet.today');
-    final d = now.add(Duration(days: i));
+  String _dayLabel(BuildContext context, DateTime now, int week, int i) {
+    if (week == 0 && i == 0) return context.tr('diet.today');
+    final d = now.add(Duration(days: week * 7 + i));
     return DateFormat.E(Localizations.localeOf(context).languageCode).format(d);
   }
 }
