@@ -66,6 +66,21 @@ const kRecipes = <String, MealRecipe>{
   'nuts_banana': MealRecipe('nuts_banana', [_assembly]),
   'bread_cheese': MealRecipe('bread_cheese', [_assembly]),
   'yogurt_berries': MealRecipe('yogurt_berries', [_assembly]),
+  'mushroom_omelette': MealRecipe('mushroom_omelette', [_pan]),
+  'cottage_oats': MealRecipe('cottage_oats', [_assembly]),
+  'veggie_toast': MealRecipe('veggie_toast', [_pan]),
+  'turkey_buckwheat': MealRecipe('turkey_buckwheat', [_pot]),
+  'veggie_stew': MealRecipe('veggie_stew', [_pot]),
+  'chicken_pasta_veg': MealRecipe('chicken_pasta_veg', [_pan]),
+  'fish_rice_veg': MealRecipe('fish_rice_veg', [_pan]),
+  'turkey_salad': MealRecipe('turkey_salad', [_pan]),
+  'mushroom_chicken': MealRecipe('mushroom_chicken', [_pan]),
+  'stuffed_peppers': MealRecipe('stuffed_peppers', [_oven]),
+  'zucchini_eggs': MealRecipe('zucchini_eggs', [_pan]),
+  'cottage_cucumber': MealRecipe('cottage_cucumber', [_assembly]),
+  'apple_banana': MealRecipe('apple_banana', [_assembly]),
+  'boiled_eggs': MealRecipe('boiled_eggs', [_pot]),
+  'kefir_berries': MealRecipe('kefir_berries', [_assembly]),
 };
 
 MealRecipe? recipeFor(String mealId) => kRecipes[mealId];
