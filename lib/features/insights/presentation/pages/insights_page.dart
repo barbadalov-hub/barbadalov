@@ -7,6 +7,7 @@ import 'package:lifeos/features/insights/domain/insight_engine.dart';
 import 'package:lifeos/features/insights/domain/mood_patterns.dart';
 import 'package:lifeos/features/insights/presentation/providers/insights_providers.dart';
 import 'package:lifeos/features/mind/domain/mood.dart';
+import 'package:lifeos/shared/theme/app_theme.dart';
 import 'package:lifeos/shared/widgets/animated_backdrop.dart';
 import 'package:lifeos/shared/widgets/gradient_card.dart';
 import 'package:lifeos/shared/widgets/section_card.dart';
@@ -204,7 +205,32 @@ class _CrossCard extends StatelessWidget {
                         .bodyLarge
                         ?.copyWith(fontWeight: FontWeight.w600),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: LifeColors.mind.withValues(alpha: 0.10),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('💡', style: TextStyle(fontSize: 14)),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            context.tr(pattern.tipKey),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 6),
                   Text(
                     context.trp('insight.basedOn', {'n': pattern.samples}),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
