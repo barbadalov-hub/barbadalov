@@ -19,6 +19,7 @@ import 'package:lifeos/features/appearance/presentation/pages/appearance_page.da
 import 'package:lifeos/features/coach/presentation/pages/coach_page.dart';
 import 'package:lifeos/features/insights/presentation/pages/insights_page.dart';
 import 'package:lifeos/features/wrapped/presentation/pages/wrapped_page.dart';
+import 'package:lifeos/features/reports/presentation/pages/forecast_page.dart';
 import 'package:lifeos/features/reports/presentation/pages/report_page.dart';
 import 'package:lifeos/features/reports/presentation/providers/report_providers.dart';
 import 'package:lifeos/features/profile/domain/entities/user_profile.dart';
@@ -192,6 +193,7 @@ class MorePage extends ConsumerWidget {
         page('⏰', context.tr('reminder.title'), const RemindersPage()),
       ], badge: unread),
       _MoreCat('📊', context.tr('moreCat.progress'), [
+        page('🔮', context.tr('forecast.title'), const ForecastPage()),
         page('📊', context.tr('report.title'), const ReportPage()),
         page('📜', context.tr('hist.title'), const HistoryPage()),
         page('⏳', context.tr('weeks.title'), const LifeWeeksPage()),
