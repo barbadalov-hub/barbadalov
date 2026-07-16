@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:lifeos/features/insights/domain/cross_insights.dart';
 
 DayMetrics _d({double? sleep, double? steps, double? water, double? spend}) =>
@@ -46,5 +47,33 @@ void main() {
     ];
     expect(
         engine.find(days).where((p) => p.outcome == LifeMetric.spend), isEmpty);
+  });
+
+  test('tipKey is the pattern key plus .tip', () {
+    const p = CrossPattern(
+        driver: LifeMetric.sleep,
+        outcome: LifeMetric.spend,
+        corr: -0.6,
+        samples: 8,
+        deltaPct: -20);
+    expect(p.tipKey, 'insight.cross.sleep_spend.down.tip');
+  });
+
+  test('every checked pair has a localized message and tip in both directions',
+      () {
+    for (final (driver, outcome) in CrossInsightEngine.pairs) {
+      for (final delta in [10.0, -10.0]) {
+        final p = CrossPattern(
+            driver: driver,
+            outcome: outcome,
+            corr: 0.5,
+            samples: 8,
+            deltaPct: delta);
+        expect(AppLocalizations.values.containsKey(p.key), isTrue,
+            reason: 'missing message ${p.key}');
+        expect(AppLocalizations.values.containsKey(p.tipKey), isTrue,
+            reason: 'missing tip ${p.tipKey}');
+      }
+    }
   });
 }

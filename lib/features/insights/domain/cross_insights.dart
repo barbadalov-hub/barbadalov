@@ -36,6 +36,9 @@ class CrossPattern {
   /// i18n key stem: `insight.cross.<driver>_<outcome>.<up|down>`.
   String get key =>
       'insight.cross.${driver.name}_${outcome.name}.${up ? 'up' : 'down'}';
+
+  /// i18n key for the actionable "try this" suggestion for this pattern.
+  String get tipKey => '$key.tip';
 }
 
 /// Finds honest relationships between non-mood pillars over a curated set of
