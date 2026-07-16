@@ -69,6 +69,8 @@ class UaStorePriceCatalog implements StorePriceSource {
     'feta': (200, PortionUnit.g, [95, 105, 115]),
     'peanut_butter': (350, PortionUnit.g, [95, 105, 115]),
     'green_beans': (400, PortionUnit.g, [48, 54, 60]),
+    'watermelon': (1000, PortionUnit.g, [22, 26, 30]),
+    'pumpkin': (1000, PortionUnit.g, [24, 28, 32]),
   };
 
   @override

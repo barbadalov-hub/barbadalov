@@ -954,6 +954,19 @@ class MenuPage extends ConsumerWidget {
                       ),
                 ),
               ),
+            Row(
+              children: [
+                const Icon(Icons.eco, size: 16, color: LifeColors.finance),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(context.tr('menu.seasonalNote'),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.outline,
+                          )),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
             const _WeekSelector(),
             const SizedBox(height: 12),
             const _WeekMenuSection(),
@@ -1110,6 +1123,21 @@ class _MealDetailSheet {
                       )),
               Text(ctx.tr(meal.nameKey),
                   style: Theme.of(ctx).textTheme.headlineSmall),
+              if (meal.region != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.public, size: 16),
+                      const SizedBox(width: 6),
+                      Text(ctx.tr(meal.region!),
+                          style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(ctx).colorScheme.primary,
+                                fontWeight: FontWeight.w600,
+                              )),
+                    ],
+                  ),
+                ),
               if (today && meal.slot != MealSlot.snack)
                 Consumer(
                   builder: (c, ref, _) => Align(

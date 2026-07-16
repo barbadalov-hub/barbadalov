@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:lifeos/features/food/data/meal_catalog.dart';
 import 'package:lifeos/features/food/domain/entities/nutrition.dart';
 import 'package:lifeos/features/food/domain/repositories/store_price_source.dart';
+import 'package:lifeos/features/food/domain/seasonal.dart';
 import 'package:lifeos/shared/models/money.dart';
 
 /// A full day of recommended meals.
@@ -35,14 +36,15 @@ class DietPlanner {
     int seed = 0,
     Map<MealSlot, int> slotOffsets = const {},
     String? dietId,
+    int? month,
   }) {
     // Pick each slot independently against a per-slot calorie budget — O(n) in
     // the catalog size, so it scales to a large menu (the old full-combination
     // search was O(breakfasts × lunches × dinners × 2^snacks)).
     MealOption bestFor(List<MealOption> options, double budget, int rot) {
       final ranked = [...options]
-        ..sort((a, b) => _slotScore(a, budget, dietId)
-            .compareTo(_slotScore(b, budget, dietId)));
+        ..sort((a, b) => _slotScore(a, budget, dietId, month)
+            .compareTo(_slotScore(b, budget, dietId, month)));
       final topN = ranked.length < 5 ? ranked.length : 5;
       return ranked[rot.abs() % topN];
     }
@@ -53,8 +55,8 @@ class DietPlanner {
 
     // Two distinct snacks near the snack budget.
     final snacksRanked = [...MealCatalog.snacks]
-      ..sort((a, b) => _slotScore(a, targetKcal * _sShare, dietId)
-          .compareTo(_slotScore(b, targetKcal * _sShare, dietId)));
+      ..sort((a, b) => _slotScore(a, targetKcal * _sShare, dietId, month)
+          .compareTo(_slotScore(b, targetKcal * _sShare, dietId, month)));
     final snackPicks = <MealOption>[];
     for (var i = 0; snackPicks.length < 2 && i < snacksRanked.length; i++) {
       final s = snacksRanked[(seed.abs() + i) % snacksRanked.length];
@@ -87,15 +89,20 @@ class DietPlanner {
   }
 
   /// Fitness of one dish for a slot: nearness to the slot's calorie budget,
-  /// a mild protein preference, and the chosen-diet bias. Lower is better.
+  /// a mild protein preference, the chosen-diet bias, and a seasonal nudge
+  /// toward dishes using produce that is in season this [month]. Lower is
+  /// better.
   ///
   /// Preferences use **density** (grams per kcal), not absolute grams: because
   /// the day is scaled to hit the calorie target, the day's total protein/carbs
   /// end up proportional to the picked dishes' protein/carb *density*.
-  double _slotScore(MealOption m, double budget, String? dietId) =>
+  double _slotScore(MealOption m, double budget, String? dietId, int? month) =>
       (m.nutrition.kcal - budget).abs() -
       _density(m.nutrition.proteinG, m.nutrition.kcal) * 300 +
-      _dietTerm(dietId, m.nutrition);
+      _dietTerm(dietId, m.nutrition) -
+      (month == null
+          ? 0.0
+          : seasonalScore(m.ingredients.map((i) => i.productId), month) * 25.0);
 
   double _density(int grams, int kcal) => kcal <= 0 ? 0.0 : grams / kcal;
 
