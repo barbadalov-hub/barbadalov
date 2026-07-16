@@ -96,6 +96,21 @@ const kRecipes = <String, MealRecipe>{
   'cheese_cubes': MealRecipe('cheese_cubes', [_assembly]),
   'berries_nuts': MealRecipe('berries_nuts', [_assembly]),
   'apple_nuts': MealRecipe('apple_nuts', [_assembly]),
+  'avocado_toast': MealRecipe('avocado_toast', [_assembly]),
+  'oat_berry_bowl': MealRecipe('oat_berry_bowl', [_pot]),
+  'pepper_scramble': MealRecipe('pepper_scramble', [_pan]),
+  'pork_buckwheat': MealRecipe('pork_buckwheat', [_pot]),
+  'couscous_chicken': MealRecipe('couscous_chicken', [_pan]),
+  'bean_soup': MealRecipe('bean_soup', [_pot]),
+  'fish_couscous': MealRecipe('fish_couscous', [_pan]),
+  'pork_veg': MealRecipe('pork_veg', [_pan]),
+  'chicken_beans': MealRecipe('chicken_beans', [_pot]),
+  'avocado_chicken_salad': MealRecipe('avocado_chicken_salad', [_pan]),
+  'corn_tuna_salad': MealRecipe('corn_tuna_salad', [_assembly]),
+  'avocado_egg': MealRecipe('avocado_egg', [_assembly]),
+  'cottage_honey': MealRecipe('cottage_honey', [_assembly]),
+  'yogurt_oats': MealRecipe('yogurt_oats', [_assembly]),
+  'pepper_cheese': MealRecipe('pepper_cheese', [_assembly]),
 };
 
 MealRecipe? recipeFor(String mealId) => kRecipes[mealId];
