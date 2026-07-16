@@ -38,6 +38,7 @@ final dayPlanProvider = Provider<DayPlan?>((ref) {
         seed: dayOfYear + shuffle,
         slotOffsets: ref.watch(slotSwapProvider),
         dietId: ref.watch(selectedDietProvider),
+        month: now.month,
       );
 });
 
@@ -90,12 +91,14 @@ final weekPlanProvider = Provider<List<DayPlan>?>((ref) {
               seed: dayOfYear + shuffle,
               slotOffsets: ref.watch(slotSwapProvider),
               dietId: dietId,
+              month: now.month,
             )
           : planner.plan(
               targetKcal: assessment.targetKcal,
               proteinTargetG: assessment.proteinG,
               seed: base + i,
               dietId: dietId,
+              month: now.add(Duration(days: week * 7 + i)).month,
             ),
   ];
 });

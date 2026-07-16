@@ -317,6 +317,46 @@ class MealCatalog {
       ],
       nutrition: NutritionFacts(kcal: 380, proteinG: 20, fatG: 18, carbsG: 34),
     ),
+    MealOption(
+      id: 'shakshuka',
+      slot: MealSlot.breakfast,
+      emoji: '🍳',
+      nameKey: 'meal.shakshuka',
+      region: 'region.mideast',
+      ingredients: [
+        IngredientPortion('eggs', 3, PortionUnit.pcs),
+        IngredientPortion('tomatoes', 150, PortionUnit.g),
+        IngredientPortion('bell_pepper', 80, PortionUnit.g),
+        IngredientPortion('onion', 40, PortionUnit.g),
+      ],
+      nutrition: NutritionFacts(kcal: 340, proteinG: 22, fatG: 20, carbsG: 18),
+    ),
+    MealOption(
+      id: 'granola_yogurt',
+      slot: MealSlot.breakfast,
+      emoji: '🥣',
+      nameKey: 'meal.granola_yogurt',
+      region: 'region.usa',
+      ingredients: [
+        IngredientPortion('yogurt', 200, PortionUnit.g),
+        IngredientPortion('oats', 40, PortionUnit.g),
+        IngredientPortion('berries', 60, PortionUnit.g),
+        IngredientPortion('honey', 10, PortionUnit.g),
+      ],
+      nutrition: NutritionFacts(kcal: 340, proteinG: 12, fatG: 6, carbsG: 60),
+    ),
+    MealOption(
+      id: 'japanese_rice_egg',
+      slot: MealSlot.breakfast,
+      emoji: '🍳',
+      nameKey: 'meal.japanese_rice_egg',
+      region: 'region.japan',
+      ingredients: [
+        IngredientPortion('rice', 80, PortionUnit.g),
+        IngredientPortion('eggs', 2, PortionUnit.pcs),
+      ],
+      nutrition: NutritionFacts(kcal: 360, proteinG: 16, fatG: 10, carbsG: 52),
+    ),
   ];
 
   static const lunches = <MealOption>[
@@ -659,6 +699,76 @@ class MealCatalog {
       ],
       nutrition: NutritionFacts(kcal: 450, proteinG: 18, fatG: 10, carbsG: 72),
     ),
+    MealOption(
+      id: 'italian_pasta',
+      slot: MealSlot.lunch,
+      emoji: '🍲',
+      nameKey: 'meal.italian_pasta',
+      region: 'region.italy',
+      ingredients: [
+        IngredientPortion('pasta', 90, PortionUnit.g),
+        IngredientPortion('tomatoes', 120, PortionUnit.g),
+        IngredientPortion('cheese', 30, PortionUnit.g),
+        IngredientPortion('onion', 30, PortionUnit.g),
+      ],
+      nutrition: NutritionFacts(kcal: 480, proteinG: 16, fatG: 12, carbsG: 76),
+    ),
+    MealOption(
+      id: 'georgian_chicken',
+      slot: MealSlot.lunch,
+      emoji: '🍗',
+      nameKey: 'meal.georgian_chicken',
+      region: 'region.georgia',
+      ingredients: [
+        IngredientPortion('chicken', 180, PortionUnit.g),
+        IngredientPortion('tomatoes', 100, PortionUnit.g),
+        IngredientPortion('onion', 40, PortionUnit.g),
+        IngredientPortion('walnuts', 15, PortionUnit.g),
+      ],
+      nutrition: NutritionFacts(kcal: 480, proteinG: 46, fatG: 22, carbsG: 14),
+    ),
+    MealOption(
+      id: 'mexican_bowl',
+      slot: MealSlot.lunch,
+      emoji: '🥗',
+      nameKey: 'meal.mexican_bowl',
+      region: 'region.mexico',
+      ingredients: [
+        IngredientPortion('beans', 100, PortionUnit.g),
+        IngredientPortion('rice', 70, PortionUnit.g),
+        IngredientPortion('corn', 60, PortionUnit.g),
+        IngredientPortion('tomatoes', 80, PortionUnit.g),
+      ],
+      nutrition: NutritionFacts(kcal: 480, proteinG: 18, fatG: 6, carbsG: 88),
+    ),
+    MealOption(
+      id: 'indian_dhal',
+      slot: MealSlot.lunch,
+      emoji: '🍲',
+      nameKey: 'meal.indian_dhal',
+      region: 'region.india',
+      ingredients: [
+        IngredientPortion('lentils', 100, PortionUnit.g),
+        IngredientPortion('tomatoes', 100, PortionUnit.g),
+        IngredientPortion('onion', 50, PortionUnit.g),
+        IngredientPortion('carrots', 50, PortionUnit.g),
+      ],
+      nutrition: NutritionFacts(kcal: 400, proteinG: 22, fatG: 5, carbsG: 68),
+    ),
+    MealOption(
+      id: 'pumpkin_soup',
+      slot: MealSlot.lunch,
+      emoji: '🍲',
+      nameKey: 'meal.pumpkin_soup',
+      region: 'region.france',
+      ingredients: [
+        IngredientPortion('pumpkin', 250, PortionUnit.g),
+        IngredientPortion('carrots', 60, PortionUnit.g),
+        IngredientPortion('onion', 40, PortionUnit.g),
+        IngredientPortion('milk', 60, PortionUnit.ml),
+      ],
+      nutrition: NutritionFacts(kcal: 250, proteinG: 8, fatG: 8, carbsG: 38),
+    ),
   ];
 
   static const dinners = <MealOption>[
@@ -999,6 +1109,47 @@ class MealCatalog {
       ],
       nutrition: NutritionFacts(kcal: 470, proteinG: 46, fatG: 8, carbsG: 52),
     ),
+    MealOption(
+      id: 'greek_chicken_bowl',
+      slot: MealSlot.dinner,
+      emoji: '🥗',
+      nameKey: 'meal.greek_chicken_bowl',
+      region: 'region.greece',
+      ingredients: [
+        IngredientPortion('chicken', 160, PortionUnit.g),
+        IngredientPortion('feta', 40, PortionUnit.g),
+        IngredientPortion('cucumbers', 120, PortionUnit.g),
+        IngredientPortion('tomatoes', 100, PortionUnit.g),
+      ],
+      nutrition: NutritionFacts(kcal: 430, proteinG: 46, fatG: 20, carbsG: 12),
+    ),
+    MealOption(
+      id: 'spanish_gazpacho',
+      slot: MealSlot.dinner,
+      emoji: '🍲',
+      nameKey: 'meal.spanish_gazpacho',
+      region: 'region.spain',
+      ingredients: [
+        IngredientPortion('tomatoes', 200, PortionUnit.g),
+        IngredientPortion('cucumbers', 100, PortionUnit.g),
+        IngredientPortion('bell_pepper', 80, PortionUnit.g),
+        IngredientPortion('bread', 1, PortionUnit.pcs),
+      ],
+      nutrition: NutritionFacts(kcal: 250, proteinG: 8, fatG: 5, carbsG: 44),
+    ),
+    MealOption(
+      id: 'japanese_salmon_bowl',
+      slot: MealSlot.dinner,
+      emoji: '🐟',
+      nameKey: 'meal.japanese_salmon_bowl',
+      region: 'region.japan',
+      ingredients: [
+        IngredientPortion('salmon', 150, PortionUnit.g),
+        IngredientPortion('rice', 80, PortionUnit.g),
+        IngredientPortion('cucumbers', 80, PortionUnit.g),
+      ],
+      nutrition: NutritionFacts(kcal: 520, proteinG: 34, fatG: 20, carbsG: 56),
+    ),
   ];
 
   static const snacks = <MealOption>[
@@ -1261,6 +1412,18 @@ class MealCatalog {
         IngredientPortion('walnuts', 15, PortionUnit.g),
       ],
       nutrition: NutritionFacts(kcal: 200, proteinG: 22, fatG: 12, carbsG: 8),
+    ),
+    MealOption(
+      id: 'watermelon_feta',
+      slot: MealSlot.snack,
+      emoji: '🥗',
+      nameKey: 'meal.watermelon_feta',
+      region: 'region.greece',
+      ingredients: [
+        IngredientPortion('watermelon', 200, PortionUnit.g),
+        IngredientPortion('feta', 40, PortionUnit.g),
+      ],
+      nutrition: NutritionFacts(kcal: 190, proteinG: 8, fatG: 11, carbsG: 18),
     ),
   ];
 

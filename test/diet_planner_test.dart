@@ -3,6 +3,7 @@ import 'package:lifeos/features/food/application/diet_planner.dart';
 import 'package:lifeos/features/food/data/meal_catalog.dart';
 import 'package:lifeos/features/food/data/ua_store_price_catalog.dart';
 import 'package:lifeos/features/food/domain/entities/nutrition.dart';
+import 'package:lifeos/features/food/domain/seasonal.dart';
 
 void main() {
   group('DietPlanner', () {
@@ -66,6 +67,27 @@ void main() {
             .proteinG;
       }
       expect(highProtein, greaterThan(plainProtein));
+    });
+
+    test('a summer menu uses more in-season produce than a winter one', () {
+      int seasonSum(int planMonth, int evalMonth) {
+        var total = 0;
+        for (var s = 0; s < 7; s++) {
+          final plan = planner.plan(
+              targetKcal: 2000,
+              proteinTargetG: 120,
+              seed: s,
+              month: planMonth);
+          for (final m in plan.meals) {
+            total += seasonalScore(
+                m.ingredients.map((i) => i.productId), evalMonth);
+          }
+        }
+        return total;
+      }
+
+      // Planned for August vs January, both judged by August seasonality.
+      expect(seasonSum(8, 8), greaterThan(seasonSum(1, 8)));
     });
   });
 

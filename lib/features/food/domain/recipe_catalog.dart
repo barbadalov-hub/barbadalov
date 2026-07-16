@@ -130,6 +130,18 @@ const kRecipes = <String, MealRecipe>{
   'feta_cucumber': MealRecipe('feta_cucumber', [_assembly]),
   'banana_milk': MealRecipe('banana_milk', [_assembly]),
   'cottage_nuts': MealRecipe('cottage_nuts', [_assembly]),
+  'shakshuka': MealRecipe('shakshuka', [_pan]),
+  'granola_yogurt': MealRecipe('granola_yogurt', [_assembly]),
+  'japanese_rice_egg': MealRecipe('japanese_rice_egg', [_pot]),
+  'italian_pasta': MealRecipe('italian_pasta', [_pan]),
+  'georgian_chicken': MealRecipe('georgian_chicken', [_pan]),
+  'mexican_bowl': MealRecipe('mexican_bowl', [_pot]),
+  'indian_dhal': MealRecipe('indian_dhal', [_pot]),
+  'pumpkin_soup': MealRecipe('pumpkin_soup', [_pot]),
+  'greek_chicken_bowl': MealRecipe('greek_chicken_bowl', [_pan]),
+  'spanish_gazpacho': MealRecipe('spanish_gazpacho', [_assembly]),
+  'japanese_salmon_bowl': MealRecipe('japanese_salmon_bowl', [_pan]),
+  'watermelon_feta': MealRecipe('watermelon_feta', [_assembly]),
 };
 
 MealRecipe? recipeFor(String mealId) => kRecipes[mealId];

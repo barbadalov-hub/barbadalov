@@ -55,6 +55,10 @@ class MealOption extends Equatable {
   final List<IngredientPortion> ingredients;
   final NutritionFacts nutrition;
 
+  /// Optional cuisine/country i18n key (e.g. `region.italy`) for dishes from a
+  /// particular national cuisine; null for everyday local food.
+  final String? region;
+
   const MealOption({
     required this.id,
     required this.slot,
@@ -62,6 +66,7 @@ class MealOption extends Equatable {
     required this.nameKey,
     required this.ingredients,
     required this.nutrition,
+    this.region,
   });
 
   /// Scale the portion by [factor] (nutrition + gram/ml amounts, rounded to
@@ -75,6 +80,7 @@ class MealOption extends Equatable {
       slot: slot,
       emoji: emoji,
       nameKey: nameKey,
+      region: region,
       ingredients: [
         for (final i in ingredients)
           i.unit == PortionUnit.pcs
@@ -95,5 +101,6 @@ class MealOption extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, slot, emoji, nameKey, ingredients, nutrition];
+  List<Object?> get props =>
+      [id, slot, emoji, nameKey, ingredients, nutrition, region];
 }
