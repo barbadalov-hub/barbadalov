@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lifeos/features/health/domain/entities/health_day.dart';
 import 'package:lifeos/features/health/presentation/providers/health_providers.dart';
+import 'package:lifeos/features/insights/domain/cross_insights.dart';
 import 'package:lifeos/features/insights/domain/insight_engine.dart';
 import 'package:lifeos/features/insights/domain/logging_streak.dart';
 import 'package:lifeos/features/insights/domain/mood_patterns.dart';
@@ -50,6 +51,41 @@ class InsightsData {
 }
 
 int _dayKey(DateTime d) => d.year * 10000 + d.month * 100 + d.day;
+
+/// Cross-pillar connections between non-mood metrics (e.g. sleep ↔ spending) —
+/// the distinctive "why" a whole-life app can surface. Rebuilt from the same
+/// daily data the mood engine uses.
+final crossInsightsProvider = Provider<List<CrossPattern>>((ref) {
+  final days = [...ref.watch(healthHistoryProvider)];
+  final today = ref.watch(todayHealthProvider).valueOrNull;
+  if (today != null) days.add(today);
+  final txs = ref.watch(transactionsProvider).valueOrNull ?? const [];
+
+  final healthByDay = {for (final h in days) _dayKey(h.date): h};
+  final spendByDay = <int, int>{};
+  for (final t in txs) {
+    if (t.isExpense) {
+      final k = _dayKey(t.date);
+      spendByDay[k] = (spendByDay[k] ?? 0) + t.amount.minorUnits;
+    }
+  }
+
+  final metrics = <DayMetrics>[];
+  for (final k in {...healthByDay.keys, ...spendByDay.keys}) {
+    final h = healthByDay[k];
+    final v = <LifeMetric, double>{};
+    if (h != null) {
+      if (h.sleepHours > 0) v[LifeMetric.sleep] = h.sleepHours;
+      if (h.steps > 0) v[LifeMetric.steps] = h.steps.toDouble();
+      if (h.waterMl > 0) v[LifeMetric.water] = h.waterMl.toDouble();
+    }
+    final spend = spendByDay[k];
+    if (spend != null && spend > 0) v[LifeMetric.spend] = spend / 100.0;
+    if (v.isNotEmpty) metrics.add(DayMetrics(v));
+  }
+
+  return const CrossInsightEngine().find(metrics);
+});
 
 final insightsProvider = Provider<InsightsData>((ref) {
   final now = ref.watch(clockProvider).now();

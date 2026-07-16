@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
+import 'package:lifeos/features/insights/domain/cross_insights.dart';
 import 'package:lifeos/features/insights/domain/insight_engine.dart';
 import 'package:lifeos/features/insights/domain/mood_patterns.dart';
 import 'package:lifeos/features/insights/presentation/providers/insights_providers.dart';
@@ -59,6 +60,7 @@ class InsightsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final data = ref.watch(insightsProvider);
+    final cross = ref.watch(crossInsightsProvider);
     final lang = Localizations.localeOf(context).languageCode;
 
     return Scaffold(
@@ -104,9 +106,21 @@ class InsightsPage extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
 
-            if (!data.hasAny)
+            if (!data.hasAny && cross.isEmpty)
               _Empty()
             else ...[
+              if (cross.isNotEmpty) ...[
+                Text('🔗 ${context.tr('insight.crossTitle')}',
+                    style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 4),
+                Text(context.tr('insight.crossSub'),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.outline,
+                        )),
+                const SizedBox(height: 8),
+                for (final p in cross) _CrossCard(pattern: p),
+                const SizedBox(height: 16),
+              ],
               if (data.correlations.isNotEmpty) ...[
                 Text(context.tr('insight.patterns'),
                     style: Theme.of(context).textTheme.titleMedium),
@@ -148,6 +162,57 @@ class InsightsPage extends ConsumerWidget {
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.outline,
                   ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// A cross-pillar connection: one habit's effect on another, in plain language.
+class _CrossCard extends StatelessWidget {
+  final CrossPattern pattern;
+  const _CrossCard({required this.pattern});
+
+  static const _emoji = {
+    LifeMetric.sleep: '😴',
+    LifeMetric.steps: '👟',
+    LifeMetric.water: '💧',
+    LifeMetric.spend: '💸',
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: SectionCard(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(_emoji[pattern.driver] ?? '🔗',
+                style: const TextStyle(fontSize: 24)),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    context.trp(pattern.key, {'pct': pattern.deltaPct.abs().round()}),
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyLarge
+                        ?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    context.trp('insight.basedOn', {'n': pattern.samples}),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.outline,
+                        ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
