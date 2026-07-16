@@ -6,6 +6,7 @@ import 'package:lifeos/features/profile/domain/checkup_advisor.dart';
 import 'package:lifeos/features/profile/domain/entities/user_profile.dart';
 import 'package:lifeos/features/profile/domain/fitness_calculator.dart';
 import 'package:lifeos/features/profile/presentation/providers/profile_providers.dart';
+import 'package:lifeos/shared/theme/app_theme.dart';
 import 'package:lifeos/shared/widgets/animated_backdrop.dart';
 import 'package:lifeos/shared/widgets/section_card.dart';
 
@@ -410,23 +411,41 @@ class _IdealWeightCard extends StatelessWidget {
 
 /// Suggested doctors + lab tests from the profile — educational prompts to
 /// discuss with a real doctor, never a diagnosis.
-class _CheckupCard extends StatelessWidget {
+class _CheckupCard extends ConsumerWidget {
   final UserProfile profile;
   final FitnessAssessment a;
   const _CheckupCard({required this.profile, required this.a});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final suggestions = suggestCheckups(profile, a);
     final doctors =
         suggestions.where((s) => s.kind == CheckupKind.doctor).toList();
     final labs = suggestions.where((s) => s.kind == CheckupKind.lab).toList();
+    final tracker = ref.watch(checkupTrackerProvider);
+    final done = suggestions
+        .where((s) => tracker[s.trackKey] == CheckupStatus.done)
+        .length;
     return SectionCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('🩺 ${context.tr('checkup.title')}',
-              style: Theme.of(context).textTheme.titleMedium),
+          Row(
+            children: [
+              Expanded(
+                child: Text('🩺 ${context.tr('checkup.title')}',
+                    style: Theme.of(context).textTheme.titleMedium),
+              ),
+              if (suggestions.isNotEmpty)
+                Text(
+                    context.trp('checkup.track.progress',
+                        {'done': done, 'total': suggestions.length}),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: LifeColors.finance,
+                          fontWeight: FontWeight.w700,
+                        )),
+            ],
+          ),
           const SizedBox(height: 4),
           Text(context.tr('checkup.sub'),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -440,7 +459,7 @@ class _CheckupCard extends StatelessWidget {
                     .titleSmall
                     ?.copyWith(fontWeight: FontWeight.w800)),
             const SizedBox(height: 4),
-            for (final s in doctors) _row(context, s),
+            for (final s in doctors) _row(context, ref, s, tracker[s.trackKey]),
             const SizedBox(height: 8),
           ],
           if (labs.isNotEmpty) ...[
@@ -450,9 +469,14 @@ class _CheckupCard extends StatelessWidget {
                     .titleSmall
                     ?.copyWith(fontWeight: FontWeight.w800)),
             const SizedBox(height: 4),
-            for (final s in labs) _row(context, s),
+            for (final s in labs) _row(context, ref, s, tracker[s.trackKey]),
           ],
           const SizedBox(height: 8),
+          Text(context.tr('checkup.track.hint'),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.outline,
+                  )),
+          const SizedBox(height: 4),
           Text(context.tr('checkup.disclaimer'),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.outline,
@@ -463,16 +487,31 @@ class _CheckupCard extends StatelessWidget {
     );
   }
 
-  Widget _row(BuildContext context, CheckupSuggestion s) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 3),
+  Widget _row(BuildContext context, WidgetRef ref, CheckupSuggestion s,
+      CheckupStatus? status) {
+    final st = status ?? CheckupStatus.todo;
+    final done = st == CheckupStatus.done;
+    return InkWell(
+      onTap: () =>
+          ref.read(checkupTrackerProvider.notifier).cycle(s.trackKey),
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 5),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('•  '),
+            _StatusPill(st),
+            const SizedBox(width: 8),
             Expanded(
               child: RichText(
                 text: TextSpan(
-                  style: Theme.of(context).textTheme.bodyMedium,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        decoration:
+                            done ? TextDecoration.lineThrough : null,
+                        color: done
+                            ? Theme.of(context).colorScheme.outline
+                            : null,
+                      ),
                   children: [
                     TextSpan(
                         text: context.tr(s.labelKey),
@@ -487,7 +526,37 @@ class _CheckupCard extends StatelessWidget {
             ),
           ],
         ),
-      );
+      ),
+    );
+  }
+}
+
+/// A tappable status chip: to-do (outline circle), planned (amber clock),
+/// done (green check).
+class _StatusPill extends StatelessWidget {
+  final CheckupStatus status;
+  const _StatusPill(this.status);
+
+  @override
+  Widget build(BuildContext context) {
+    late final IconData icon;
+    late final Color color;
+    switch (status) {
+      case CheckupStatus.todo:
+        icon = Icons.radio_button_unchecked;
+        color = Theme.of(context).colorScheme.outline;
+      case CheckupStatus.planned:
+        icon = Icons.schedule;
+        color = const Color(0xFFF5A623);
+      case CheckupStatus.done:
+        icon = Icons.check_circle;
+        color = LifeColors.finance;
+    }
+    return Padding(
+      padding: const EdgeInsets.only(top: 1),
+      child: Icon(icon, size: 18, color: color),
+    );
+  }
 }
 
 class _AssessmentCard extends StatelessWidget {
