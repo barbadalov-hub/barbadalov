@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:lifeos/features/health/presentation/pages/measurements_page.dart';
+import 'package:lifeos/features/profile/domain/checkup_advisor.dart';
 import 'package:lifeos/features/profile/domain/entities/user_profile.dart';
 import 'package:lifeos/features/profile/domain/fitness_calculator.dart';
 import 'package:lifeos/features/profile/presentation/providers/profile_providers.dart';
@@ -216,6 +217,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 current: ref.watch(profileProvider)?.weightKg ?? 0),
             const SizedBox(height: 12),
             _AssessmentCard(a: assessment),
+            const SizedBox(height: 12),
+            _CheckupCard(
+                profile: ref.watch(profileProvider)!, a: assessment),
           ],
         ],
         ),
@@ -402,6 +406,88 @@ class _IdealWeightCard extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Suggested doctors + lab tests from the profile — educational prompts to
+/// discuss with a real doctor, never a diagnosis.
+class _CheckupCard extends StatelessWidget {
+  final UserProfile profile;
+  final FitnessAssessment a;
+  const _CheckupCard({required this.profile, required this.a});
+
+  @override
+  Widget build(BuildContext context) {
+    final suggestions = suggestCheckups(profile, a);
+    final doctors =
+        suggestions.where((s) => s.kind == CheckupKind.doctor).toList();
+    final labs = suggestions.where((s) => s.kind == CheckupKind.lab).toList();
+    return SectionCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('🩺 ${context.tr('checkup.title')}',
+              style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 4),
+          Text(context.tr('checkup.sub'),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.outline,
+                  )),
+          const SizedBox(height: 12),
+          if (doctors.isNotEmpty) ...[
+            Text(context.tr('checkup.doctors'),
+                style: Theme.of(context)
+                    .textTheme
+                    .titleSmall
+                    ?.copyWith(fontWeight: FontWeight.w800)),
+            const SizedBox(height: 4),
+            for (final s in doctors) _row(context, s),
+            const SizedBox(height: 8),
+          ],
+          if (labs.isNotEmpty) ...[
+            Text(context.tr('checkup.labs'),
+                style: Theme.of(context)
+                    .textTheme
+                    .titleSmall
+                    ?.copyWith(fontWeight: FontWeight.w800)),
+            const SizedBox(height: 4),
+            for (final s in labs) _row(context, s),
+          ],
+          const SizedBox(height: 8),
+          Text(context.tr('checkup.disclaimer'),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.outline,
+                    fontStyle: FontStyle.italic,
+                  )),
+        ],
+      ),
+    );
+  }
+
+  Widget _row(BuildContext context, CheckupSuggestion s) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 3),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('•  '),
+            Expanded(
+              child: RichText(
+                text: TextSpan(
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  children: [
+                    TextSpan(
+                        text: context.tr(s.labelKey),
+                        style: const TextStyle(fontWeight: FontWeight.w600)),
+                    TextSpan(
+                        text: ' — ${context.tr(s.reasonKey)}',
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.outline)),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
 }
 
 class _AssessmentCard extends StatelessWidget {

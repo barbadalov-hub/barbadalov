@@ -5,6 +5,7 @@ import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:lifeos/features/food/application/diet_planner.dart';
 import 'package:lifeos/features/food/domain/diet_catalog.dart';
 import 'package:lifeos/features/food/domain/entities/nutrition.dart';
+import 'package:lifeos/features/food/domain/medical_diets.dart';
 import 'package:lifeos/features/food/domain/recipe_catalog.dart';
 import 'package:lifeos/features/profile/domain/entities/user_profile.dart';
 import 'package:lifeos/features/food/presentation/providers/diet_providers.dart';
@@ -544,6 +545,8 @@ class _DietPlansSheet extends ConsumerWidget {
             _DietPlanCard(plan: ranked[i], recommended: i == 0),
           const SizedBox(height: 16),
           _SeasonalVitaminsCard(month: ref.watch(clockProvider).now().month),
+          const SizedBox(height: 16),
+          const _MedicalDietsSection(),
         ],
       ),
     );
@@ -784,6 +787,170 @@ class _DietDetailSheet {
           ],
         ),
       );
+}
+
+/// Therapeutic ("table") diets — shown for reference, activated only when the
+/// user confirms their own doctor prescribed one.
+class _MedicalDietsSection extends ConsumerWidget {
+  const _MedicalDietsSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final prescribed = ref.watch(prescribedDietsProvider);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('🩺 ${context.tr('meddiet.title')}',
+            style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 4),
+        Text(context.tr('meddiet.sub'),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.outline,
+                )),
+        const SizedBox(height: 8),
+        for (final d in kMedicalDiets)
+          SectionCard(
+            onTap: () => _MedicalDietSheet.show(context, d),
+            color: prescribed.contains(d.id)
+                ? LifeColors.health.withValues(alpha: 0.12)
+                : null,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            child: Row(
+              children: [
+                Text(d.emoji, style: const TextStyle(fontSize: 22)),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(context.tr(d.nameKey),
+                          style: Theme.of(context).textTheme.titleSmall),
+                      Text(context.tr(d.conditionKey),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(context).colorScheme.outline,
+                              )),
+                    ],
+                  ),
+                ),
+                if (prescribed.contains(d.id))
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: LifeColors.health,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(context.tr('meddiet.prescribed'),
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700)),
+                  ),
+                const SizedBox(width: 4),
+                const Icon(Icons.chevron_right),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// One therapeutic diet: condition, what to eat, what to avoid, how to cook,
+/// plus the "my doctor prescribed this" opt-in.
+class _MedicalDietSheet extends ConsumerWidget {
+  final MedicalDiet diet;
+  const _MedicalDietSheet(this.diet);
+
+  static Future<void> show(BuildContext context, MedicalDiet diet) =>
+      showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        showDragHandle: true,
+        builder: (_) => _MedicalDietSheet(diet),
+      );
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final prescribed = ref.watch(prescribedDietsProvider).contains(diet.id);
+    Widget block(String emoji, String title, String bodyKey) => Padding(
+          padding: const EdgeInsets.only(bottom: 14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('$emoji $title',
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleSmall
+                      ?.copyWith(fontWeight: FontWeight.w800)),
+              const SizedBox(height: 4),
+              Text(context.tr(bodyKey),
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.copyWith(height: 1.4)),
+            ],
+          ),
+        );
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.85,
+      minChildSize: 0.5,
+      maxChildSize: 0.95,
+      builder: (context, controller) => ListView(
+        controller: controller,
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
+        children: [
+          Row(
+            children: [
+              Text(diet.emoji, style: const TextStyle(fontSize: 28)),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(context.tr(diet.nameKey),
+                    style: Theme.of(context).textTheme.headlineSmall),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(context.tr(diet.conditionKey),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  )),
+          const SizedBox(height: 16),
+          block('✅', context.tr('meddiet.eat'), diet.eatKey),
+          block('⛔', context.tr('meddiet.avoid'), diet.avoidKey),
+          block('🍳', context.tr('meddiet.cook'), diet.cookKey),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: LifeColors.health.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  value: prescribed,
+                  onChanged: (_) =>
+                      ref.read(prescribedDietsProvider.notifier).toggle(diet.id),
+                  title: Text(context.tr('meddiet.myDoctor')),
+                ),
+                Text(context.tr('meddiet.disclaimer'),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.outline,
+                          fontStyle: FontStyle.italic,
+                        )),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 /// Seasonal vitamin guidance — which vitamins tend to run low each season,

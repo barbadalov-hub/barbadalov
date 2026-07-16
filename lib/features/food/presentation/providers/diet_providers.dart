@@ -96,6 +96,29 @@ final dayPlanProvider = Provider<DayPlan?>((ref) {
       );
 });
 
+/// Therapeutic diets the user has confirmed their **doctor prescribed** (ids).
+/// Nothing medical is shown as active unless the user opts in here.
+class PrescribedDietsController extends Notifier<Set<String>> {
+  static const _key = 'diet.prescribed';
+
+  @override
+  Set<String> build() {
+    final raw = ref.watch(keyValueStoreProvider).getString(_key) ?? '';
+    return raw.split(',').where((s) => s.isNotEmpty).toSet();
+  }
+
+  void toggle(String id) {
+    final next = {...state};
+    if (!next.add(id)) next.remove(id);
+    ref.read(keyValueStoreProvider).setString(_key, next.join(','));
+    state = next;
+  }
+}
+
+final prescribedDietsProvider =
+    NotifierProvider<PrescribedDietsController, Set<String>>(
+        PrescribedDietsController.new);
+
 /// Which day of the selected week the diet menu is showing (0 … 6).
 final selectedDietDayProvider = StateProvider<int>((ref) => 0);
 
