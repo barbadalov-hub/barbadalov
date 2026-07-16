@@ -214,6 +214,45 @@ class MealCatalog {
       ],
       nutrition: NutritionFacts(kcal: 380, proteinG: 18, fatG: 11, carbsG: 52),
     ),
+    MealOption(
+      id: 'avocado_toast',
+      slot: MealSlot.breakfast,
+      emoji: '🥙',
+      nameKey: 'meal.avocado_toast',
+      ingredients: [
+        IngredientPortion('bread', 2, PortionUnit.pcs),
+        IngredientPortion('avocado', 80, PortionUnit.g),
+        IngredientPortion('eggs', 1, PortionUnit.pcs),
+        IngredientPortion('tomatoes', 50, PortionUnit.g),
+      ],
+      nutrition: NutritionFacts(kcal: 380, proteinG: 14, fatG: 22, carbsG: 34),
+    ),
+    MealOption(
+      id: 'oat_berry_bowl',
+      slot: MealSlot.breakfast,
+      emoji: '🥣',
+      nameKey: 'meal.oat_berry_bowl',
+      ingredients: [
+        IngredientPortion('oats', 60, PortionUnit.g),
+        IngredientPortion('milk', 200, PortionUnit.ml),
+        IngredientPortion('berries', 80, PortionUnit.g),
+        IngredientPortion('honey', 10, PortionUnit.g),
+      ],
+      nutrition: NutritionFacts(kcal: 380, proteinG: 12, fatG: 8, carbsG: 66),
+    ),
+    MealOption(
+      id: 'pepper_scramble',
+      slot: MealSlot.breakfast,
+      emoji: '🍳',
+      nameKey: 'meal.pepper_scramble',
+      ingredients: [
+        IngredientPortion('eggs', 3, PortionUnit.pcs),
+        IngredientPortion('bell_pepper', 80, PortionUnit.g),
+        IngredientPortion('cheese', 30, PortionUnit.g),
+        IngredientPortion('onion', 30, PortionUnit.g),
+      ],
+      nutrition: NutritionFacts(kcal: 350, proteinG: 25, fatG: 24, carbsG: 10),
+    ),
   ];
 
   static const lunches = <MealOption>[
@@ -440,6 +479,58 @@ class MealCatalog {
       ],
       nutrition: NutritionFacts(kcal: 500, proteinG: 42, fatG: 8, carbsG: 62),
     ),
+    MealOption(
+      id: 'pork_buckwheat',
+      slot: MealSlot.lunch,
+      emoji: '🍲',
+      nameKey: 'meal.pork_buckwheat',
+      ingredients: [
+        IngredientPortion('pork', 150, PortionUnit.g),
+        IngredientPortion('buckwheat', 80, PortionUnit.g),
+        IngredientPortion('carrots', 60, PortionUnit.g),
+        IngredientPortion('onion', 40, PortionUnit.g),
+      ],
+      nutrition: NutritionFacts(kcal: 590, proteinG: 40, fatG: 26, carbsG: 56),
+    ),
+    MealOption(
+      id: 'couscous_chicken',
+      slot: MealSlot.lunch,
+      emoji: '🍗',
+      nameKey: 'meal.couscous_chicken',
+      ingredients: [
+        IngredientPortion('chicken', 150, PortionUnit.g),
+        IngredientPortion('couscous', 70, PortionUnit.g),
+        IngredientPortion('tomatoes', 80, PortionUnit.g),
+        IngredientPortion('bell_pepper', 60, PortionUnit.g),
+      ],
+      nutrition: NutritionFacts(kcal: 520, proteinG: 42, fatG: 10, carbsG: 62),
+    ),
+    MealOption(
+      id: 'bean_soup',
+      slot: MealSlot.lunch,
+      emoji: '🍲',
+      nameKey: 'meal.bean_soup',
+      ingredients: [
+        IngredientPortion('beans', 120, PortionUnit.g),
+        IngredientPortion('tomatoes', 100, PortionUnit.g),
+        IngredientPortion('carrots', 60, PortionUnit.g),
+        IngredientPortion('onion', 50, PortionUnit.g),
+      ],
+      nutrition: NutritionFacts(kcal: 380, proteinG: 20, fatG: 5, carbsG: 66),
+    ),
+    MealOption(
+      id: 'fish_couscous',
+      slot: MealSlot.lunch,
+      emoji: '🐟',
+      nameKey: 'meal.fish_couscous',
+      ingredients: [
+        IngredientPortion('fish', 190, PortionUnit.g),
+        IngredientPortion('couscous', 70, PortionUnit.g),
+        IngredientPortion('zucchini', 100, PortionUnit.g),
+        IngredientPortion('tomatoes', 80, PortionUnit.g),
+      ],
+      nutrition: NutritionFacts(kcal: 500, proteinG: 40, fatG: 10, carbsG: 60),
+    ),
   ];
 
   static const dinners = <MealOption>[
@@ -664,6 +755,58 @@ class MealCatalog {
       ],
       nutrition: NutritionFacts(kcal: 380, proteinG: 18, fatG: 14, carbsG: 46),
     ),
+    MealOption(
+      id: 'pork_veg',
+      slot: MealSlot.dinner,
+      emoji: '🥗',
+      nameKey: 'meal.pork_veg',
+      ingredients: [
+        IngredientPortion('pork', 150, PortionUnit.g),
+        IngredientPortion('zucchini', 120, PortionUnit.g),
+        IngredientPortion('bell_pepper', 100, PortionUnit.g),
+        IngredientPortion('onion', 40, PortionUnit.g),
+      ],
+      nutrition: NutritionFacts(kcal: 470, proteinG: 36, fatG: 28, carbsG: 16),
+    ),
+    MealOption(
+      id: 'chicken_beans',
+      slot: MealSlot.dinner,
+      emoji: '🍗',
+      nameKey: 'meal.chicken_beans',
+      ingredients: [
+        IngredientPortion('chicken', 160, PortionUnit.g),
+        IngredientPortion('beans', 100, PortionUnit.g),
+        IngredientPortion('tomatoes', 100, PortionUnit.g),
+        IngredientPortion('onion', 40, PortionUnit.g),
+      ],
+      nutrition: NutritionFacts(kcal: 450, proteinG: 44, fatG: 12, carbsG: 44),
+    ),
+    MealOption(
+      id: 'avocado_chicken_salad',
+      slot: MealSlot.dinner,
+      emoji: '🥗',
+      nameKey: 'meal.avocado_chicken_salad',
+      ingredients: [
+        IngredientPortion('chicken', 150, PortionUnit.g),
+        IngredientPortion('avocado', 80, PortionUnit.g),
+        IngredientPortion('cucumbers', 120, PortionUnit.g),
+        IngredientPortion('tomatoes', 100, PortionUnit.g),
+      ],
+      nutrition: NutritionFacts(kcal: 430, proteinG: 40, fatG: 22, carbsG: 16),
+    ),
+    MealOption(
+      id: 'corn_tuna_salad',
+      slot: MealSlot.dinner,
+      emoji: '🥗',
+      nameKey: 'meal.corn_tuna_salad',
+      ingredients: [
+        IngredientPortion('tuna', 185, PortionUnit.g),
+        IngredientPortion('corn', 80, PortionUnit.g),
+        IngredientPortion('cucumbers', 100, PortionUnit.g),
+        IngredientPortion('tomatoes', 80, PortionUnit.g),
+      ],
+      nutrition: NutritionFacts(kcal: 380, proteinG: 40, fatG: 6, carbsG: 40),
+    ),
   ];
 
   static const snacks = <MealOption>[
@@ -838,6 +981,50 @@ class MealCatalog {
         IngredientPortion('walnuts', 15, PortionUnit.g),
       ],
       nutrition: NutritionFacts(kcal: 180, proteinG: 3, fatG: 10, carbsG: 22),
+    ),
+    MealOption(
+      id: 'avocado_egg',
+      slot: MealSlot.snack,
+      emoji: '🥙',
+      nameKey: 'meal.avocado_egg',
+      ingredients: [
+        IngredientPortion('avocado', 80, PortionUnit.g),
+        IngredientPortion('eggs', 1, PortionUnit.pcs),
+      ],
+      nutrition: NutritionFacts(kcal: 220, proteinG: 8, fatG: 18, carbsG: 8),
+    ),
+    MealOption(
+      id: 'cottage_honey',
+      slot: MealSlot.snack,
+      emoji: '🥣',
+      nameKey: 'meal.cottage_honey',
+      ingredients: [
+        IngredientPortion('cottage_cheese', 150, PortionUnit.g),
+        IngredientPortion('honey', 15, PortionUnit.g),
+      ],
+      nutrition: NutritionFacts(kcal: 200, proteinG: 22, fatG: 6, carbsG: 18),
+    ),
+    MealOption(
+      id: 'yogurt_oats',
+      slot: MealSlot.snack,
+      emoji: '🥛',
+      nameKey: 'meal.yogurt_oats',
+      ingredients: [
+        IngredientPortion('yogurt', 200, PortionUnit.g),
+        IngredientPortion('oats', 30, PortionUnit.g),
+      ],
+      nutrition: NutritionFacts(kcal: 220, proteinG: 10, fatG: 5, carbsG: 34),
+    ),
+    MealOption(
+      id: 'pepper_cheese',
+      slot: MealSlot.snack,
+      emoji: '🥙',
+      nameKey: 'meal.pepper_cheese',
+      ingredients: [
+        IngredientPortion('bell_pepper', 100, PortionUnit.g),
+        IngredientPortion('cheese', 40, PortionUnit.g),
+      ],
+      nutrition: NutritionFacts(kcal: 200, proteinG: 12, fatG: 14, carbsG: 8),
     ),
   ];
 

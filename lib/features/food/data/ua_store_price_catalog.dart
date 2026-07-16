@@ -59,6 +59,11 @@ class UaStorePriceCatalog implements StorePriceSource {
     'chickpeas': (900, PortionUnit.g, [55, 60, 66]),
     'broccoli': (1000, PortionUnit.g, [95, 105, 115]),
     'spinach': (200, PortionUnit.g, [45, 50, 55]),
+    'pork': (1000, PortionUnit.g, [210, 225, 240]),
+    'beans': (900, PortionUnit.g, [52, 58, 64]),
+    'corn': (400, PortionUnit.g, [40, 45, 50]),
+    'couscous': (500, PortionUnit.g, [58, 64, 70]),
+    'avocado': (1000, PortionUnit.g, [180, 195, 210]),
   };
 
   @override
