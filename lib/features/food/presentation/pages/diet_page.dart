@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
+import 'package:lifeos/features/food/application/diet_planner.dart';
 import 'package:lifeos/features/food/domain/diet_catalog.dart';
 import 'package:lifeos/features/food/domain/entities/nutrition.dart';
 import 'package:lifeos/features/food/domain/recipe_catalog.dart';
@@ -1022,25 +1023,24 @@ class _WeekMenuSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              for (var i = 0; i < week.length; i++)
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: ChoiceChip(
-                    label: Text(_dayLabel(context, now, weekIdx, i)),
-                    selected: sel == i,
-                    onSelected: (_) => ref
-                        .read(selectedDietDayProvider.notifier)
-                        .state = i,
-                  ),
-                ),
-            ],
+        SizedBox(
+          height: 70,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: week.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 8),
+            itemBuilder: (c, i) => _DayCard(
+              date: now.add(Duration(days: weekIdx * 7 + i)),
+              isToday: weekIdx == 0 && i == 0,
+              selected: sel == i,
+              onTap: () =>
+                  ref.read(selectedDietDayProvider.notifier).state = i,
+            ),
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 12),
+        _DaySummaryCard(day: day),
+        const SizedBox(height: 12),
         for (final meal in day.meals) ...[
           _MealTile(meal: meal, today: isToday),
           const SizedBox(height: 8),
@@ -1048,15 +1048,167 @@ class _WeekMenuSection extends ConsumerWidget {
       ],
     );
   }
+}
 
-  String _dayLabel(BuildContext context, DateTime now, int week, int i) {
-    if (week == 0 && i == 0) return context.tr('diet.today');
-    final d = now.add(Duration(days: week * 7 + i));
-    return DateFormat.E(Localizations.localeOf(context).languageCode).format(d);
+/// Accent colour for a meal slot — used as a left bar on the meal card and the
+/// summary chips.
+Color slotColor(MealSlot slot) => switch (slot) {
+      MealSlot.breakfast => const Color(0xFFF5A623),
+      MealSlot.lunch => const Color(0xFF2E9E6B),
+      MealSlot.dinner => const Color(0xFF3BA7FF),
+      MealSlot.snack => const Color(0xFF8E5BFF),
+    };
+
+/// A compact date card in the day strip: weekday + date number, highlighted
+/// when selected, with a dot on today.
+class _DayCard extends StatelessWidget {
+  final DateTime date;
+  final bool isToday;
+  final bool selected;
+  final VoidCallback onTap;
+  const _DayCard({
+    required this.date,
+    required this.isToday,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final wd = DateFormat.E(Localizations.localeOf(context).languageCode)
+        .format(date);
+    final fg = selected ? Colors.white : scheme.onSurface;
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: onTap,
+      child: Container(
+        width: 54,
+        decoration: BoxDecoration(
+          color: selected
+              ? LifeColors.finance
+              : scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(wd.toUpperCase(),
+                style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: selected ? Colors.white70 : scheme.outline)),
+            const SizedBox(height: 2),
+            Text('${date.day}',
+                style: TextStyle(
+                    fontSize: 18, fontWeight: FontWeight.w800, color: fg)),
+            const SizedBox(height: 3),
+            Container(
+              width: 5,
+              height: 5,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isToday
+                    ? (selected ? Colors.white : LifeColors.finance)
+                    : Colors.transparent,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
-/// A compact meal row inside a day tab. Tapping opens the full detail popup.
+/// The selected day's calories vs target, macros and estimated cost.
+class _DaySummaryCard extends ConsumerWidget {
+  final DayPlan day;
+  const _DaySummaryCard({required this.day});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final a = ref.watch(assessmentProvider);
+    final target = (a?.targetKcal ?? day.total.kcal).clamp(1, 1 << 30);
+    final pct = (day.total.kcal / target).clamp(0.0, 1.0).toDouble();
+    final cost = ref.watch(mealCostCalculatorProvider);
+    var costMinor = 0;
+    for (final m in day.meals) {
+      final c = cost.cheapest(m);
+      if (c != null) costMinor += c.$2.minorUnits;
+    }
+    final t = day.total;
+    return SectionCard(
+      color: LifeColors.finance.withValues(alpha: 0.10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text('${t.kcal}',
+                  style: Theme.of(context)
+                      .textTheme
+                      .headlineMedium
+                      ?.copyWith(fontWeight: FontWeight.w800)),
+              const SizedBox(width: 4),
+              Text('/ $target ${context.tr('diet.kcal')}',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.outline,
+                      )),
+              const Spacer(),
+              if (costMinor > 0)
+                Text('≈ ${Money(costMinor, currency: 'UAH').format()}',
+                    style: const TextStyle(fontWeight: FontWeight.w700)),
+            ],
+          ),
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(5),
+            child: LinearProgressIndicator(
+              value: pct,
+              minHeight: 8,
+              color: LifeColors.finance,
+              backgroundColor: Theme.of(context)
+                  .colorScheme
+                  .surfaceContainerHighest,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              _macro(context, context.tr('profile.protein'), t.proteinG,
+                  const Color(0xFFE5484D)),
+              _macro(context, context.tr('profile.fat'), t.fatG,
+                  const Color(0xFFF5A623)),
+              _macro(context, context.tr('profile.carbs'), t.carbsG,
+                  const Color(0xFF3BA7FF)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _macro(BuildContext context, String label, int grams, Color color) =>
+      Expanded(
+        child: Row(
+          children: [
+            Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+            ),
+            const SizedBox(width: 6),
+            Text('$label ${grams}g',
+                style: Theme.of(context).textTheme.bodySmall),
+          ],
+        ),
+      );
+}
+
+/// A meal card inside a day tab: slot-coloured accent, dish, cuisine and a
+/// calorie badge. Tapping opens the full detail popup.
 class _MealTile extends ConsumerWidget {
   final MealOption meal;
   final bool today;
@@ -1065,36 +1217,97 @@ class _MealTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final eaten = today && ref.watch(eatenMealsProvider).contains(meal.id);
+    final accent = slotColor(meal.slot);
     return SectionCard(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: EdgeInsets.zero,
       onTap: () => _MealDetailSheet.show(context, meal, today: today),
-      child: Row(
-        children: [
-          Text(meal.emoji, style: const TextStyle(fontSize: 24)),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(context.tr('diet.slot.${meal.slot.name}'),
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.outline,
-                        )),
-                Text(context.tr(meal.nameKey),
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          decoration:
-                              eaten ? TextDecoration.lineThrough : null,
-                        )),
-              ],
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              width: 5,
+              decoration: BoxDecoration(
+                color: accent,
+                borderRadius: const BorderRadius.horizontal(
+                    left: Radius.circular(16)),
+              ),
             ),
-          ),
-          Text('${meal.nutrition.kcal} ${context.tr('diet.kcal')}',
-              style: Theme.of(context).textTheme.bodySmall),
-          const SizedBox(width: 6),
-          Icon(eaten ? Icons.check_circle : Icons.chevron_right,
-              size: 20,
-              color: eaten ? const Color(0xFF2E9E6B) : null),
-        ],
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 10, 14, 10),
+                child: Row(
+                  children: [
+                    Text(meal.emoji, style: const TextStyle(fontSize: 26)),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(context.tr('diet.slot.${meal.slot.name}'),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelSmall
+                                      ?.copyWith(
+                                        color: accent,
+                                        fontWeight: FontWeight.w700,
+                                      )),
+                              if (meal.region != null) ...[
+                                const SizedBox(width: 6),
+                                const Icon(Icons.public, size: 11),
+                                const SizedBox(width: 2),
+                                Text(context.tr(meal.region!),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelSmall
+                                        ?.copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .outline,
+                                        )),
+                              ],
+                            ],
+                          ),
+                          Text(context.tr(meal.nameKey),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    decoration: eaten
+                                        ? TextDecoration.lineThrough
+                                        : null,
+                                  )),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: accent.withValues(alpha: 0.14),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text('${meal.nutrition.kcal}',
+                          style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 13,
+                              color: accent)),
+                    ),
+                    const SizedBox(width: 6),
+                    Icon(eaten ? Icons.check_circle : Icons.chevron_right,
+                        size: 20,
+                        color: eaten ? const Color(0xFF2E9E6B) : null),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
