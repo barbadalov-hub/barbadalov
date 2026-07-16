@@ -3,6 +3,10 @@ import 'package:lifeos/features/profile/domain/fitness_calculator.dart';
 
 enum CheckupKind { doctor, lab }
 
+/// How far along the user is with a suggested check-up. Cycles todo → planned
+/// → done as they tap it; persisted so the list becomes a real health to-do.
+enum CheckupStatus { todo, planned, done }
+
 /// A suggested doctor visit or lab test, with the reason it's suggested.
 /// Educational prompts to discuss with a real doctor — never a diagnosis.
 class CheckupSuggestion {
@@ -12,6 +16,9 @@ class CheckupSuggestion {
   const CheckupSuggestion(this.kind, this.id, this.reasonKey);
 
   String get labelKey => 'checkup.${kind.name}.$id';
+
+  /// Stable key for tracking this suggestion's status across sessions.
+  String get trackKey => '${kind.name}.$id';
 }
 
 /// Suggests age/sex/body-appropriate check-ups and lab tests from the profile.
