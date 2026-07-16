@@ -5,7 +5,11 @@ import 'package:lifeos/features/food/data/ua_store_price_catalog.dart';
 import 'package:lifeos/features/food/domain/entities/nutrition.dart';
 import 'package:lifeos/features/food/domain/events/food_events.dart';
 import 'package:lifeos/features/food/domain/repositories/store_price_source.dart';
+import 'package:lifeos/features/food/domain/weekly_groceries.dart';
+import 'package:lifeos/features/money/domain/entities/category.dart';
+import 'package:lifeos/features/money/presentation/providers/money_providers.dart';
 import 'package:lifeos/features/profile/presentation/providers/profile_providers.dart';
+import 'package:lifeos/shared/models/money.dart';
 import 'package:lifeos/shared/providers/core_providers.dart';
 
 /// Grocery prices come from a curated, fully offline catalog of brand-free
@@ -17,6 +21,56 @@ final mealCostCalculatorProvider = Provider<MealCostCalculator>(
     (ref) => MealCostCalculator(ref.watch(storePriceSourceProvider)));
 
 final dietPlannerProvider = Provider<DietPlanner>((ref) => const DietPlanner());
+
+final weeklyGroceryPlannerProvider = Provider<WeeklyGroceryPlanner>(
+    (ref) => WeeklyGroceryPlanner(ref.watch(storePriceSourceProvider)));
+
+/// The user's **weekly** food budget for the meal planner (minor units, UAH),
+/// persisted. Separate from MoneyOS's monthly food-category budget.
+class WeeklyFoodBudgetController extends Notifier<int> {
+  static const _key = 'diet.foodBudgetWeekly';
+  static const _default = 150000; // 1500 UAH / week
+
+  @override
+  int build() {
+    final v = ref.watch(keyValueStoreProvider).getString(_key);
+    return v == null ? _default : (int.tryParse(v) ?? _default);
+  }
+
+  void set(int minorUnits) {
+    final v = minorUnits.clamp(0, 1 << 30);
+    ref.read(keyValueStoreProvider).setString(_key, '$v');
+    state = v;
+  }
+}
+
+final weeklyFoodBudgetProvider =
+    NotifierProvider<WeeklyFoodBudgetController, int>(
+        WeeklyFoodBudgetController.new);
+
+/// A consolidated shopping list + cost for the currently selected menu week.
+final weeklyGroceriesProvider = Provider<WeeklyGroceries?>((ref) {
+  final week = ref.watch(weekPlanProvider);
+  if (week == null || week.isEmpty) return null;
+  final meals = [for (final day in week) ...day.meals];
+  return ref.watch(weeklyGroceryPlannerProvider).build(meals);
+});
+
+/// Actual money spent on food (the Food expense category) over the last 7 days.
+final weeklyFoodSpendProvider = Provider<Money>((ref) {
+  final now = ref.watch(clockProvider).now();
+  final since = now.subtract(const Duration(days: 7));
+  final txs = ref.watch(transactionsProvider).valueOrNull ?? const [];
+  var minor = 0;
+  for (final t in txs) {
+    if (t.isExpense &&
+        t.categoryId == DefaultCategories.food.id &&
+        t.date.isAfter(since)) {
+      minor += t.amount.minorUnits;
+    }
+  }
+  return Money(minor, currency: 'UAH');
+});
 
 /// Bump to get a different (still target-fitting) menu for today.
 final dietShuffleProvider = StateProvider<int>((ref) => 0);

@@ -968,6 +968,10 @@ class MenuPage extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 12),
+            _GroceryBudgetEntry(
+              onTap: () => _GroceryBudgetSheet.show(context),
+            ),
+            const SizedBox(height: 12),
             const _WeekSelector(),
             const SizedBox(height: 12),
             const _WeekMenuSection(),
@@ -975,6 +979,248 @@ class MenuPage extends ConsumerWidget {
         ),
       ),
     );
+  }
+}
+
+/// Compact entry showing the week's food cost vs budget; opens the full
+/// budget + shopping-list sheet.
+class _GroceryBudgetEntry extends ConsumerWidget {
+  final VoidCallback onTap;
+  const _GroceryBudgetEntry({required this.onTap});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final groceries = ref.watch(weeklyGroceriesProvider);
+    final budget = ref.watch(weeklyFoodBudgetProvider);
+    if (groceries == null) return const SizedBox.shrink();
+    final total = groceries.total;
+    final over = total.minorUnits > budget;
+    final pct = budget <= 0
+        ? 1.0
+        : (total.minorUnits / budget).clamp(0.0, 1.0).toDouble();
+    return SectionCard(
+      onTap: onTap,
+      color: (over ? LifeColors.financeDanger : LifeColors.finance)
+          .withValues(alpha: 0.10),
+      child: Row(
+        children: [
+          const Text('🛒', style: TextStyle(fontSize: 26)),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(context.tr('grocery.title'),
+                    style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 4),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: pct,
+                    minHeight: 6,
+                    color: over ? LifeColors.financeDanger : LifeColors.finance,
+                    backgroundColor:
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${total.format()} / ${Money(budget, currency: 'UAH').format()}',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
+                ),
+              ],
+            ),
+          ),
+          const Icon(Icons.chevron_right),
+        ],
+      ),
+    );
+  }
+}
+
+/// Full food-budget + weekly shopping-list popup.
+class _GroceryBudgetSheet extends ConsumerWidget {
+  const _GroceryBudgetSheet();
+
+  static Future<void> show(BuildContext context) => showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        showDragHandle: true,
+        builder: (_) => const _GroceryBudgetSheet(),
+      );
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final groceries = ref.watch(weeklyGroceriesProvider);
+    final budget = ref.watch(weeklyFoodBudgetProvider);
+    final spent = ref.watch(weeklyFoodSpendProvider);
+    if (groceries == null) return const SizedBox.shrink();
+    final total = groceries.total;
+    final over = total.minorUnits > budget;
+
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.85,
+      minChildSize: 0.5,
+      maxChildSize: 0.95,
+      builder: (context, controller) => ListView(
+        controller: controller,
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(context.tr('grocery.title'),
+                    style: Theme.of(context).textTheme.headlineSmall),
+              ),
+              TextButton.icon(
+                onPressed: () => _editBudget(context, ref, budget),
+                icon: const Icon(Icons.edit, size: 18),
+                label: Text(context.tr('grocery.editBudget')),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          // Weekly cost vs budget.
+          SectionCard(
+            color: (over ? LifeColors.financeDanger : LifeColors.finance)
+                .withValues(alpha: 0.12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  over
+                      ? context.trp('grocery.over', {
+                          'amount': Money(total.minorUnits - budget,
+                                  currency: 'UAH')
+                              .format(),
+                        })
+                      : context.trp('grocery.within', {
+                          'amount': Money(budget - total.minorUnits,
+                                  currency: 'UAH')
+                              .format(),
+                        }),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: over ? LifeColors.financeDanger : LifeColors.finance,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  '${context.tr('grocery.weekCost')}: ${total.format()} · '
+                  '${context.tr('grocery.budget')}: '
+                  '${Money(budget, currency: 'UAH').format()}',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  context.trp('grocery.actual', {'amount': spent.format()}),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  context.trp('grocery.list', {'n': groceries.lines.length}),
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+              TextButton.icon(
+                onPressed: () {
+                  final add = ref.read(addShoppingItemProvider);
+                  for (final l in groceries.lines) {
+                    add.call(context.tr('prod.${l.productId}'));
+                  }
+                  ScaffoldMessenger.of(context)
+                    ..hideCurrentSnackBar()
+                    ..showSnackBar(SnackBar(
+                        content: Text(context.tr('food.addedToShopping'))));
+                },
+                icon: const Icon(Icons.add_shopping_cart, size: 18),
+                label: Text(context.tr('grocery.addAll')),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          for (final l in groceries.lines)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      '${context.tr('prod.${l.productId}')} · '
+                      '${l.packs}×',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ),
+                  Text('${context.tr('store.${l.store.id}')} · ',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.outline,
+                          )),
+                  Text(l.cost.format(),
+                      style: const TextStyle(fontWeight: FontWeight.w700)),
+                ],
+              ),
+            ),
+          const Divider(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(context.tr('grocery.total'),
+                  style: const TextStyle(fontWeight: FontWeight.w700)),
+              Text(total.format(),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w800, fontSize: 16)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _editBudget(
+      BuildContext context, WidgetRef ref, int current) async {
+    final controller =
+        TextEditingController(text: (current / 100).round().toString());
+    final result = await showDialog<int>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(ctx.tr('grocery.editBudget')),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            labelText: ctx.tr('grocery.weekBudgetLabel'),
+            suffixText: '₴',
+          ),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(ctx.tr('common.cancel'))),
+          FilledButton(
+            onPressed: () {
+              final major = int.tryParse(controller.text.trim()) ?? 0;
+              Navigator.pop(ctx, major * 100);
+            },
+            child: Text(ctx.tr('common.save')),
+          ),
+        ],
+      ),
+    );
+    if (result != null && result > 0) {
+      ref.read(weeklyFoodBudgetProvider.notifier).set(result);
+    }
   }
 }
 
