@@ -88,17 +88,24 @@ class DietPlanner {
 
   /// Fitness of one dish for a slot: nearness to the slot's calorie budget,
   /// a mild protein preference, and the chosen-diet bias. Lower is better.
+  ///
+  /// Preferences use **density** (grams per kcal), not absolute grams: because
+  /// the day is scaled to hit the calorie target, the day's total protein/carbs
+  /// end up proportional to the picked dishes' protein/carb *density*.
   double _slotScore(MealOption m, double budget, String? dietId) =>
       (m.nutrition.kcal - budget).abs() -
-      m.nutrition.proteinG * 0.4 +
+      _density(m.nutrition.proteinG, m.nutrition.kcal) * 300 +
       _dietTerm(dietId, m.nutrition);
+
+  double _density(int grams, int kcal) => kcal <= 0 ? 0.0 : grams / kcal;
 
   /// A soft bias toward dishes that suit the chosen diet. Positive numbers are
   /// penalties (worse fit). Timing-only diets (fasting) and generally balanced
   /// ones don't change dish selection.
   double _dietTerm(String? dietId, NutritionFacts t) => switch (dietId) {
-        'lowCarb' => t.carbsG * 2.0, // prefer lower-carb dishes
-        'highProtein' => -t.proteinG * 1.5, // reward more protein
+        'lowCarb' => _density(t.carbsG, t.kcal) * 600, // penalize carb density
+        'highProtein' =>
+          -_density(t.proteinG, t.kcal) * 600, // reward protein density
         _ => 0.0,
       };
 
