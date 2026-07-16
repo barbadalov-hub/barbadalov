@@ -54,6 +54,11 @@ class UaStorePriceCatalog implements StorePriceSource {
     'bell_pepper': (1000, PortionUnit.g, [72, 80, 88]),
     'zucchini': (1000, PortionUnit.g, [40, 45, 50]),
     'green_peas': (400, PortionUnit.g, [42, 47, 52]),
+    'salmon': (1000, PortionUnit.g, [420, 450, 480]),
+    'tuna': (185, PortionUnit.g, [65, 72, 80]),
+    'chickpeas': (900, PortionUnit.g, [55, 60, 66]),
+    'broccoli': (1000, PortionUnit.g, [95, 105, 115]),
+    'spinach': (200, PortionUnit.g, [45, 50, 55]),
   };
 
   @override
