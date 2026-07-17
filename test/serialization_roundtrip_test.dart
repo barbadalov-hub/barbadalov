@@ -65,6 +65,20 @@ void main() {
     expect(FoodItem.fromJson(_trip(x.toJson())).toJson(), x.toJson());
   });
 
+  test('FoodItem (with productId) round-trips', () {
+    final x = FoodItem(
+      id: 'f2',
+      name: 'Bread',
+      emoji: '🍞',
+      addedAt: _d,
+      expiry: _d.add(const Duration(days: 5)),
+      productId: 'bread',
+    );
+    final back = FoodItem.fromJson(_trip(x.toJson()));
+    expect(back.productId, 'bread');
+    expect(back, x);
+  });
+
   test('ShoppingItem round-trips', () {
     const x = ShoppingItem(id: 's1', name: 'Eggs', checked: true);
     expect(ShoppingItem.fromJson(_trip(x.toJson())).toJson(), x.toJson());

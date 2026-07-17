@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
+import 'package:lifeos/features/food/domain/cook_from_pantry.dart';
 import 'package:lifeos/features/food/domain/entities/food_item.dart';
+import 'package:lifeos/features/food/domain/shelf_life_catalog.dart';
 import 'package:lifeos/features/food/presentation/providers/food_providers.dart';
 import 'package:lifeos/shared/models/money.dart';
 import 'package:lifeos/shared/providers/core_providers.dart';
@@ -58,26 +60,13 @@ class FoodPage extends ConsumerWidget {
             ),
           ],
           const SizedBox(height: 12),
+          const _CookFromPantryCard(),
+          const SizedBox(height: 12),
           _Header(
             title: context.tr('food.pantry'),
             onAdd: () => _addPantryDialog(context, ref),
           ),
-          _QuickAddRow(
-            items: const [
-              ('🥛', 'qa.milk', 5),
-              ('🥚', 'qa.eggs', 14),
-              ('🍞', 'qa.bread', 3),
-              ('🧀', 'qa.cheese', 10),
-              ('🍎', 'qa.apples', 12),
-              ('🍗', 'qa.chicken', 3),
-            ],
-            onPick: (emoji, name, days) => ref.read(addFoodItemProvider).call(
-                  name: name,
-                  emoji: emoji,
-                  expiry:
-                      ref.read(clockProvider).now().add(Duration(days: days!)),
-                ),
-          ),
+          const _KnownProductQuickAdd(),
           pantry.when(
             loading: () => const LinearProgressIndicator(),
             error: (e, _) => Text('$e'),
@@ -549,6 +538,154 @@ class _QuickAddRow extends StatelessWidget {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+/// Quick-add chips for common **known** products: one tap adds them to the
+/// pantry with a category emoji, a catalog product id (so recipes can match),
+/// and an auto-filled expiry from the product's typical shelf life.
+class _KnownProductQuickAdd extends ConsumerWidget {
+  const _KnownProductQuickAdd();
+
+  static const _ids = [
+    'bread', 'milk', 'eggs', 'cheese', 'chicken', 'apple', //
+    'tomatoes', 'rice', 'potatoes', 'banana',
+  ];
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return SizedBox(
+      height: 40,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: [
+          for (final id in _ids)
+            if (knownProduct(id) case final p?)
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: ActionChip(
+                  avatar: Text(p.emoji),
+                  label: Text(context.tr(p.nameKey)),
+                  onPressed: () => ref.read(addFoodItemProvider).call(
+                        name: context.tr(p.nameKey),
+                        emoji: p.emoji,
+                        productId: p.id,
+                        expiry: ref.read(clockProvider).now().add(
+                              Duration(days: p.shelfLifeDays),
+                            ),
+                      ),
+                ),
+              ),
+        ],
+      ),
+    );
+  }
+}
+
+/// "Cook from your pantry": balanced meals you can make from what you've got,
+/// soon-to-expire items surfaced first so food doesn't go to waste.
+class _CookFromPantryCard extends ConsumerWidget {
+  const _CookFromPantryCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final meals = ref.watch(cookFromPantryProvider);
+    if (meals.isEmpty) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 12),
+        Text('🍲 ${context.tr('cook.title')}',
+            style: Theme.of(context).textTheme.titleLarge),
+        Text(context.tr('cook.sub'),
+            style: Theme.of(context)
+                .textTheme
+                .bodySmall
+                ?.copyWith(color: Theme.of(context).colorScheme.outline)),
+        const SizedBox(height: 8),
+        for (final pm in meals.take(4)) _CookTile(pm: pm),
+      ],
+    );
+  }
+}
+
+class _CookTile extends ConsumerWidget {
+  final PantryMeal pm;
+  const _CookTile({required this.pm});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final missingNames =
+        pm.missingProductIds.map((id) => context.tr('prod.$id')).join(', ');
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: SectionCard(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(pm.meal.emoji, style: const TextStyle(fontSize: 22)),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(context.tr(pm.meal.nameKey),
+                            style: const TextStyle(fontWeight: FontWeight.w700)),
+                      ),
+                      if (pm.usesExpiring) ...[
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: LifeColors.financeDanger.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(context.tr('cook.useUp'),
+                              style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: LifeColors.financeDanger)),
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    context.trp(
+                        'cook.have', {'matched': pm.matched, 'total': pm.total}),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: LifeColors.finance, fontWeight: FontWeight.w600),
+                  ),
+                  if (pm.missingProductIds.isNotEmpty)
+                    Text(context.trp('cook.missing', {'items': missingNames}),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.outline)),
+                ],
+              ),
+            ),
+            if (pm.missingProductIds.isNotEmpty)
+              IconButton(
+                tooltip: context.tr('cook.addMissing'),
+                icon: const Icon(Icons.add_shopping_cart, size: 20),
+                onPressed: () {
+                  final add = ref.read(addShoppingItemProvider);
+                  for (final id in pm.missingProductIds) {
+                    add.call(context.tr('prod.$id'));
+                  }
+                  ScaffoldMessenger.of(context)
+                    ..hideCurrentSnackBar()
+                    ..showSnackBar(SnackBar(
+                        content: Text(context.tr('food.addedToShopping'))));
+                },
+              ),
+          ],
+        ),
       ),
     );
   }

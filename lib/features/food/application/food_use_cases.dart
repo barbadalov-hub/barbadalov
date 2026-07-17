@@ -28,6 +28,7 @@ class AddFoodItem {
     String emoji = '🍎',
     int quantity = 1,
     DateTime? expiry,
+    String? productId,
     String userId = 'local',
   }) {
     if (name.trim().isEmpty) {
@@ -39,6 +40,7 @@ class AddFoodItem {
       emoji: emoji,
       quantity: quantity,
       expiry: expiry,
+      productId: productId,
       addedAt: _clock.now(),
     );
     _repository.addFoodItem(item);
