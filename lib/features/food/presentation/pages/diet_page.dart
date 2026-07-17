@@ -1223,6 +1223,7 @@ class _GroceryBudgetSheet extends ConsumerWidget {
     final groceries = ref.watch(weeklyGroceriesProvider);
     final budget = ref.watch(weeklyFoodBudgetProvider);
     final spent = ref.watch(weeklyFoodSpendProvider);
+    final checked = ref.watch(groceryCheckProvider);
     if (groceries == null) return const SizedBox.shrink();
     final total = groceries.total;
     final over = total.minorUnits > budget;
@@ -1296,46 +1297,77 @@ class _GroceryBudgetSheet extends ConsumerWidget {
             children: [
               Expanded(
                 child: Text(
-                  context.trp('grocery.list', {'n': groceries.lines.length}),
+                  '${context.trp('grocery.list', {'n': groceries.lines.length})}'
+                  ' · ${context.trp('grocery.bought', {'done': checked.where((id) => groceries.lines.any((l) => l.productId == id)).length, 'total': groceries.lines.length})}',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
-              TextButton.icon(
-                onPressed: () {
-                  final add = ref.read(addShoppingItemProvider);
-                  for (final l in groceries.lines) {
-                    add.call(context.tr('prod.${l.productId}'));
-                  }
-                  ScaffoldMessenger.of(context)
-                    ..hideCurrentSnackBar()
-                    ..showSnackBar(SnackBar(
-                        content: Text(context.tr('food.addedToShopping'))));
-                },
-                icon: const Icon(Icons.add_shopping_cart, size: 18),
-                label: Text(context.tr('grocery.addAll')),
-              ),
+              if (checked.isNotEmpty)
+                TextButton(
+                  onPressed: () => ref.read(groceryCheckProvider.notifier).clear(),
+                  child: Text(context.tr('grocery.clearChecks')),
+                ),
             ],
+          ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              onPressed: () {
+                final add = ref.read(addShoppingItemProvider);
+                for (final l in groceries.lines) {
+                  add.call(context.tr('prod.${l.productId}'));
+                }
+                ScaffoldMessenger.of(context)
+                  ..hideCurrentSnackBar()
+                  ..showSnackBar(SnackBar(
+                      content: Text(context.tr('food.addedToShopping'))));
+              },
+              icon: const Icon(Icons.add_shopping_cart, size: 18),
+              label: Text(context.tr('grocery.addAll')),
+            ),
           ),
           const SizedBox(height: 4),
           for (final l in groceries.lines)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      '${context.tr('prod.${l.productId}')} · '
-                      '${l.packs}×',
-                      style: Theme.of(context).textTheme.bodyMedium,
+            InkWell(
+              onTap: () =>
+                  ref.read(groceryCheckProvider.notifier).toggle(l.productId),
+              borderRadius: BorderRadius.circular(8),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    Icon(
+                      checked.contains(l.productId)
+                          ? Icons.check_circle
+                          : Icons.radio_button_unchecked,
+                      size: 20,
+                      color: checked.contains(l.productId)
+                          ? LifeColors.finance
+                          : Theme.of(context).colorScheme.outline,
                     ),
-                  ),
-                  Text('${context.tr('store.${l.store.id}')} · ',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.outline,
-                          )),
-                  Text(l.cost.format(),
-                      style: const TextStyle(fontWeight: FontWeight.w700)),
-                ],
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        '${context.tr('prod.${l.productId}')} · '
+                        '${l.packs}×',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              decoration: checked.contains(l.productId)
+                                  ? TextDecoration.lineThrough
+                                  : null,
+                              color: checked.contains(l.productId)
+                                  ? Theme.of(context).colorScheme.outline
+                                  : null,
+                            ),
+                      ),
+                    ),
+                    Text('${context.tr('store.${l.store.id}')} · ',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context).colorScheme.outline,
+                            )),
+                    Text(l.cost.format(),
+                        style: const TextStyle(fontWeight: FontWeight.w700)),
+                  ],
+                ),
               ),
             ),
           const Divider(height: 24),
