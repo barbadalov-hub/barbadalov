@@ -9,6 +9,7 @@ import 'package:lifeos/features/home/presentation/providers/today_providers.dart
 import 'package:lifeos/features/insights/presentation/providers/insights_providers.dart';
 import 'package:lifeos/features/mind/presentation/providers/mood_providers.dart';
 import 'package:lifeos/features/money/presentation/providers/money_providers.dart';
+import 'package:lifeos/features/profile/domain/checkup_advisor.dart';
 import 'package:lifeos/features/profile/presentation/providers/profile_providers.dart';
 import 'package:lifeos/features/reports/presentation/providers/report_providers.dart';
 import 'package:lifeos/shared/models/money.dart';
@@ -58,6 +59,17 @@ final coachContextProvider = Provider<CoachContext>((ref) {
     }
   }
 
+  // Check-up advisor: outstanding doctor visits / lab tests from the profile.
+  final checkups = (profile != null && assessment != null)
+      ? suggestCheckups(profile, assessment)
+      : const <CheckupSuggestion>[];
+  final checkupTracker = ref.watch(checkupTrackerProvider);
+  final pendingCheckups = checkups
+      .where((s) => checkupTracker[s.trackKey] != CheckupStatus.done)
+      .toList();
+  final checkupTopLabel =
+      pendingCheckups.isEmpty ? '' : t.tr(pendingCheckups.first.labelKey);
+
   return CoachContext(
     name: profile?.name ?? '',
     lifeScore: score.total,
@@ -87,6 +99,9 @@ final coachContextProvider = Provider<CoachContext>((ref) {
     kcalEaten: eaten.kcal,
     weightStr: weightStr,
     weightDeltaKg: weightDelta,
+    checkupPending: pendingCheckups.length,
+    checkupTotal: checkups.length,
+    checkupTopLabel: checkupTopLabel,
   );
 });
 

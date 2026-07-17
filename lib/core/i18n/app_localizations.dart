@@ -1951,6 +1951,7 @@ const Map<String, Map<String, String>> _values = {
   'coach.chip.weight': {'en': 'How\'s my weight?', 'ru': 'Как мой вес?', 'uk': 'Як моя вага?'},
   'coach.chip.workout': {'en': 'Should I train today?', 'ru': 'Тренироваться сегодня?', 'uk': 'Тренуватися сьогодні?'},
   'coach.chip.tasks': {'en': 'What should I focus on?', 'ru': 'Чем мне заняться?', 'uk': 'Чим мені зайнятися?'},
+  'coach.chip.checkup': {'en': 'Any check-ups due?', 'ru': 'Какие анализы сдать?', 'uk': 'Які аналізи здати?'},
   'coach.reply.greeting': {
     'en': 'Hi {name}! I\'m your AI coach. Ask me about finances, sleep, habits or mood — or tap a suggestion below.',
     'ru': 'Привет, {name}! Я твой AI-коуч. Спроси меня о финансах, сне, привычках или настроении — или выбери подсказку ниже.',
@@ -2134,6 +2135,9 @@ const Map<String, Map<String, String>> _values = {
   'coach.reply.tasksNone': {'en': 'Add a habit or two and I\'ll help you keep the streak going 📌', 'ru': 'Добавь пару привычек — и я помогу держать серию 📌', 'uk': 'Додай кілька звичок — і я допоможу тримати серію 📌'},
   'coach.reply.tasks': {'en': 'You\'ve done {done}/{total} habits today. Knock out the rest and call it a win ✅', 'ru': 'Сегодня выполнено {done}/{total} привычек. Закрой остальные — и день зачёт ✅', 'uk': 'Сьогодні виконано {done}/{total} звичок. Закрий решту — і день зараховано ✅'},
   'coach.reply.thanks': {'en': 'Anytime — I\'ve got your back 💜 Keep showing up.', 'ru': 'Всегда пожалуйста — я рядом 💜 Продолжай в том же духе.', 'uk': 'Завжди будь ласка — я поруч 💜 Продовжуй у тому ж дусі.'},
+  'coach.reply.checkupNone': {'en': 'Fill in your profile (age, height, weight) and I\'ll suggest check-ups worth asking your doctor about 🩺', 'ru': 'Заполни профиль (возраст, рост, вес) — и я подскажу, какие анализы и обследования стоит обсудить с врачом 🩺', 'uk': 'Заповни профіль (вік, зріст, вагу) — і я підкажу, які аналізи й обстеження варто обговорити з лікарем 🩺'},
+  'coach.reply.checkupClear': {'en': 'You\'ve marked every suggested check-up done — nicely on top of your health ✅', 'ru': 'Ты отметил все рекомендованные проверки как сделанные — здоровье под контролем ✅', 'uk': 'Ти позначив усі рекомендовані перевірки як зроблені — здоров’я під контролем ✅'},
+  'coach.reply.checkup': {'en': 'You have {n} check-up(s) still open — start with {first}. It\'s in your profile as a checklist 🩺', 'ru': 'У тебя ещё {n} незакрытых проверок — начни с «{first}». Это в профиле в виде чек-листа 🩺', 'uk': 'У тебе ще {n} незакритих перевірок — почни з «{first}». Це в профілі у вигляді чек-листа 🩺'},
 
   // --- Achievements wall --------------------------------------------------
   'ach.title': {'en': 'Achievements', 'ru': 'Достижения', 'uk': 'Досягнення'},

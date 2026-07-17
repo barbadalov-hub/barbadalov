@@ -26,6 +26,13 @@ void main() {
       expect(engine.classify('как мои привычки'), CoachIntent.habits);
       expect(engine.classify('как мои цели'), CoachIntent.goals);
     });
+
+    test('maps check-up questions', () {
+      expect(engine.classify('какие анализы сдать'), CoachIntent.checkup);
+      expect(engine.classify('к какому врачу сходить'), CoachIntent.checkup);
+      expect(engine.classify('what check-ups are due'), CoachIntent.checkup);
+      expect(engine.classify('які аналізи здати'), CoachIntent.checkup);
+    });
   });
 
   group('reply', () {
@@ -252,6 +259,29 @@ void main() {
           'coach.reply.tasks');
       expect(engine.reply(CoachIntent.thanks, const CoachContext()).messageKey,
           'coach.reply.thanks');
+    });
+
+    test('checkup reply reflects how many are outstanding', () {
+      // No profile / nothing suggested yet.
+      expect(engine.reply(CoachIntent.checkup, const CoachContext()).messageKey,
+          'coach.reply.checkupNone');
+      // Everything suggested is already done.
+      expect(
+          engine
+              .reply(CoachIntent.checkup,
+                  const CoachContext(checkupTotal: 3, checkupPending: 0))
+              .messageKey,
+          'coach.reply.checkupClear');
+      // Some still open — names the first and counts the rest.
+      final r = engine.reply(
+          CoachIntent.checkup,
+          const CoachContext(
+              checkupTotal: 3,
+              checkupPending: 2,
+              checkupTopLabel: 'Therapist / GP'));
+      expect(r.messageKey, 'coach.reply.checkup');
+      expect(r.params['n'], 2);
+      expect(r.params['first'], 'Therapist / GP');
     });
   });
 }

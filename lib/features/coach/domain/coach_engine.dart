@@ -18,6 +18,7 @@ enum CoachIntent {
   weight,
   workout,
   tasks,
+  checkup,
   thanks,
   unknown,
 }
@@ -64,6 +65,13 @@ class CoachContext {
   /// days you sleep more"), or '' when there's no strong correlation yet.
   final String insightSentence;
 
+  /// Check-up advisor: how many suggested doctor visits / lab tests are still
+  /// outstanding, the total suggested, and a pre-localized label for the first
+  /// outstanding one ('' when nothing is pending or no profile yet).
+  final int checkupPending;
+  final int checkupTotal;
+  final String checkupTopLabel;
+
   const CoachContext({
     this.name = '',
     this.lifeScore = 50,
@@ -93,6 +101,9 @@ class CoachContext {
     this.kcalEaten = 0,
     this.weightStr = '',
     this.weightDeltaKg = 0,
+    this.checkupPending = 0,
+    this.checkupTotal = 0,
+    this.checkupTopLabel = '',
   });
 }
 
@@ -124,6 +135,7 @@ class CoachEngine {
     CoachIntent.habits,
     CoachIntent.tasks,
     CoachIntent.goals,
+    CoachIntent.checkup,
     CoachIntent.money,
     CoachIntent.insight,
     CoachIntent.motivate,
@@ -163,6 +175,7 @@ class CoachEngine {
     CoachIntent.weight: ['weight', 'вес', 'вага', 'похуд', 'схуд', 'кг', 'kg', 'pounds', 'жир', 'lose', 'сброс'],
     CoachIntent.workout: ['workout', 'train', 'трениров', 'трену', 'упражн', 'вправ', 'exercise', 'gym', 'зал', 'качал', 'фитнес', 'фітнес', 'спорт'],
     CoachIntent.tasks: ['task', 'задач', 'todo', 'to do', 'продуктивн', 'productiv', 'справ', 'встиг', 'план на день', 'plan my day'],
+    CoachIntent.checkup: ['анализ', 'аналіз', 'врач', 'лікар', 'доктор', 'обслед', 'обстеж', 'чек-ап', 'чекап', 'check-up', 'checkup', 'blood test', 'lab test', 'diagnos', 'диспансер', 'сдать', 'здав', 'кровь', 'кров'],
     CoachIntent.thanks: ['thank', 'thx', 'спасиб', 'дякую', 'дяку', 'благодар', 'вдячн'],
     CoachIntent.greeting: ['hello', 'привет', 'прив', 'здравств', 'вітаю', 'добрый', 'доброго', 'hi'],
   };
@@ -182,6 +195,7 @@ class CoachEngine {
     CoachIntent.water,
     CoachIntent.habits,
     CoachIntent.tasks,
+    CoachIntent.checkup,
     CoachIntent.goals,
     CoachIntent.insight,
     CoachIntent.money,
@@ -336,6 +350,18 @@ class CoachEngine {
             ? const CoachReply('coach.reply.tasksNone')
             : CoachReply('coach.reply.tasks',
                 {'done': c.habitsDone, 'total': c.habitsTotal});
+
+      case CoachIntent.checkup:
+        if (c.checkupTotal == 0) {
+          return const CoachReply('coach.reply.checkupNone');
+        }
+        if (c.checkupPending == 0) {
+          return const CoachReply('coach.reply.checkupClear');
+        }
+        return CoachReply('coach.reply.checkup', {
+          'n': c.checkupPending,
+          'first': c.checkupTopLabel,
+        });
 
       case CoachIntent.thanks:
         return const CoachReply('coach.reply.thanks');
