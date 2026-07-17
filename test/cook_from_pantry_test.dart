@@ -76,6 +76,41 @@ void main() {
     }
   });
 
+  group('bestUsing', () {
+    test('picks the best-covered dish that uses the product', () {
+      final meals = [
+        _meal('toast', ['bread', 'butter', 'jam', 'cheese']), // 1/4, low
+        _meal('sandwich', ['bread', 'cheese']), // 2/2 uses bread
+        _meal('salad', ['tomatoes', 'cucumbers']), // doesn't use bread
+      ];
+      final best = engine.bestUsing(
+        productId: 'bread',
+        available: {'bread', 'cheese'},
+        meals: meals,
+      );
+      expect(best, isNotNull);
+      expect(best!.meal.id, 'sandwich');
+    });
+
+    test('null when no dish using the product meets coverage', () {
+      final best = engine.bestUsing(
+        productId: 'bread',
+        available: {'bread'},
+        meals: [_meal('feast', ['bread', 'a', 'b', 'c', 'd'])], // 1/5
+      );
+      expect(best, isNull);
+    });
+
+    test('null when nothing uses the product at all', () {
+      final best = engine.bestUsing(
+        productId: 'bread',
+        available: {'eggs'},
+        meals: [_meal('omelette', ['eggs'])],
+      );
+      expect(best, isNull);
+    });
+  });
+
   group('shelf-life catalog', () {
     test('known products carry a positive shelf life', () {
       for (final p in kKnownProducts) {

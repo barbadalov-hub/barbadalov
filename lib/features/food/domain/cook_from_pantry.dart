@@ -76,4 +76,44 @@ class CookFromPantry {
 
     return out.length > limit ? out.sublist(0, limit) : out;
   }
+
+  /// The single best dish to cook that uses [productId] (e.g. an item about to
+  /// expire), given the pantry [available]. Highest ingredient coverage wins;
+  /// null when no dish that uses it meets [minCoverage]. Used to turn an expiry
+  /// alert into an actionable "cook X tonight" nudge.
+  PantryMeal? bestUsing({
+    required String productId,
+    required Set<String> available,
+    required List<MealOption> meals,
+  }) {
+    PantryMeal? best;
+    for (final m in meals) {
+      if (!m.ingredients.any((i) => i.productId == productId)) continue;
+      final missing = <String>[];
+      var matched = 0;
+      for (final ing in m.ingredients) {
+        if (available.contains(ing.productId)) {
+          matched++;
+        } else {
+          missing.add(ing.productId);
+        }
+      }
+      final coverage = matched / m.ingredients.length;
+      if (coverage < minCoverage) continue;
+      final pm = PantryMeal(
+        meal: m,
+        matched: matched,
+        total: m.ingredients.length,
+        missingProductIds: missing,
+        usesExpiring: true,
+      );
+      if (best == null ||
+          pm.coverage > best.coverage ||
+          (pm.coverage == best.coverage &&
+              m.id.compareTo(best.meal.id) < 0)) {
+        best = pm;
+      }
+    }
+    return best;
+  }
 }
