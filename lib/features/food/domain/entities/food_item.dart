@@ -9,6 +9,11 @@ class FoodItem extends Equatable {
   final DateTime? expiry;
   final DateTime addedAt;
 
+  /// Catalog product id (e.g. 'bread') when this item was added from the known
+  /// products list — lets the "cook from your pantry" matcher line it up with
+  /// recipes. Null for free-text items.
+  final String? productId;
+
   const FoodItem({
     required this.id,
     required this.name,
@@ -16,6 +21,7 @@ class FoodItem extends Equatable {
     required this.addedAt,
     this.quantity = 1,
     this.expiry,
+    this.productId,
   });
 
   /// Days until expiry (negative if already expired); null when no expiry set.
@@ -44,6 +50,7 @@ class FoodItem extends Equatable {
         'quantity': quantity,
         'expiry': expiry?.toIso8601String(),
         'addedAt': addedAt.toIso8601String(),
+        if (productId != null) 'productId': productId,
       };
 
   factory FoodItem.fromJson(Map<String, dynamic> json) => FoodItem(
@@ -55,8 +62,10 @@ class FoodItem extends Equatable {
             ? null
             : DateTime.parse(json['expiry'] as String),
         addedAt: DateTime.parse(json['addedAt'] as String),
+        productId: json['productId'] as String?,
       );
 
   @override
-  List<Object?> get props => [id, name, emoji, quantity, expiry, addedAt];
+  List<Object?> get props =>
+      [id, name, emoji, quantity, expiry, addedAt, productId];
 }

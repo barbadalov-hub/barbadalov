@@ -413,6 +413,12 @@ const Map<String, Map<String, String>> _values = {
 
   // --- Food ---------------------------------------------------------------
   'food.pantry': {'en': 'Pantry', 'ru': 'Кладовая', 'uk': 'Комора'},
+  'cook.title': {'en': 'Cook from your pantry', 'ru': 'Приготовить из своих продуктов', 'uk': 'Приготувати зі своїх продуктів'},
+  'cook.sub': {'en': 'Balanced meals from what you already have — expiring items first.', 'ru': 'Сбалансированные блюда из того, что уже есть — сначала то, что скоро испортится.', 'uk': 'Збалансовані страви з того, що вже є — спершу те, що скоро зіпсується.'},
+  'cook.have': {'en': 'You have {matched} of {total} ingredients', 'ru': 'У вас есть {matched} из {total} ингредиентов', 'uk': 'У вас є {matched} з {total} інгредієнтів'},
+  'cook.missing': {'en': 'Need: {items}', 'ru': 'Нужно: {items}', 'uk': 'Потрібно: {items}'},
+  'cook.useUp': {'en': 'use it up', 'ru': 'на исходе', 'uk': 'на межі'},
+  'cook.addMissing': {'en': 'Add missing to shopping list', 'ru': 'Добавить недостающее в список покупок', 'uk': 'Додати те, чого бракує, до списку покупок'},
   'food.useNext': {'en': 'Use next: {name} · {days}d left', 'ru': 'Съесть первым: {name} · осталось {days}д', 'uk': 'Зʼїсти першим: {name} · лишилось {days}д'},
   'food.pantryEmpty': {'en': 'Pantry is empty.', 'ru': 'Кладовая пуста.', 'uk': 'Комора порожня.'},
   'food.shopping': {'en': 'Shopping list', 'ru': 'Список покупок', 'uk': 'Список покупок'},

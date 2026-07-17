@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lifeos/core/constants/app_constants.dart';
 import 'package:lifeos/features/food/application/food_use_cases.dart';
 import 'package:lifeos/features/food/data/food_repository_impl.dart';
+import 'package:lifeos/features/food/data/meal_catalog.dart';
+import 'package:lifeos/features/food/domain/cook_from_pantry.dart';
 import 'package:lifeos/features/food/domain/entities/food_item.dart';
 import 'package:lifeos/features/food/domain/entities/meal_plan.dart';
 import 'package:lifeos/features/food/domain/entities/recipe.dart';
@@ -124,6 +126,36 @@ final useNextProvider = Provider<FoodItem?>((ref) {
   final now = ref.watch(clockProvider).now();
   final items = ref.watch(pantryProvider).valueOrNull ?? const [];
   return PantryPlanner.useNext(items, now);
+});
+
+/// Catalog product ids the user currently has in the pantry (known products
+/// only — free-text items can't be matched to recipes).
+final pantryProductIdsProvider = Provider<Set<String>>((ref) {
+  final items = ref.watch(pantryProvider).valueOrNull ?? const [];
+  return {
+    for (final i in items)
+      if (i.productId != null) i.productId!,
+  };
+});
+
+/// Product ids that are expiring soon (or expired) — the ones to use up first.
+final expiringProductIdsProvider = Provider<Set<String>>((ref) {
+  return {
+    for (final i in ref.watch(expiringSoonProvider))
+      if (i.productId != null) i.productId!,
+  };
+});
+
+/// Meals you can cook from what's in the pantry right now, expiring items
+/// first. Empty until you add known products to the pantry.
+final cookFromPantryProvider = Provider<List<PantryMeal>>((ref) {
+  final available = ref.watch(pantryProductIdsProvider);
+  if (available.isEmpty) return const [];
+  return const CookFromPantry().suggest(
+    available: available,
+    expiring: ref.watch(expiringProductIdsProvider),
+    meals: MealCatalog.all,
+  );
 });
 
 final addFoodItemProvider = Provider<AddFoodItem>((ref) => AddFoodItem(
