@@ -3,6 +3,7 @@ import 'package:lifeos/core/constants/app_constants.dart';
 import 'package:lifeos/features/money/application/add_transaction.dart';
 import 'package:lifeos/features/money/application/compute_budget.dart';
 import 'package:lifeos/features/money/application/finance_tips.dart';
+import 'package:lifeos/features/money/application/month_comparison.dart';
 import 'package:lifeos/features/money/application/remove_transaction.dart';
 import 'package:lifeos/features/goals/presentation/providers/goal_providers.dart';
 import 'package:lifeos/features/money/application/spending_analyzer.dart';
@@ -112,62 +113,10 @@ final dailySpendingProvider = Provider<Map<int, int>>((ref) {
   return out;
 });
 
-/// This-month vs last-month spending, with the category that moved the most.
-class MonthComparison {
-  final int thisSpent;
-  final int lastSpent;
-  final String? topMoverCategory;
-  final int topMoverDelta; // signed (this − last)
-  const MonthComparison({
-    required this.thisSpent,
-    required this.lastSpent,
-    this.topMoverCategory,
-    this.topMoverDelta = 0,
-  });
-
-  bool get hasLast => lastSpent > 0;
-  int get delta => thisSpent - lastSpent;
-  int? get pctChange =>
-      lastSpent == 0 ? null : (delta * 100 / lastSpent).round();
-}
-
 final monthComparisonProvider = Provider<MonthComparison>((ref) {
   final now = ref.watch(clockProvider).now();
   final list = ref.watch(transactionsProvider).valueOrNull ?? const [];
-  final lastMonth = DateTime(now.year, now.month - 1);
-
-  var thisSpent = 0;
-  var lastSpent = 0;
-  final thisCat = <String, int>{};
-  final lastCat = <String, int>{};
-  for (final t in list) {
-    if (!t.isExpense) continue;
-    if (t.date.year == now.year && t.date.month == now.month) {
-      thisSpent += t.amount.minorUnits;
-      thisCat[t.categoryId] = (thisCat[t.categoryId] ?? 0) + t.amount.minorUnits;
-    } else if (t.date.year == lastMonth.year &&
-        t.date.month == lastMonth.month) {
-      lastSpent += t.amount.minorUnits;
-      lastCat[t.categoryId] = (lastCat[t.categoryId] ?? 0) + t.amount.minorUnits;
-    }
-  }
-
-  String? mover;
-  var moverDelta = 0;
-  for (final cat in {...thisCat.keys, ...lastCat.keys}) {
-    final d = (thisCat[cat] ?? 0) - (lastCat[cat] ?? 0);
-    if (d.abs() > moverDelta.abs()) {
-      moverDelta = d;
-      mover = cat;
-    }
-  }
-
-  return MonthComparison(
-    thisSpent: thisSpent,
-    lastSpent: lastSpent,
-    topMoverCategory: mover,
-    topMoverDelta: moverDelta,
-  );
+  return MonthComparison.compute(transactions: list, now: now);
 });
 
 /// "Smart finance": live pace/projection/cut/goal-impact observations.
