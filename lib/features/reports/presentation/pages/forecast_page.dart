@@ -27,7 +27,7 @@ class ForecastPage extends ConsumerStatefulWidget {
 }
 
 class _ForecastPageState extends ConsumerState<ForecastPage> {
-  int? _deficit; // kcal/day; null until seeded from the assessment
+  int? _kcalMagnitude; // daily kcal deficit OR surplus size; null until seeded
   double? _monthlySave; // major currency; null until seeded from the budget
 
   @override
@@ -60,16 +60,21 @@ class _ForecastPageState extends ConsumerState<ForecastPage> {
 
   Widget _body(BuildContext context, FitnessAssessment a, double currentKg,
       Budget budget, List<Goal> goals, DateTime now, String lang) {
-    final defaultDeficit = (a.tdee - a.targetKcal).clamp(0, 1500);
-    final deficit = _deficit ?? defaultDeficit;
     final net = budget.available.major;
     final monthlySave = _monthlySave ?? (net > 0 ? net : 0.0);
 
     final idealKg = a.idealWeightKg;
-    final in3mo = projectWeightKg(currentKg: currentKg, deficit: deficit, days: 90);
-    final daysToIdeal =
-        daysToWeight(currentKg: currentKg, targetKg: idealKg, deficit: deficit);
-    final idealDate = daysToIdeal == null
+    // Which way the ideal weight lies decides deficit (lose) vs surplus (gain).
+    final gaining = idealKg - currentKg > 0.5;
+    final magnitudeDefault = (a.tdee - a.targetKcal).abs().clamp(0, 1500);
+    final magnitude = _kcalMagnitude ?? magnitudeDefault;
+    final dailyDelta = gaining ? magnitude : -magnitude;
+
+    final in3mo =
+        projectWeightKg(currentKg: currentKg, dailyDelta: dailyDelta, days: 90);
+    final daysToIdeal = daysToWeight(
+        currentKg: currentKg, targetKg: idealKg, dailyDelta: dailyDelta);
+    final idealDate = (daysToIdeal == null || daysToIdeal == 0)
         ? null
         : DateFormat.yMMM(lang).format(now.add(Duration(days: daysToIdeal)));
 
@@ -105,27 +110,37 @@ class _ForecastPageState extends ConsumerState<ForecastPage> {
                     ?.copyWith(fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 6),
-              Text(
-                idealDate == null
-                    ? context.tr('forecast.weightStuck')
-                    : context.trp('forecast.weightReach',
-                        {'kg': kg(idealKg), 'date': idealDate}),
-                style: TextStyle(
-                    color: idealDate == null
-                        ? Theme.of(context).colorScheme.outline
-                        : LifeColors.finance,
-                    fontWeight: FontWeight.w600),
-              ),
+              Builder(builder: (context) {
+                final String text;
+                final Color color;
+                if (daysToIdeal == 0) {
+                  text = context.tr('forecast.weightAtIdeal');
+                  color = LifeColors.finance;
+                } else if (idealDate != null) {
+                  text = context.trp('forecast.weightReach',
+                      {'kg': kg(idealKg), 'date': idealDate});
+                  color = LifeColors.finance;
+                } else {
+                  text = context.tr(gaining
+                      ? 'forecast.weightStuckGain'
+                      : 'forecast.weightStuck');
+                  color = Theme.of(context).colorScheme.outline;
+                }
+                return Text(text,
+                    style: TextStyle(color: color, fontWeight: FontWeight.w600));
+              }),
               const SizedBox(height: 8),
-              Text(context.trp('forecast.deficit', {'n': deficit}),
+              Text(
+                  context.trp(gaining ? 'forecast.surplus' : 'forecast.deficit',
+                      {'n': magnitude}),
                   style: Theme.of(context).textTheme.bodySmall),
               Slider(
-                value: deficit.toDouble(),
+                value: magnitude.toDouble(),
                 min: 0,
                 max: 1000,
                 divisions: 20,
-                label: '$deficit',
-                onChanged: (v) => setState(() => _deficit = v.round()),
+                label: '$magnitude',
+                onChanged: (v) => setState(() => _kcalMagnitude = v.round()),
               ),
             ],
           ),

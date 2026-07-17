@@ -6,30 +6,33 @@ library;
 /// About 7700 kcal per kilogram of body weight.
 const double kcalPerKg = 7700;
 
-/// Projected weight after [days] at a daily calorie [deficit] (kcal below
-/// maintenance; a deficit lowers weight). Clamped to a sane human range.
+/// Projected weight after [days] given a daily calorie [dailyDelta]:
+/// negative = deficit (weight falls), positive = surplus (weight rises).
+/// Clamped to a sane human range.
 double projectWeightKg({
   required double currentKg,
-  required int deficit,
+  required int dailyDelta,
   required int days,
 }) {
-  final kg = currentKg - (deficit * days) / kcalPerKg;
+  final kg = currentKg + (dailyDelta * days) / kcalPerKg;
   return kg.clamp(35.0, 400.0);
 }
 
-/// Days to reach [targetKg] from [currentKg] at a daily [deficit]. Null when
-/// the pace can't get there (no deficit, or target is above current weight
-/// while in a deficit).
+/// Days to move from [currentKg] to [targetKg] at a daily calorie [dailyDelta]
+/// (negative = deficit → lose, positive = surplus → gain). Returns 0 when
+/// already there, and null when the pace moves the wrong way (or not at all)
+/// relative to the target.
 int? daysToWeight({
   required double currentKg,
   required double targetKg,
-  required int deficit,
+  required int dailyDelta,
 }) {
-  if (deficit <= 0) return null;
-  final toLose = currentKg - targetKg; // positive when we need to lose
-  if (toLose <= 0) return null;
-  final perDay = deficit / kcalPerKg;
-  return (toLose / perDay).ceil();
+  final diff = targetKg - currentKg; // + need to gain, − need to lose
+  if (diff.abs() < 0.05) return 0;
+  if (dailyDelta == 0) return null;
+  final perDay = dailyDelta / kcalPerKg; // + gains weight, − loses weight
+  if (diff.isNegative != perDay.isNegative) return null; // wrong direction
+  return (diff / perDay).ceil();
 }
 
 /// Savings accumulated after [months] at a [monthlyNet] rate.
