@@ -9,7 +9,13 @@ import 'package:lifeos/features/health/presentation/pages/workouts_page.dart';
 import 'package:lifeos/features/health/domain/entities/health_day.dart';
 import 'package:lifeos/features/health/presentation/widgets/drink_sheet.dart';
 import 'package:lifeos/features/health/presentation/widgets/health_charts.dart';
+import 'package:lifeos/features/food/presentation/pages/diet_page.dart';
+import 'package:lifeos/features/food/presentation/pages/food_page.dart';
+import 'package:lifeos/features/mind/presentation/pages/mind_page.dart';
+import 'package:lifeos/features/mind/presentation/pages/mood_journal_page.dart';
+import 'package:lifeos/features/profile/domain/entities/user_profile.dart';
 import 'package:lifeos/features/profile/presentation/providers/profile_providers.dart';
+import 'package:lifeos/features/wellness/presentation/pages/wellness_page.dart';
 import 'package:lifeos/shared/theme/app_theme.dart';
 import 'package:lifeos/shared/widgets/animated_backdrop.dart';
 import 'package:lifeos/shared/widgets/motion.dart';
@@ -194,6 +200,8 @@ class HealthPage extends ConsumerWidget {
                 ],
               ),
             ),
+            const SizedBox(height: 20),
+            const _HealthHub(),
             const SizedBox(height: 12),
             Text(
               context.tr('health.deviceHint'),
@@ -307,6 +315,84 @@ class HealthPage extends ConsumerWidget {
 
 /// Compact entry card that opens a grouped detail popup, keeping the main
 /// Health screen short (same pattern as Money's analytics entry).
+/// A compact grid that gathers every health-related area into one place, so the
+/// Health tab is the single hub for diet, food, mind, mood and wellness instead
+/// of them being scattered across the More menu.
+class _HealthHub extends ConsumerWidget {
+  const _HealthHub();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final sex = ref.watch(profileProvider)?.sex;
+    final wellnessEmoji = sex == Sex.female ? '🌸' : '⚡';
+    final wellnessTitle = context.tr(sex == null
+        ? 'wellness.title'
+        : sex == Sex.female
+            ? 'cycle.title'
+            : 'vitality.title');
+
+    void open(Widget page) => Navigator.of(context)
+        .push(MaterialPageRoute<void>(builder: (_) => page));
+
+    final tiles = <Widget>[
+      _HubTile('🥦', context.tr('diet.title'), () => open(const DietPage())),
+      _HubTile('🍎', context.tr('more.food'), () => open(const FoodPage())),
+      _HubTile('🧠', context.tr('mind.title'), () => open(const MindPage())),
+      _HubTile('📔', context.tr('mood.title'),
+          () => open(const MoodJournalPage())),
+      _HubTile(wellnessEmoji, wellnessTitle, () => open(const WellnessPage())),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(context.tr('health.hubTitle'),
+            style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+        GridView.count(
+          crossAxisCount: 2,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: 8,
+          crossAxisSpacing: 8,
+          childAspectRatio: 3.2,
+          children: tiles,
+        ),
+      ],
+    );
+  }
+}
+
+class _HubTile extends StatelessWidget {
+  final String emoji;
+  final String label;
+  final VoidCallback onTap;
+  const _HubTile(this.emoji, this.label, this.onTap);
+
+  @override
+  Widget build(BuildContext context) {
+    return SectionCard(
+      onTap: onTap,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      child: Row(
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 20)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(label,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.copyWith(fontWeight: FontWeight.w600)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _HealthEntry extends StatelessWidget {
   final String emoji;
   final String title;
