@@ -125,6 +125,55 @@ final selectedDietDayProvider = StateProvider<int>((ref) => 0);
 /// Which upcoming week the menu is showing (0 = this week … 3).
 final selectedMenuWeekProvider = StateProvider<int>((ref) => 0);
 
+/// A token identifying the current shopping list (calendar week + selected week
+/// tab + diet). When it changes, checked-off items reset — you're shopping for
+/// a different list.
+final groceryCheckTokenProvider = Provider<String>((ref) {
+  final now = ref.watch(clockProvider).now();
+  // Monday of the current calendar week — a proper week boundary, so checks
+  // don't reset mid-week.
+  final monday = DateTime(now.year, now.month, now.day)
+      .subtract(Duration(days: now.weekday - 1));
+  final tab = ref.watch(selectedMenuWeekProvider);
+  final diet = ref.watch(selectedDietProvider) ?? '';
+  return '${monday.year}-${monday.month}-${monday.day}-$tab-$diet';
+});
+
+/// Which grocery lines (by productId) the user has ticked off while shopping.
+/// Persisted, but scoped to [groceryCheckTokenProvider] so it clears each week.
+class GroceryCheckController extends Notifier<Set<String>> {
+  static const _key = 'grocery.checked';
+
+  @override
+  Set<String> build() {
+    final token = ref.watch(groceryCheckTokenProvider);
+    final raw = ref.watch(keyValueStoreProvider).getString(_key) ?? '';
+    final parts = raw.split('|');
+    if (parts.length != 2 || parts[0] != token) return <String>{};
+    return parts[1].split(',').where((s) => s.isNotEmpty).toSet();
+  }
+
+  void _persist(String token, Set<String> ids) =>
+      ref.read(keyValueStoreProvider).setString(_key, '$token|${ids.join(',')}');
+
+  void toggle(String productId) {
+    final token = ref.read(groceryCheckTokenProvider);
+    final next = {...state};
+    if (!next.add(productId)) next.remove(productId);
+    _persist(token, next);
+    state = next;
+  }
+
+  void clear() {
+    _persist(ref.read(groceryCheckTokenProvider), const {});
+    state = <String>{};
+  }
+}
+
+final groceryCheckProvider =
+    NotifierProvider<GroceryCheckController, Set<String>>(
+        GroceryCheckController.new);
+
 /// The diet the user picked from the catalog (id, e.g. 'lowCarb'), persisted.
 /// Empty string means "none / balanced". Biases the planner's dish choice.
 class SelectedDietController extends Notifier<String?> {

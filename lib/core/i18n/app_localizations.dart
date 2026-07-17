@@ -660,6 +660,8 @@ const Map<String, Map<String, String>> _values = {
   'grocery.budget': {'en': 'Budget', 'ru': 'Бюджет', 'uk': 'Бюджет'},
   'grocery.actual': {'en': 'Actually spent on food this week: {amount}', 'ru': 'Реально потрачено на еду за неделю: {amount}', 'uk': 'Реально витрачено на їжу за тиждень: {amount}'},
   'grocery.list': {'en': 'Shopping list ({n})', 'ru': 'Список покупок ({n})', 'uk': 'Список покупок ({n})'},
+  'grocery.bought': {'en': '{done}/{total} bought', 'ru': 'куплено {done}/{total}', 'uk': 'куплено {done}/{total}'},
+  'grocery.clearChecks': {'en': 'Reset', 'ru': 'Сбросить', 'uk': 'Скинути'},
   'grocery.addAll': {'en': 'Add all', 'ru': 'Добавить всё', 'uk': 'Додати все'},
   'grocery.total': {'en': 'Total', 'ru': 'Итого', 'uk': 'Разом'},
   'region.italy': {'en': 'Italy', 'ru': 'Италия', 'uk': 'Італія'},
