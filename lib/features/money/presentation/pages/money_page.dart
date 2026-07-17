@@ -36,57 +36,6 @@ class MoneyPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(context.tr('nav.money')),
-        actions: [
-          IconButton(
-            tooltip: context.tr('receipt.title'),
-            icon: const Icon(Icons.receipt_long),
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(builder: (_) => const ReceiptPage()),
-            ),
-          ),
-          PopupMenuButton<String>(
-            onSelected: (v) {
-              switch (v) {
-                case 'csv':
-                  _exportCsv(context, ref);
-                case 'limits':
-                  Navigator.of(context).push(MaterialPageRoute<void>(
-                      builder: (_) => const BudgetLimitsPage()));
-                case 'recurring':
-                  Navigator.of(context).push(MaterialPageRoute<void>(
-                      builder: (_) => const RecurringPage()));
-                case 'rules':
-                  Navigator.of(context).push(MaterialPageRoute<void>(
-                      builder: (_) => const CategoryRulesPage()));
-                case 'import':
-                  Navigator.of(context).push(MaterialPageRoute<void>(
-                      builder: (_) => const CsvImportPage()));
-              }
-            },
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 'limits',
-                child: Text('🎯 ${context.tr('limit.pageTitle')}'),
-              ),
-              PopupMenuItem(
-                value: 'recurring',
-                child: Text('🔁 ${context.tr('recurring.title')}'),
-              ),
-              PopupMenuItem(
-                value: 'rules',
-                child: Text('🏷️ ${context.tr('rules.title')}'),
-              ),
-              PopupMenuItem(
-                value: 'import',
-                child: Text('📥 ${context.tr('csv.title')}'),
-              ),
-              PopupMenuItem(
-                value: 'csv',
-                child: Text('📄 ${context.tr('money.exportCsv')}'),
-              ),
-            ],
-          ),
-        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'fab-money',
@@ -114,6 +63,8 @@ class MoneyPage extends ConsumerWidget {
               // The four charts (trend, categories, comparison, calendar) live
               // together in one popup so the main screen stays short.
               _AnalyticsEntry(onTap: () => _showAnalyticsSheet(context)),
+              const SizedBox(height: 12),
+              _ToolsEntry(onTap: () => _showToolsSheet(context, ref)),
               const SizedBox(height: 16),
               Text(context.tr('money.history'),
                   style: Theme.of(context).textTheme.titleMedium),
@@ -129,21 +80,22 @@ class MoneyPage extends ConsumerWidget {
     );
   }
 
-  Future<void> _exportCsv(BuildContext context, WidgetRef ref) async {
-    final list = ref.read(transactionsProvider).valueOrNull ?? const [];
-    if (list.isEmpty) return;
-    final csv = buildTransactionsCsv(list);
-    final stamp = DateTime.now().toIso8601String().split('T').first;
-    final downloaded = downloadTextFile('lifeos-transactions-$stamp.csv', csv);
-    if (!downloaded) await Clipboard.setData(ClipboardData(text: csv));
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(
-        content: Text(context.tr(
-            downloaded ? 'money.csvDownloaded' : 'money.csvCopied')),
-      ));
-  }
+}
+
+Future<void> _exportCsv(BuildContext context, WidgetRef ref) async {
+  final list = ref.read(transactionsProvider).valueOrNull ?? const [];
+  if (list.isEmpty) return;
+  final csv = buildTransactionsCsv(list);
+  final stamp = DateTime.now().toIso8601String().split('T').first;
+  final downloaded = downloadTextFile('lifeos-transactions-$stamp.csv', csv);
+  if (!downloaded) await Clipboard.setData(ClipboardData(text: csv));
+  if (!context.mounted) return;
+  ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(SnackBar(
+      content: Text(
+          context.tr(downloaded ? 'money.csvDownloaded' : 'money.csvCopied')),
+    ));
 }
 
 /// Compact entry that opens all four money charts in one popup, keeping the
@@ -210,6 +162,106 @@ void _showAnalyticsSheet(BuildContext context) {
           const _MonthComparisonCard(),
           const SizedBox(height: 12),
           const _SpendingCalendarCard(),
+        ],
+      ),
+    ),
+  );
+}
+
+class _ToolsEntry extends StatelessWidget {
+  final VoidCallback onTap;
+  const _ToolsEntry({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return SectionCard(
+      onTap: onTap,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: Row(
+        children: [
+          const Text('🧰', style: TextStyle(fontSize: 26)),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(context.tr('money.tools'),
+                    style: Theme.of(context).textTheme.titleMedium),
+                Text(
+                  context.tr('money.toolsSub'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
+                ),
+              ],
+            ),
+          ),
+          const Icon(Icons.chevron_right),
+        ],
+      ),
+    );
+  }
+}
+
+/// All the money tools (receipts, limits, recurring, rules, import/export)
+/// gathered into one sheet, so the main screen and app bar stay uncluttered.
+void _showToolsSheet(BuildContext context, WidgetRef ref) {
+  void go(Widget page) {
+    Navigator.of(context).pop();
+    Navigator.of(context)
+        .push(MaterialPageRoute<void>(builder: (_) => page));
+  }
+
+  showModalBottomSheet<void>(
+    context: context,
+    showDragHandle: true,
+    builder: (ctx) => SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(ctx.tr('money.tools'),
+                  style: Theme.of(ctx).textTheme.headlineSmall),
+            ),
+          ),
+          ListTile(
+            leading: const Text('🧾', style: TextStyle(fontSize: 22)),
+            title: Text(ctx.tr('receipt.title')),
+            onTap: () => go(const ReceiptPage()),
+          ),
+          ListTile(
+            leading: const Text('🎯', style: TextStyle(fontSize: 22)),
+            title: Text(ctx.tr('limit.pageTitle')),
+            onTap: () => go(const BudgetLimitsPage()),
+          ),
+          ListTile(
+            leading: const Text('🔁', style: TextStyle(fontSize: 22)),
+            title: Text(ctx.tr('recurring.title')),
+            onTap: () => go(const RecurringPage()),
+          ),
+          ListTile(
+            leading: const Text('🏷️', style: TextStyle(fontSize: 22)),
+            title: Text(ctx.tr('rules.title')),
+            onTap: () => go(const CategoryRulesPage()),
+          ),
+          ListTile(
+            leading: const Text('📥', style: TextStyle(fontSize: 22)),
+            title: Text(ctx.tr('csv.title')),
+            onTap: () => go(const CsvImportPage()),
+          ),
+          ListTile(
+            leading: const Text('📄', style: TextStyle(fontSize: 22)),
+            title: Text(ctx.tr('money.exportCsv')),
+            onTap: () {
+              Navigator.of(ctx).pop();
+              _exportCsv(context, ref);
+            },
+          ),
         ],
       ),
     ),
