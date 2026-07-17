@@ -175,11 +175,9 @@ class MorePage extends ConsumerWidget {
         page('👤', context.tr('profile.title'), const ProfilePage()),
         page(wellnessEmoji, wellnessTitle, const WellnessPage()),
       ]),
-      _MoreCat('🥗', context.tr('moreCat.food'), [
+      _MoreCat('🥗', context.tr('moreCat.body'), [
         page('🥦', context.tr('diet.title'), const DietPage()),
         page('🍎', context.tr('more.food'), const FoodPage()),
-      ]),
-      _MoreCat('🧠', context.tr('moreCat.mind'), [
         page('🧠', context.tr('mind.title'), const MindPage()),
         page('📔', context.tr('mood.title'), const MoodJournalPage()),
       ]),
