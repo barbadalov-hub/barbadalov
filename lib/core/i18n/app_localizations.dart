@@ -447,6 +447,7 @@ const Map<String, Map<String, String>> _values = {
   'food.expired': {'en': 'expired', 'ru': 'просрочено', 'uk': 'прострочено'},
   'food.expiry.title': {'en': 'Food expiring', 'ru': 'Скоро испортится', 'uk': 'Скоро зіпсується'},
   'food.expiry.soon': {'en': '{emoji} {name}: {n} day(s) left', 'ru': '{emoji} {name}: осталось {n} дн.', 'uk': '{emoji} {name}: залишилось {n} дн.'},
+  'food.expiry.soonCook': {'en': '{emoji} {name}: {n} day(s) left — cook {dish} to use it up', 'ru': '{emoji} {name}: осталось {n} дн. — приготовьте «{dish}», чтобы не пропало', 'uk': '{emoji} {name}: залишилось {n} дн. — приготуйте «{dish}», щоб не зіпсувалося'},
   'food.expiry.expired': {'en': '{emoji} {name} has expired — use or toss it', 'ru': '{emoji} {name}: срок годности истёк — используйте или выбросьте', 'uk': '{emoji} {name}: термін придатності минув — використайте або викиньте'},
   'food.today': {'en': 'today', 'ru': 'сегодня', 'uk': 'сьогодні'},
   'food.recipes': {'en': 'Recipes', 'ru': 'Рецепты', 'uk': 'Рецепти'},

@@ -1,7 +1,11 @@
 import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lifeos/core/i18n/app_localizations.dart';
+import 'package:lifeos/core/i18n/locale_controller.dart';
 import 'package:lifeos/core/services/key_value_store.dart';
+import 'package:lifeos/features/food/data/meal_catalog.dart';
+import 'package:lifeos/features/food/domain/cook_from_pantry.dart';
 import 'package:lifeos/features/food/domain/entities/food_item.dart';
 import 'package:lifeos/features/food/presentation/providers/food_providers.dart';
 import 'package:lifeos/features/notifications/domain/entities/app_notification.dart';
@@ -41,6 +45,10 @@ void _checkExpiry(Ref ref, List<FoodItem> items) {
   final alerted = _loadAlerted(store);
   final repo = ref.read(notificationRepositoryProvider);
 
+  final available = ref.read(pantryProductIdsProvider);
+  final lang = ref.read(localeProvider)?.languageCode ?? 'en';
+  final t = AppLocalizations(lang);
+
   var changed = false;
   for (final item in items) {
     final expired = item.isExpired(now);
@@ -48,12 +56,33 @@ void _checkExpiry(Ref ref, List<FoodItem> items) {
     if (alerted.contains(key)) continue;
 
     final days = item.daysUntilExpiry(now) ?? 0;
+
+    // For a still-good item, suggest a dish that uses it up before it spoils.
+    String? bodyKey;
+    final params = <String, Object>{
+      'emoji': item.emoji,
+      'name': item.name,
+      'n': days,
+    };
+    if (!expired && item.productId != null) {
+      final dish = const CookFromPantry().bestUsing(
+        productId: item.productId!,
+        available: available,
+        meals: MealCatalog.all,
+      );
+      if (dish != null) {
+        bodyKey = 'food.expiry.soonCook';
+        params['dish'] = t.tr(dish.meal.nameKey);
+      }
+    }
+    bodyKey ??= expired ? 'food.expiry.expired' : 'food.expiry.soon';
+
     repo.add(AppNotification(
       id: key,
       tier: expired ? NotificationTier.critical : NotificationTier.important,
       titleKey: 'food.expiry.title',
-      bodyKey: expired ? 'food.expiry.expired' : 'food.expiry.soon',
-      params: {'emoji': item.emoji, 'name': item.name, 'n': days},
+      bodyKey: bodyKey,
+      params: params,
       createdAt: now,
     ));
     alerted.add(key);
