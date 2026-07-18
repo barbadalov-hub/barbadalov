@@ -5,6 +5,7 @@ import 'package:lifeos/core/services/ocr_gateway.dart';
 import 'package:lifeos/features/food/domain/cook_from_pantry.dart';
 import 'package:lifeos/features/food/domain/entities/food_item.dart';
 import 'package:lifeos/features/food/domain/expiry_date_parser.dart';
+import 'package:lifeos/features/food/domain/pantry_week_planner.dart';
 import 'package:lifeos/features/food/domain/product_text_matcher.dart';
 import 'package:lifeos/features/food/domain/shelf_life_catalog.dart';
 import 'package:lifeos/features/food/presentation/providers/food_providers.dart';
@@ -744,7 +745,117 @@ class _CookFromPantryCard extends ConsumerWidget {
                 ?.copyWith(color: Theme.of(context).colorScheme.outline)),
         const SizedBox(height: 8),
         for (final pm in meals.take(4)) _CookTile(pm: pm),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            onPressed: () => _showPantryWeekSheet(context, ref),
+            icon: const Icon(Icons.calendar_view_week, size: 18),
+            label: Text(context.tr('pantry.weekCta')),
+          ),
+        ),
       ],
+    );
+  }
+}
+
+/// A 7-day menu built purely from the pantry, shown in one scrollable sheet.
+void _showPantryWeekSheet(BuildContext context, WidgetRef ref) {
+  final week = ref.read(pantryWeekProvider);
+  if (week.isEmpty) return;
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    showDragHandle: true,
+    builder: (ctx) => DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.85,
+      minChildSize: 0.5,
+      maxChildSize: 0.95,
+      builder: (ctx, controller) => ListView(
+        controller: controller,
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+        children: [
+          Text(ctx.tr('pantry.weekTitle'),
+              style: Theme.of(ctx).textTheme.headlineSmall),
+          const SizedBox(height: 4),
+          Text(ctx.tr('pantry.weekSub'),
+              style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(ctx).colorScheme.outline,
+                  )),
+          const SizedBox(height: 12),
+          for (var i = 0; i < week.length; i++)
+            _PantryDayCard(day: week[i], index: i),
+        ],
+      ),
+    ),
+  );
+}
+
+class _PantryDayCard extends StatelessWidget {
+  final PantryDayPlan day;
+  final int index;
+  const _PantryDayCard({required this.day, required this.index});
+
+  @override
+  Widget build(BuildContext context) {
+    Widget row(String slotEmoji, PantryMeal? pm) {
+      if (pm == null) return const SizedBox.shrink();
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 3),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('$slotEmoji ', style: const TextStyle(fontSize: 14)),
+            Text('${pm.meal.emoji} ', style: const TextStyle(fontSize: 14)),
+            Expanded(
+              child: Text(context.tr(pm.meal.nameKey),
+                  style: Theme.of(context).textTheme.bodyMedium),
+            ),
+            if (pm.usesExpiring)
+              Padding(
+                padding: const EdgeInsets.only(right: 6),
+                child: Text(context.tr('cook.useUp'),
+                    style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: LifeColors.financeDanger)),
+              ),
+            Text('${pm.matched}/${pm.total}',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: pm.missingProductIds.isEmpty
+                          ? LifeColors.finance
+                          : Theme.of(context).colorScheme.outline,
+                      fontWeight: FontWeight.w700,
+                    )),
+          ],
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: SectionCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(context.trp('pantry.day', {'n': index + 1}),
+                    style: const TextStyle(fontWeight: FontWeight.w800)),
+                Text('${day.kcal} ${context.tr('diet.kcal')}',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.outline,
+                        )),
+              ],
+            ),
+            const SizedBox(height: 4),
+            row('🌅', day.breakfast),
+            row('🌞', day.lunch),
+            row('🌙', day.dinner),
+          ],
+        ),
+      ),
     );
   }
 }

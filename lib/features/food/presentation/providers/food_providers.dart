@@ -4,6 +4,7 @@ import 'package:lifeos/features/food/application/food_use_cases.dart';
 import 'package:lifeos/features/food/data/food_repository_impl.dart';
 import 'package:lifeos/features/food/data/meal_catalog.dart';
 import 'package:lifeos/features/food/domain/cook_from_pantry.dart';
+import 'package:lifeos/features/food/domain/pantry_week_planner.dart';
 import 'package:lifeos/features/food/domain/entities/food_item.dart';
 import 'package:lifeos/features/food/domain/entities/meal_plan.dart';
 import 'package:lifeos/features/food/domain/entities/recipe.dart';
@@ -152,6 +153,18 @@ final cookFromPantryProvider = Provider<List<PantryMeal>>((ref) {
   final available = ref.watch(pantryProductIdsProvider);
   if (available.isEmpty) return const [];
   return const CookFromPantry().suggest(
+    available: available,
+    expiring: ref.watch(expiringProductIdsProvider),
+    meals: MealCatalog.all,
+  );
+});
+
+/// A 7-day balanced menu built from what's in the pantry (no diet). Empty until
+/// known products are added.
+final pantryWeekProvider = Provider<List<PantryDayPlan>>((ref) {
+  final available = ref.watch(pantryProductIdsProvider);
+  if (available.isEmpty) return const [];
+  return const PantryWeekPlanner().plan(
     available: available,
     expiring: ref.watch(expiringProductIdsProvider),
     meals: MealCatalog.all,
