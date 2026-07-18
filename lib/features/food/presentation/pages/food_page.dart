@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
+import 'package:lifeos/core/services/ocr_gateway.dart';
 import 'package:lifeos/features/food/domain/cook_from_pantry.dart';
 import 'package:lifeos/features/food/domain/entities/food_item.dart';
+import 'package:lifeos/features/food/domain/expiry_date_parser.dart';
+import 'package:lifeos/features/food/domain/product_text_matcher.dart';
 import 'package:lifeos/features/food/domain/shelf_life_catalog.dart';
 import 'package:lifeos/features/food/presentation/providers/food_providers.dart';
 import 'package:lifeos/shared/models/money.dart';
@@ -65,6 +68,14 @@ class FoodPage extends ConsumerWidget {
           _Header(
             title: context.tr('food.pantry'),
             onAdd: () => _addPantryDialog(context, ref),
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: () => _scanProduct(context, ref),
+              icon: const Icon(Icons.document_scanner_outlined, size: 18),
+              label: Text(context.tr('scan.product')),
+            ),
           ),
           const _KnownProductQuickAdd(),
           pantry.when(
@@ -291,6 +302,133 @@ class FoodPage extends ConsumerWidget {
           expiry: ref.read(clockProvider).now().add(Duration(days: days)),
         );
   }
+
+  /// Photo → pantry. On phones this runs on-device OCR of the packaging; on
+  /// web/desktop (no OCR) it asks the user to paste the label text. Either way
+  /// the expiry date and product are parsed from the text and pre-filled.
+  Future<void> _scanProduct(BuildContext context, WidgetRef ref) async {
+    String? text;
+    if (ocrGateway.available) {
+      text = await ocrGateway.scan(OcrSource.camera);
+    } else if (context.mounted) {
+      text = await _pasteLabelDialog(context);
+    }
+    if (text == null || text.trim().isEmpty || !context.mounted) return;
+
+    final now = ref.read(clockProvider).now();
+    final expiry = const ExpiryDateParser().parse(text, now: now);
+    final productId = const ProductTextMatcher().match(text);
+    await _confirmScanned(context, ref,
+        text: text, expiry: expiry, productId: productId);
+  }
+
+  Future<String?> _pasteLabelDialog(BuildContext context) {
+    final controller = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(ctx.tr('scan.pasteTitle')),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          minLines: 2,
+          maxLines: 5,
+          decoration: InputDecoration(
+            labelText: ctx.tr('scan.pasteHint'),
+            hintText: 'Best before 12.05.2026',
+          ),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(ctx.tr('common.cancel'))),
+          FilledButton(
+              onPressed: () => Navigator.pop(ctx, controller.text),
+              child: Text(ctx.tr('common.ok'))),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _confirmScanned(
+    BuildContext context,
+    WidgetRef ref, {
+    required String text,
+    DateTime? expiry,
+    String? productId,
+  }) async {
+    final now = ref.read(clockProvider).now();
+    final product = productId == null ? null : knownProduct(productId);
+    final emoji = product?.emoji ?? '🍎';
+    final defaultName = product != null
+        ? context.tr(product.nameKey)
+        : text.split('\n').map((l) => l.trim()).firstWhere(
+              (l) => l.isNotEmpty,
+              orElse: () => text.trim(),
+            );
+    final controller = TextEditingController(
+        text: defaultName.length > 40
+            ? defaultName.substring(0, 40)
+            : defaultName);
+    // Detected expiry, else the product's typical shelf life, else a week.
+    final effectiveExpiry = expiry ??
+        now.add(Duration(days: product?.shelfLifeDays ?? 7));
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(ctx.tr('scan.confirmTitle')),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: controller,
+              autofocus: true,
+              decoration: InputDecoration(labelText: ctx.tr('food.name')),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                const Text('📅 ', style: TextStyle(fontSize: 16)),
+                Expanded(
+                  child: Text(
+                    expiry != null
+                        ? ctx.trp('scan.detected', {
+                            'date': _fmtDate(effectiveExpiry),
+                          })
+                        : ctx.trp('scan.assumed', {
+                            'date': _fmtDate(effectiveExpiry),
+                          }),
+                    style: Theme.of(ctx).textTheme.bodySmall,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(ctx.tr('common.cancel'))),
+          FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(ctx.tr('common.add'))),
+        ],
+      ),
+    );
+
+    if (confirmed != true || controller.text.trim().isEmpty) return;
+    ref.read(addFoodItemProvider).call(
+          name: controller.text,
+          emoji: emoji,
+          productId: productId,
+          expiry: effectiveExpiry,
+        );
+  }
+
+  String _fmtDate(DateTime d) =>
+      '${d.day.toString().padLeft(2, '0')}.${d.month.toString().padLeft(2, '0')}.${d.year}';
 
   Future<void> _addShoppingDialog(BuildContext context, WidgetRef ref) async {
     final controller = TextEditingController();
