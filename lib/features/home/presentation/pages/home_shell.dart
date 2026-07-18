@@ -160,11 +160,12 @@ class MorePage extends ConsumerWidget {
 
     // Push a full page from a More entry.
     _MoreEntry page(String emoji, String title, Widget target,
-            {Widget? trailing}) =>
+            {Widget? trailing, String? section}) =>
         _MoreEntry(
           emoji: emoji,
           title: title,
           trailing: trailing,
+          section: section,
           onTap: () => Navigator.of(context).push(
             MaterialPageRoute<void>(builder: (_) => target),
           ),
@@ -191,13 +192,20 @@ class MorePage extends ConsumerWidget {
         page('⏰', context.tr('reminder.title'), const RemindersPage()),
       ], badge: unread),
       _MoreCat('📊', context.tr('moreCat.progress'), [
-        page('🔮', context.tr('forecast.title'), const ForecastPage()),
-        page('📊', context.tr('report.title'), const ReportPage()),
-        page('📜', context.tr('hist.title'), const HistoryPage()),
-        page('⏳', context.tr('weeks.title'), const LifeWeeksPage()),
-        page('✨', context.tr('wrapped.title'), const WrappedPage()),
-        page('🔮', context.tr('insight.title'), const InsightsPage()),
-        page('🏅', context.tr('ach.title'), const AchievementsPage()),
+        page('🔮', context.tr('forecast.title'), const ForecastPage(),
+            section: context.tr('moreSec.analytics')),
+        page('📊', context.tr('report.title'), const ReportPage(),
+            section: context.tr('moreSec.analytics')),
+        page('🔮', context.tr('insight.title'), const InsightsPage(),
+            section: context.tr('moreSec.analytics')),
+        page('📜', context.tr('hist.title'), const HistoryPage(),
+            section: context.tr('moreSec.retro')),
+        page('⏳', context.tr('weeks.title'), const LifeWeeksPage(),
+            section: context.tr('moreSec.retro')),
+        page('✨', context.tr('wrapped.title'), const WrappedPage(),
+            section: context.tr('moreSec.retro')),
+        page('🏅', context.tr('ach.title'), const AchievementsPage(),
+            section: context.tr('moreSec.retro')),
       ]),
       _MoreCat('🔐', context.tr('moreCat.account'), [
         page('☁️', context.tr('cloud.title'), const AccountPage()),
@@ -294,12 +302,18 @@ class _MoreEntry {
   final String emoji;
   final String title;
   final Widget? trailing;
+
+  /// Optional subheader this entry belongs under. When consecutive entries
+  /// share a section, the sheet shows the label once above the group — used to
+  /// organise longer categories without splitting them into more cards.
+  final String? section;
   final VoidCallback onTap;
   const _MoreEntry({
     required this.emoji,
     required this.title,
     required this.onTap,
     this.trailing,
+    this.section,
   });
 }
 
@@ -359,6 +373,40 @@ class _CategoryCard extends StatelessWidget {
     );
   }
 
+  /// Category rows, inserting a subheader whenever the section label changes.
+  List<Widget> _buildRows(BuildContext sheetCtx) {
+    final rows = <Widget>[];
+    String? lastSection;
+    for (final e in cat.items) {
+      if (e.section != null && e.section != lastSection) {
+        rows.add(Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 2),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              e.section!,
+              style: Theme.of(sheetCtx).textTheme.labelMedium?.copyWith(
+                    color: Theme.of(sheetCtx).colorScheme.outline,
+                    fontWeight: FontWeight.w700,
+                  ),
+            ),
+          ),
+        ));
+      }
+      lastSection = e.section;
+      rows.add(ListTile(
+        leading: Text(e.emoji, style: const TextStyle(fontSize: 24)),
+        title: Text(e.title),
+        trailing: e.trailing ?? const Icon(Icons.chevron_right),
+        onTap: () {
+          Navigator.of(sheetCtx).pop();
+          e.onTap();
+        },
+      ));
+    }
+    return rows;
+  }
+
   void _open(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
@@ -378,16 +426,7 @@ class _CategoryCard extends StatelessWidget {
                 ],
               ),
             ),
-            for (final e in cat.items)
-              ListTile(
-                leading: Text(e.emoji, style: const TextStyle(fontSize: 24)),
-                title: Text(e.title),
-                trailing: e.trailing ?? const Icon(Icons.chevron_right),
-                onTap: () {
-                  Navigator.of(sheetCtx).pop();
-                  e.onTap();
-                },
-              ),
+            ..._buildRows(sheetCtx),
             const SizedBox(height: 8),
           ],
         ),

@@ -2523,6 +2523,8 @@ const Map<String, Map<String, String>> _values = {
   'moreCat.food': {'en': 'Food', 'ru': 'Питание', 'uk': 'Харчування'},
   'moreCat.mind': {'en': 'Mind', 'ru': 'Разум', 'uk': 'Розум'},
   'moreCat.body': {'en': 'Food & mind', 'ru': 'Питание и разум', 'uk': 'Харчування і розум'},
+  'moreSec.analytics': {'en': 'Analytics', 'ru': 'Аналитика', 'uk': 'Аналітика'},
+  'moreSec.retro': {'en': 'Looking back', 'ru': 'Ретроспектива', 'uk': 'Ретроспектива'},
   'moreCat.ai': {'en': 'AI', 'ru': 'ИИ', 'uk': 'ШІ'},
   'moreCat.signals': {'en': 'Signals', 'ru': 'Сигналы', 'uk': 'Сигнали'},
   'moreCat.progress': {'en': 'Progress & recaps', 'ru': 'Итоги и прогресс', 'uk': 'Підсумки та прогрес'},
