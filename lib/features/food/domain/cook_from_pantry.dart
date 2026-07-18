@@ -43,38 +43,46 @@ class CookFromPantry {
     final out = <PantryMeal>[];
     for (final m in meals) {
       if (m.ingredients.isEmpty) continue;
-      final missing = <String>[];
-      var matched = 0;
-      var usesExpiring = false;
-      for (final ing in m.ingredients) {
-        if (available.contains(ing.productId)) {
-          matched++;
-          if (expiring.contains(ing.productId)) usesExpiring = true;
-        } else {
-          missing.add(ing.productId);
-        }
-      }
-      final coverage = matched / m.ingredients.length;
-      if (coverage < minCoverage) continue;
-      out.add(PantryMeal(
-        meal: m,
-        matched: matched,
-        total: m.ingredients.length,
-        missingProductIds: missing,
-        usesExpiring: usesExpiring,
-      ));
+      final pm = describe(m, available, expiring);
+      if (pm.coverage < minCoverage) continue;
+      out.add(pm);
     }
-
-    out.sort((a, b) {
-      if (a.usesExpiring != b.usesExpiring) return a.usesExpiring ? -1 : 1;
-      final c = b.coverage.compareTo(a.coverage);
-      if (c != 0) return c;
-      final mm = a.missingProductIds.length.compareTo(b.missingProductIds.length);
-      if (mm != 0) return mm;
-      return a.meal.id.compareTo(b.meal.id); // stable
-    });
-
+    out.sort(byPreference);
     return out.length > limit ? out.sublist(0, limit) : out;
+  }
+
+  /// Describes how well [available] covers [meal]'s ingredients.
+  PantryMeal describe(
+      MealOption meal, Set<String> available, Set<String> expiring) {
+    final missing = <String>[];
+    var matched = 0;
+    var usesExpiring = false;
+    for (final ing in meal.ingredients) {
+      if (available.contains(ing.productId)) {
+        matched++;
+        if (expiring.contains(ing.productId)) usesExpiring = true;
+      } else {
+        missing.add(ing.productId);
+      }
+    }
+    return PantryMeal(
+      meal: meal,
+      matched: matched,
+      total: meal.ingredients.length,
+      missingProductIds: missing,
+      usesExpiring: usesExpiring,
+    );
+  }
+
+  /// Ranking: use-it-up meals first, then higher coverage, then fewer missing,
+  /// then a stable id tiebreak.
+  static int byPreference(PantryMeal a, PantryMeal b) {
+    if (a.usesExpiring != b.usesExpiring) return a.usesExpiring ? -1 : 1;
+    final c = b.coverage.compareTo(a.coverage);
+    if (c != 0) return c;
+    final mm = a.missingProductIds.length.compareTo(b.missingProductIds.length);
+    if (mm != 0) return mm;
+    return a.meal.id.compareTo(b.meal.id);
   }
 
   /// The single best dish to cook that uses [productId] (e.g. an item about to
