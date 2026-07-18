@@ -169,74 +169,77 @@ class FoodPage extends ConsumerWidget {
               );
             },
           ),
-          const SizedBox(height: 24),
-          _Header(
+          const SizedBox(height: 12),
+          _CollapsibleSection(
             title: context.tr('food.recipes'),
             onAdd: () => _addRecipeDialog(context, ref),
+            children: [
+              recipes.when(
+                loading: () => const LinearProgressIndicator(),
+                error: (e, _) => Text('$e'),
+                data: (list) {
+                  if (list.isEmpty) {
+                    return _Empty(context.tr('food.noRecipes'));
+                  }
+                  return Column(
+                    children: [
+                      for (final r in list)
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: Text(r.emoji,
+                              style: const TextStyle(fontSize: 22)),
+                          title: Text(r.name),
+                          subtitle: Text(r.ingredients.join(', ')),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.add_shopping_cart),
+                            tooltip: context.tr('food.toShopping'),
+                            onPressed: () {
+                              ref.read(addRecipeToShoppingProvider).call(r);
+                              ScaffoldMessenger.of(context)
+                                ..hideCurrentSnackBar()
+                                ..showSnackBar(SnackBar(
+                                    content: Text(
+                                        context.tr('food.addedToShopping'))));
+                            },
+                          ),
+                        ),
+                    ],
+                  );
+                },
+              ),
+            ],
           ),
-          recipes.when(
-            loading: () => const LinearProgressIndicator(),
-            error: (e, _) => Text('$e'),
-            data: (list) {
-              if (list.isEmpty) {
-                return _Empty(context.tr('food.noRecipes'));
-              }
-              return Column(
-                children: [
-                  for (final r in list)
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading:
-                          Text(r.emoji, style: const TextStyle(fontSize: 22)),
-                      title: Text(r.name),
-                      subtitle: Text(r.ingredients.join(', ')),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.add_shopping_cart),
-                        tooltip: context.tr('food.toShopping'),
-                        onPressed: () {
-                          ref.read(addRecipeToShoppingProvider).call(r);
-                          ScaffoldMessenger.of(context)
-                            ..hideCurrentSnackBar()
-                            ..showSnackBar(SnackBar(
-                                content:
-                                    Text(context.tr('food.addedToShopping'))));
-                        },
+          _CollapsibleSection(
+            title: context.tr('food.mealPlan'),
+            children: [
+              mealPlan.when(
+                loading: () => const LinearProgressIndicator(),
+                error: (e, _) => Text('$e'),
+                data: (plan) => Column(
+                  children: [
+                    for (var wd = 1; wd <= 7; wd++)
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: SizedBox(
+                          width: 44,
+                          child: Text(context.tr('food.wd.$wd'),
+                              style: Theme.of(context).textTheme.labelLarge),
+                        ),
+                        title: Text(
+                          plan.mealFor(wd).isEmpty ? '—' : plan.mealFor(wd),
+                          style: plan.mealFor(wd).isEmpty
+                              ? TextStyle(
+                                  color: Theme.of(context).colorScheme.outline)
+                              : null,
+                        ),
+                        trailing: const Icon(Icons.edit, size: 18),
+                        onTap: () =>
+                            _editMealDialog(context, ref, wd, plan.mealFor(wd)),
                       ),
-                    ),
-                ],
-              );
-            },
-          ),
-          const SizedBox(height: 24),
-          Text(context.tr('food.mealPlan'),
-              style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 8),
-          mealPlan.when(
-            loading: () => const LinearProgressIndicator(),
-            error: (e, _) => Text('$e'),
-            data: (plan) => Column(
-              children: [
-                for (var wd = 1; wd <= 7; wd++)
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: SizedBox(
-                      width: 44,
-                      child: Text(context.tr('food.wd.$wd'),
-                          style: Theme.of(context).textTheme.labelLarge),
-                    ),
-                    title: Text(
-                      plan.mealFor(wd).isEmpty ? '—' : plan.mealFor(wd),
-                      style: plan.mealFor(wd).isEmpty
-                          ? TextStyle(
-                              color: Theme.of(context).colorScheme.outline)
-                          : null,
-                    ),
-                    trailing: const Icon(Icons.edit, size: 18),
-                    onTap: () =>
-                        _editMealDialog(context, ref, wd, plan.mealFor(wd)),
-                  ),
-              ],
-            ),
+                  ],
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 24),
         ],
@@ -935,6 +938,40 @@ class _CookTile extends ConsumerWidget {
               ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// A section that collapses to just its title, keeping the busy Food page short
+/// by default. Optional [onAdd] shows a + on the header (secondary sections like
+/// custom recipes / the weekday plan start collapsed).
+class _CollapsibleSection extends StatelessWidget {
+  final String title;
+  final VoidCallback? onAdd;
+  final List<Widget> children;
+  const _CollapsibleSection({
+    required this.title,
+    required this.children,
+    this.onAdd,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Theme(
+      // Drop the default divider lines ExpansionTile draws.
+      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      child: ExpansionTile(
+        tilePadding: EdgeInsets.zero,
+        childrenPadding: const EdgeInsets.only(bottom: 8),
+        controlAffinity: ListTileControlAffinity.leading,
+        title: Text(title, style: Theme.of(context).textTheme.titleLarge),
+        trailing: onAdd != null
+            ? IconButton.filledTonal(
+                onPressed: onAdd, icon: const Icon(Icons.add))
+            : null,
+        expandedCrossAxisAlignment: CrossAxisAlignment.start,
+        children: children,
       ),
     );
   }
