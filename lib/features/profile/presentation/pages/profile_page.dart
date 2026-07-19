@@ -8,6 +8,7 @@ import 'package:lifeos/features/profile/domain/fitness_calculator.dart';
 import 'package:lifeos/features/profile/presentation/providers/profile_providers.dart';
 import 'package:lifeos/shared/theme/app_theme.dart';
 import 'package:lifeos/shared/widgets/animated_backdrop.dart';
+import 'package:lifeos/shared/widgets/collapsible_section.dart';
 import 'package:lifeos/shared/widgets/section_card.dart';
 
 /// Body & lifestyle questionnaire. Saving recomputes the assessment (BMI, BMR,
@@ -145,24 +146,26 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             const SizedBox(width: 8),
             Expanded(child: _field(_weight, context.tr('profile.weight'))),
           ]),
-          const SizedBox(height: 16),
-          Text(context.tr('profile.tape'),
-              style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 8),
-          Row(children: [
-            Expanded(child: _field(_chest, context.tr('profile.chest'))),
-            const SizedBox(width: 8),
-            Expanded(child: _field(_waist, context.tr('profile.waist'))),
-            const SizedBox(width: 8),
-            Expanded(child: _field(_hips, context.tr('profile.hips'))),
-          ]),
+          CollapsibleSection(
+            title: context.tr('profile.tape'),
+            children: [
+              Row(children: [
+                Expanded(child: _field(_chest, context.tr('profile.chest'))),
+                const SizedBox(width: 8),
+                Expanded(child: _field(_waist, context.tr('profile.waist'))),
+                const SizedBox(width: 8),
+                Expanded(child: _field(_hips, context.tr('profile.hips'))),
+              ]),
+              const SizedBox(height: 8),
+              Row(children: [
+                Expanded(child: _field(_arm, context.tr('profile.arm'))),
+                const SizedBox(width: 8),
+                Expanded(child: _field(_neck, context.tr('profile.neck'))),
+              ]),
+            ],
+          ),
           const SizedBox(height: 8),
-          Row(children: [
-            Expanded(child: _field(_arm, context.tr('profile.arm'))),
-            const SizedBox(width: 8),
-            Expanded(child: _field(_neck, context.tr('profile.neck'))),
-          ]),
-          const SizedBox(height: 16),
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
             value: _deskJob,
