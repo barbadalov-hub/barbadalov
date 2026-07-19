@@ -26,7 +26,24 @@ void main() {
       expect(a.proteinG, 144); // 1.8 g/kg on a cut
       expect(a.bmi, closeTo(24.7, 0.1));
       expect(a.bmiKey, 'profile.bmi.normal');
-      expect(a.idealWeightKg, closeTo(71.3, 0.2)); // BMI 22 reference
+      expect(a.idealWeightKg, closeTo(77.8, 0.2)); // men: athletic BMI-24
+    });
+
+    test('reference weight is athletic for men, leaner for women', () {
+      const base = UserProfile(
+        name: '',
+        sex: Sex.male,
+        age: 30,
+        heightCm: 170,
+        weightKg: 70,
+      );
+      // Men → BMI 24 (170cm → ~69.4kg), not the leaner BMI-22 (~63.6kg).
+      expect(calc.assess(base).idealWeightKg, closeTo(69.4, 0.2));
+      // Women → BMI 22 (170cm → ~63.6kg).
+      const woman = UserProfile(
+        name: '', sex: Sex.female, age: 30, heightCm: 170, weightKg: 70, //
+      );
+      expect(calc.assess(woman).idealWeightKg, closeTo(63.6, 0.2));
     });
 
     test('deficit never goes below BMR (no-harm rule)', () {

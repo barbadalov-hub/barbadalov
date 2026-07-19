@@ -103,7 +103,9 @@ class FitnessCalculator {
       proteinG: proteinG,
       fatG: fatG,
       carbsG: carbsG,
-      idealWeightKg: 22 * heightM * heightM, // BMI-22 reference weight
+      // Athletic-normal reference weight. BMI 22 reads as lean/skinny for a
+      // muscular build, so aim higher for men (more lean mass) than women.
+      idealWeightKg: (p.sex == Sex.male ? 24.0 : 22.0) * heightM * heightM,
       waterLiters: 0.033 * p.weightKg,
       whr: whr,
       whrHighRisk: whrHighRisk,

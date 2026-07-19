@@ -639,7 +639,7 @@ const Map<String, Map<String, String>> _values = {
   'profile.fat': {'en': 'Fat', 'ru': 'Жиры', 'uk': 'Жири'},
   'profile.carbs': {'en': 'Carbs', 'ru': 'Углеводы', 'uk': 'Вуглеводи'},
   'profile.toGo': {'en': '{sign}{n} kg', 'ru': '{sign}{n} кг', 'uk': '{sign}{n} кг'},
-  'profile.idealWeight': {'en': 'Reference weight (BMI 22)', 'ru': 'Ориентир веса (ИМТ 22)', 'uk': 'Орієнтир ваги (ІМТ 22)'},
+  'profile.idealWeight': {'en': 'Athletic reference weight', 'ru': 'Ориентир веса (спортивный)', 'uk': 'Орієнтир ваги (спортивний)'},
   'profile.water': {'en': 'Water / day', 'ru': 'Вода в день', 'uk': 'Вода на день'},
   'profile.whr': {'en': 'Waist-hip ratio', 'ru': 'Талия/бёдра (WHR)', 'uk': 'Талія/стегна (WHR)'},
   'profile.whr.ok': {'en': 'healthy', 'ru': 'в норме', 'uk': 'у нормі'},
