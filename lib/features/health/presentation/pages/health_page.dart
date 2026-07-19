@@ -148,57 +148,30 @@ class HealthPage extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            _HealthEntry(
-              emoji: '🩺',
-              title: context.tr('health.metrics'),
-              subtitle: context.tr('health.metricsSub'),
-              onTap: () => _MetricsSheet.show(context),
-            ),
-            const SizedBox(height: 12),
-            _HealthEntry(
-              emoji: '📈',
-              title: context.tr('health.trends'),
-              subtitle: context.tr('health.trendsSub'),
-              onTap: () => _TrendsSheet.show(context),
-            ),
-            const SizedBox(height: 12),
-            _HealthEntry(
-              emoji: '🌙',
-              title: context.tr('sleep.tipsTitle'),
-              subtitle: context.tr('sleep.tipsSub'),
-              onTap: () => _SleepTipsSheet.show(context),
-            ),
-            const SizedBox(height: 12),
-            SectionCard(
-              padding: const EdgeInsets.all(14),
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(builder: (_) => const WorkoutsPage()),
-              ),
-              child: Row(
-                children: [
-                  const Text('💪', style: TextStyle(fontSize: 24)),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(context.tr('wo.title'),
-                            style: Theme.of(context).textTheme.titleMedium),
-                        Text(context.tr('wo.subtitle'),
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(
-                                  color:
-                                      Theme.of(context).colorScheme.outline,
-                                )),
-                      ],
-                    ),
-                  ),
-                  const Icon(Icons.chevron_right),
-                ],
-              ),
+            const SizedBox(height: 16),
+            Text(context.tr('health.exploreTitle'),
+                style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            GridView.count(
+              crossAxisCount: 2,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 8,
+              childAspectRatio: 3.2,
+              children: [
+                _HubTile('🩺', context.tr('health.metrics'),
+                    () => _MetricsSheet.show(context)),
+                _HubTile('📈', context.tr('health.trends'),
+                    () => _TrendsSheet.show(context)),
+                _HubTile('🌙', context.tr('sleep.tipsTitle'),
+                    () => _SleepTipsSheet.show(context)),
+                _HubTile(
+                    '💪',
+                    context.tr('wo.title'),
+                    () => Navigator.of(context).push(MaterialPageRoute<void>(
+                        builder: (_) => const WorkoutsPage()))),
+              ],
             ),
             const SizedBox(height: 20),
             const _HealthHub(),
@@ -387,50 +360,6 @@ class _HubTile extends StatelessWidget {
                     .bodyMedium
                     ?.copyWith(fontWeight: FontWeight.w600)),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _HealthEntry extends StatelessWidget {
-  final String emoji;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-  const _HealthEntry({
-    required this.emoji,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SectionCard(
-      onTap: onTap,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      child: Row(
-        children: [
-          Text(emoji, style: const TextStyle(fontSize: 26)),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: Theme.of(context).textTheme.titleMedium),
-                Text(
-                  subtitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.outline,
-                      ),
-                ),
-              ],
-            ),
-          ),
-          const Icon(Icons.chevron_right),
         ],
       ),
     );

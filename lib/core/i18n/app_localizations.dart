@@ -298,6 +298,7 @@ const Map<String, Map<String, String>> _values = {
   'health.trends': {'en': 'Trends', 'ru': 'Тренды', 'uk': 'Тренди'},
   'health.trendsSub': {'en': 'Weekly charts for water, steps, sleep, weight', 'ru': 'Графики за неделю: вода, шаги, сон, вес', 'uk': 'Графіки за тиждень: вода, кроки, сон, вага'},
   'health.hubTitle': {'en': 'Everything health', 'ru': 'Всё о здоровье', 'uk': 'Усе про здоровʼя'},
+  'health.exploreTitle': {'en': 'Track & explore', 'ru': 'Отслеживание', 'uk': 'Відстеження'},
   'sleep.tipsTitle': {'en': 'Healthy sleep', 'ru': 'Здоровый сон', 'uk': 'Здоровий сон'},
   'sleep.tipsSub': {'en': 'Pre-sleep exercises & evening nutrition', 'ru': 'Упражнения перед сном и питание вечером', 'uk': 'Вправи перед сном і харчування ввечері'},
   'sleep.tipsIntro': {'en': 'A short wind-down routine helps you fall asleep faster and wake up rested.', 'ru': 'Короткий вечерний ритуал помогает быстрее засыпать и лучше высыпаться.', 'uk': 'Короткий вечірній ритуал допомагає швидше засинати й краще висипатися.'},
