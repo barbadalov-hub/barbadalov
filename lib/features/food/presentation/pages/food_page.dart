@@ -13,6 +13,7 @@ import 'package:lifeos/shared/models/money.dart';
 import 'package:lifeos/shared/providers/core_providers.dart';
 import 'package:lifeos/shared/theme/app_theme.dart';
 import 'package:lifeos/shared/widgets/animated_backdrop.dart';
+import 'package:lifeos/shared/widgets/collapsible_section.dart';
 import 'package:lifeos/shared/widgets/section_card.dart';
 
 class FoodPage extends ConsumerWidget {
@@ -170,7 +171,7 @@ class FoodPage extends ConsumerWidget {
             },
           ),
           const SizedBox(height: 12),
-          _CollapsibleSection(
+          CollapsibleSection(
             title: context.tr('food.recipes'),
             onAdd: () => _addRecipeDialog(context, ref),
             children: [
@@ -209,7 +210,7 @@ class FoodPage extends ConsumerWidget {
               ),
             ],
           ),
-          _CollapsibleSection(
+          CollapsibleSection(
             title: context.tr('food.mealPlan'),
             children: [
               mealPlan.when(
@@ -938,40 +939,6 @@ class _CookTile extends ConsumerWidget {
               ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-/// A section that collapses to just its title, keeping the busy Food page short
-/// by default. Optional [onAdd] shows a + on the header (secondary sections like
-/// custom recipes / the weekday plan start collapsed).
-class _CollapsibleSection extends StatelessWidget {
-  final String title;
-  final VoidCallback? onAdd;
-  final List<Widget> children;
-  const _CollapsibleSection({
-    required this.title,
-    required this.children,
-    this.onAdd,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Theme(
-      // Drop the default divider lines ExpansionTile draws.
-      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-      child: ExpansionTile(
-        tilePadding: EdgeInsets.zero,
-        childrenPadding: const EdgeInsets.only(bottom: 8),
-        controlAffinity: ListTileControlAffinity.leading,
-        title: Text(title, style: Theme.of(context).textTheme.titleLarge),
-        trailing: onAdd != null
-            ? IconButton.filledTonal(
-                onPressed: onAdd, icon: const Icon(Icons.add))
-            : null,
-        expandedCrossAxisAlignment: CrossAxisAlignment.start,
-        children: children,
       ),
     );
   }
