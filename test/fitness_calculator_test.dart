@@ -26,24 +26,30 @@ void main() {
       expect(a.proteinG, 144); // 1.8 g/kg on a cut
       expect(a.bmi, closeTo(24.7, 0.1));
       expect(a.bmiKey, 'profile.bmi.normal');
-      expect(a.idealWeightKg, closeTo(77.8, 0.2)); // men: athletic BMI-24
+      // Men band BMI 22–25 at 180cm → midpoint ≈ 76.1kg.
+      expect(a.idealWeightKg, closeTo(76.1, 0.2));
     });
 
-    test('reference weight is athletic for men, leaner for women', () {
-      const base = UserProfile(
-        name: '',
-        sex: Sex.male,
-        age: 30,
-        heightCm: 170,
-        weightKg: 70,
+    test('healthy weight is an athletic range, higher for men than women', () {
+      const man = UserProfile(
+        name: '', sex: Sex.male, age: 30, heightCm: 170, weightKg: 70, //
       );
-      // Men → BMI 24 (170cm → ~69.4kg), not the leaner BMI-22 (~63.6kg).
-      expect(calc.assess(base).idealWeightKg, closeTo(69.4, 0.2));
-      // Women → BMI 22 (170cm → ~63.6kg).
+      final m = calc.assess(man);
+      // Men BMI 22–25 at 170cm → 63.6–72.3, midpoint ~67.9.
+      expect(m.idealWeightMinKg, closeTo(63.6, 0.2));
+      expect(m.idealWeightMaxKg, closeTo(72.3, 0.2));
+      expect(m.idealWeightKg, closeTo(67.9, 0.2));
+
       const woman = UserProfile(
         name: '', sex: Sex.female, age: 30, heightCm: 170, weightKg: 70, //
       );
-      expect(calc.assess(woman).idealWeightKg, closeTo(63.6, 0.2));
+      final w = calc.assess(woman);
+      // Women BMI 21–24 at 170cm → 60.7–69.4, midpoint ~65.0.
+      expect(w.idealWeightMinKg, closeTo(60.7, 0.2));
+      expect(w.idealWeightMaxKg, closeTo(69.4, 0.2));
+      expect(w.idealWeightKg, closeTo(65.0, 0.2));
+      // Men's whole range sits above women's.
+      expect(m.idealWeightKg, greaterThan(w.idealWeightKg));
     });
 
     test('deficit never goes below BMR (no-harm rule)', () {
