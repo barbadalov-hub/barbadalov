@@ -1941,6 +1941,7 @@ const Map<String, Map<String, String>> _values = {
   'theme.system': {'en': 'System', 'ru': 'Система', 'uk': 'Система'},
   'theme.light': {'en': 'Light', 'ru': 'Светлая', 'uk': 'Світла'},
   'theme.dark': {'en': 'Dark', 'ru': 'Тёмная', 'uk': 'Темна'},
+  'theme.darkOnly': {'en': 'Optimized for a dark cosmos look', 'ru': 'Оптимизировано под тёмный космический стиль', 'uk': 'Оптимізовано під темний космічний стиль'},
   'theme.accent': {'en': 'Accent', 'ru': 'Акцент', 'uk': 'Акцент'},
   'theme.violet': {'en': 'Cosmic Violet', 'ru': 'Космос', 'uk': 'Космос'},
   'theme.aurora': {'en': 'Aurora', 'ru': 'Аврора', 'uk': 'Аврора'},
