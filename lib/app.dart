@@ -39,9 +39,13 @@ class LifeOsApp extends ConsumerWidget {
     return MaterialApp(
       title: AppConstants.appName,
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.light(seed),
+      // The whole app lives on dark, section-tinted galaxy backdrops, so it is
+      // dark-only: a light theme would render dark text on those dark canvases
+      // and vanish. Both slots use the dark theme and the mode is pinned to
+      // dark, regardless of the OS light/dark setting.
+      theme: AppTheme.dark(seed),
       darkTheme: AppTheme.dark(seed),
-      themeMode: theme.mode,
+      themeMode: ThemeMode.dark,
       locale: locale,
       localizationsDelegates: const [
         AppLocalizations.delegate,

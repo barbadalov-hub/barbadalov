@@ -61,27 +61,22 @@ class AppearancePage extends ConsumerWidget {
             ),
             const SizedBox(height: 22),
 
-            // Mode.
+            // Mode. The cosmos design is dark-only (dark galaxy backdrops), so
+            // there is no light/system option — just a note.
             Text(context.tr('theme.mode'),
                 style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 10),
-            SegmentedButton<ThemeMode>(
-              segments: [
-                ButtonSegment(
-                    value: ThemeMode.system,
-                    icon: const Icon(Icons.brightness_auto),
-                    label: Text(context.tr('theme.system'))),
-                ButtonSegment(
-                    value: ThemeMode.light,
-                    icon: const Icon(Icons.light_mode),
-                    label: Text(context.tr('theme.light'))),
-                ButtonSegment(
-                    value: ThemeMode.dark,
-                    icon: const Icon(Icons.dark_mode),
-                    label: Text(context.tr('theme.dark'))),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                const Icon(Icons.dark_mode, size: 18),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(context.tr('theme.darkOnly'),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.outline,
+                          )),
+                ),
               ],
-              selected: {settings.mode},
-              onSelectionChanged: (s) => controller.setMode(s.first),
             ),
             const SizedBox(height: 26),
 
