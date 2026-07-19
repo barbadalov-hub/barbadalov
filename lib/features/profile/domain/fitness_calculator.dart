@@ -22,7 +22,14 @@ class FitnessAssessment extends Equatable {
   final int proteinG;
   final int fatG;
   final int carbsG;
+  /// Midpoint of the healthy range — used where a single target is needed
+  /// (e.g. the weight forecast).
   final double idealWeightKg;
+
+  /// Sex-aware athletic-normal weight range (kg) for the person's height.
+  final double idealWeightMinKg;
+  final double idealWeightMaxKg;
+
   final double waterLiters;
   final double? whr;
   final bool whrHighRisk;
@@ -38,6 +45,8 @@ class FitnessAssessment extends Equatable {
     required this.fatG,
     required this.carbsG,
     required this.idealWeightKg,
+    required this.idealWeightMinKg,
+    required this.idealWeightMaxKg,
     required this.waterLiters,
     this.whr,
     this.whrHighRisk = false,
@@ -47,7 +56,8 @@ class FitnessAssessment extends Equatable {
   @override
   List<Object?> get props => [
         bmi, bmiKey, bmr, tdee, targetKcal, proteinG, fatG, carbsG,
-        idealWeightKg, waterLiters, whr, whrHighRisk, bodyFatPct, //
+        idealWeightKg, idealWeightMinKg, idealWeightMaxKg, //
+        waterLiters, whr, whrHighRisk, bodyFatPct,
       ];
 }
 
@@ -57,6 +67,12 @@ class FitnessCalculator {
   FitnessAssessment assess(UserProfile p) {
     final heightM = p.heightCm / 100;
     final bmi = p.weightKg / (heightM * heightM);
+
+    // Athletic-normal weight range. BMI 22 alone reads as lean/skinny, so use a
+    // band whose upper end leaves room for muscle — a touch higher for men.
+    final (loBmi, hiBmi) = p.sex == Sex.male ? (22.0, 25.0) : (21.0, 24.0);
+    final idealMinKg = loBmi * heightM * heightM;
+    final idealMaxKg = hiBmi * heightM * heightM;
 
     // Mifflin-St Jeor.
     final bmr = 10 * p.weightKg +
@@ -103,9 +119,9 @@ class FitnessCalculator {
       proteinG: proteinG,
       fatG: fatG,
       carbsG: carbsG,
-      // Athletic-normal reference weight. BMI 22 reads as lean/skinny for a
-      // muscular build, so aim higher for men (more lean mass) than women.
-      idealWeightKg: (p.sex == Sex.male ? 24.0 : 22.0) * heightM * heightM,
+      idealWeightKg: (idealMinKg + idealMaxKg) / 2,
+      idealWeightMinKg: idealMinKg,
+      idealWeightMaxKg: idealMaxKg,
       waterLiters: 0.033 * p.weightKg,
       whr: whr,
       whrHighRisk: whrHighRisk,

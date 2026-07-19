@@ -375,8 +375,18 @@ class _IdealWeightCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final delta = current - a.idealWeightKg;
-    final atIdeal = delta.abs() < 0.5;
+    // Distance to the nearest edge of the healthy range (0 when inside it).
+    final double delta;
+    if (current > a.idealWeightMaxKg) {
+      delta = current - a.idealWeightMaxKg; // above range → lose
+    } else if (current < a.idealWeightMinKg) {
+      delta = current - a.idealWeightMinKg; // below range → gain (negative)
+    } else {
+      delta = 0;
+    }
+    final inRange = delta == 0;
+    final lo = a.idealWeightMinKg.toStringAsFixed(0);
+    final hi = a.idealWeightMaxKg.toStringAsFixed(0);
     return SectionCard(
       child: Row(
         children: [
@@ -389,14 +399,14 @@ class _IdealWeightCard extends StatelessWidget {
                 Text(context.tr('profile.idealWeight'),
                     style: Theme.of(context).textTheme.titleMedium),
                 Text(
-                  '${current.toStringAsFixed(1)} → ${a.idealWeightKg.toStringAsFixed(1)} kg',
+                  context.trp('profile.healthyRange', {'lo': lo, 'hi': hi}),
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
             ),
           ),
           Text(
-            atIdeal
+            inRange
                 ? '✅'
                 : context.trp('profile.toGo', {
                     'sign': delta > 0 ? '−' : '+',
@@ -404,7 +414,7 @@ class _IdealWeightCard extends StatelessWidget {
                   }),
             style: TextStyle(
                 fontWeight: FontWeight.w700,
-                color: atIdeal ? const Color(0xFF2E9E6B) : null),
+                color: inRange ? const Color(0xFF2E9E6B) : null),
           ),
         ],
       ),
