@@ -1,0 +1,24 @@
+name: missed_call
+description: "Пропущенный вызов — an anime visual-novel game prototype. Standalone module staged inside the LifeOS repo (excluded from the app's analysis/tests)."
+publish_to: "none"
+version: 0.0.1+1
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+
+# Deliberately zero third-party dependencies: the whole visual novel is a
+# data-driven scene graph rendered with the Flutter SDK only. That keeps the
+# build plugin-free (LifeOS rule — no native Windows code) and trivial to run.
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  # Real anime CG art will live here once produced from the character briefs.
+  # assets:
+  #   - assets/cg/

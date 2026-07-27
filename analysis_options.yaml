@@ -4,8 +4,13 @@ analyzer:
   # `native/` holds native-app-only code staged for a future phone build. It
   # references phone-only packages that aren't in the web pubspec, so it is
   # excluded from analysis until it's wired in (see native/README.md).
+  #
+  # `missed_call/` is a standalone visual-novel game prototype with its own
+  # pubspec (see missed_call/README.md). It is a separate package, so it is
+  # excluded from the LifeOS app's analysis and tests.
   exclude:
     - native/**
+    - missed_call/**
   language:
     strict-casts: true
     strict-raw-types: true
