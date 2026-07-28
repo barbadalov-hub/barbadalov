@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart' show Ticker;
 
 import '../engine/models.dart';
 import '../engine/script_act1.dart';
@@ -8,11 +9,9 @@ import '../engine/vn_controller.dart';
 import 'mood_palette.dart';
 
 /// The visual-novel player: a mood-tinted CG stage on top, a dialogue box
-/// below. Tap to advance lines; pick a button at a branch. Horror dead-ends
-/// play out as a "death" and loop the night back to 03:14.
-///
-/// CGs are placeholders (a tinted panel + the art brief) until real anime art
-/// is dropped in — the engine and flow are already final.
+/// below, a night clock counting to 03:47 in the header. Tap to advance lines;
+/// pick a button at a branch. Horror dead-ends (and the timer running out) play
+/// as a "death" and loop the night back to 03:14.
 class VnScreen extends StatefulWidget {
   const VnScreen({super.key});
 
@@ -20,8 +19,13 @@ class VnScreen extends StatefulWidget {
   State<VnScreen> createState() => _VnScreenState();
 }
 
-class _VnScreenState extends State<VnScreen> {
+class _VnScreenState extends State<VnScreen>
+    with SingleTickerProviderStateMixin {
   late final VnController _controller;
+  Ticker? _ticker;
+  Duration _lastTick = Duration.zero;
+  final ValueNotifier<double> _progress = ValueNotifier<double>(0);
+
   int _lineIndex = 0;
   bool _safeMode = false;
   bool _reduceMotion = false;
@@ -33,6 +37,7 @@ class _VnScreenState extends State<VnScreen> {
     super.initState();
     _controller = VnController(script: actOneScript, startId: kActOneStart);
     _controller.addListener(_onNodeChanged);
+    _ticker = createTicker(_onTick)..start();
   }
 
   @override
@@ -41,8 +46,25 @@ class _VnScreenState extends State<VnScreen> {
     _reduceMotion = MediaQuery.of(context).disableAnimations;
   }
 
+  bool get _timerActive =>
+      !_node.isDeath && _node.id != 'slice_end' && !_controller.isTimeUp;
+
+  void _onTick(Duration elapsed) {
+    final double dt = (elapsed - _lastTick).inMicroseconds / 1000000.0;
+    _lastTick = elapsed;
+    if (!_timerActive) {
+      return;
+    }
+    _controller.tickNight(dt);
+    _progress.value = _controller.nightProgress;
+    if (_controller.isTimeUp) {
+      _controller.triggerTimeUp();
+    }
+  }
+
   void _onNodeChanged() {
     setState(() => _lineIndex = 0);
+    _progress.value = _controller.nightProgress;
     final VnNode node = _controller.current;
     if (node.isDeath && !_safeMode && !_reduceMotion) {
       setState(() => _flash = true);
@@ -58,6 +80,8 @@ class _VnScreenState extends State<VnScreen> {
   @override
   void dispose() {
     _flashTimer?.cancel();
+    _ticker?.dispose();
+    _progress.dispose();
     _controller.removeListener(_onNodeChanged);
     _controller.dispose();
     super.dispose();
@@ -124,11 +148,20 @@ class _VnScreenState extends State<VnScreen> {
               ),
             ),
           ),
-          _TopControls(
-            palette: palette,
-            safeMode: _safeMode,
-            loopCount: _controller.loopCount,
-            onToggleSafe: () => setState(() => _safeMode = !_safeMode),
+          Align(
+            alignment: Alignment.topCenter,
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(14, 6, 8, 0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    _controlsRow(palette),
+                    if (!_node.isDeath) _nightBar(palette),
+                  ],
+                ),
+              ),
+            ),
           ),
           IgnorePointer(
             child: AnimatedOpacity(
@@ -144,53 +177,90 @@ class _VnScreenState extends State<VnScreen> {
       ),
     );
   }
-}
 
-/// A subtle top row: safe-mode toggle + loop counter.
-class _TopControls extends StatelessWidget {
-  const _TopControls({
-    required this.palette,
-    required this.safeMode,
-    required this.loopCount,
-    required this.onToggleSafe,
-  });
-
-  final MoodPalette palette;
-  final bool safeMode;
-  final int loopCount;
-  final VoidCallback onToggleSafe;
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(14, 6, 8, 0),
-        child: Row(
-          children: <Widget>[
-            if (loopCount > 0)
-              Text(
-                'круг ${loopCount + 1}',
-                style: TextStyle(
-                  color: palette.text.withValues(alpha: 0.5),
-                  fontSize: 11,
-                  letterSpacing: 0.6,
-                ),
-              ),
-            const Spacer(),
-            TextButton(
-              onPressed: onToggleSafe,
-              child: Text(
-                safeMode ? 'щадящий: вкл' : 'щадящий: выкл',
-                style: TextStyle(
-                  color: palette.accent.withValues(alpha: 0.8),
-                  fontSize: 11,
-                  letterSpacing: 0.6,
-                ),
-              ),
+  Widget _controlsRow(MoodPalette palette) {
+    return Row(
+      children: <Widget>[
+        if (_controller.loopCount > 0)
+          Text(
+            'круг ${_controller.loopCount + 1}',
+            style: TextStyle(
+              color: palette.text.withValues(alpha: 0.5),
+              fontSize: 11,
+              letterSpacing: 0.6,
             ),
-          ],
+          ),
+        const Spacer(),
+        TextButton(
+          onPressed: () => setState(() => _safeMode = !_safeMode),
+          child: Text(
+            _safeMode ? 'щадящий: вкл' : 'щадящий: выкл',
+            style: TextStyle(
+              color: palette.accent.withValues(alpha: 0.8),
+              fontSize: 11,
+              letterSpacing: 0.6,
+            ),
+          ),
         ),
-      ),
+      ],
+    );
+  }
+
+  Widget _nightBar(MoodPalette palette) {
+    return ValueListenableBuilder<double>(
+      valueListenable: _progress,
+      builder: (BuildContext context, double p, Widget? child) {
+        final bool late = p > 0.85;
+        final Color fill = late ? const Color(0xFFD24A3A) : palette.accent;
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(2, 2, 8, 4),
+          child: Row(
+            children: <Widget>[
+              Text(
+                _controller.nightClock,
+                style: TextStyle(
+                  color: late ? const Color(0xFFE0705A) : palette.text,
+                  fontSize: 12,
+                  fontFeatures: const <FontFeature>[
+                    FontFeature.tabularFigures(),
+                  ],
+                  letterSpacing: 0.5,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(2),
+                  child: SizedBox(
+                    height: 3,
+                    child: Stack(
+                      children: <Widget>[
+                        ColoredBox(
+                          color: palette.text.withValues(alpha: 0.12),
+                          child: const SizedBox.expand(),
+                        ),
+                        FractionallySizedBox(
+                          widthFactor: p,
+                          child: ColoredBox(color: fill),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '03:47',
+                style: TextStyle(
+                  color: palette.text.withValues(alpha: 0.4),
+                  fontSize: 11,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -230,7 +300,7 @@ class _CgStage extends StatelessWidget {
           Align(
             alignment: Alignment.topLeft,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(14, 44, 14, 14),
+              padding: const EdgeInsets.fromLTRB(14, 72, 14, 14),
               child: _Tag(
                 node.isDeath ? '✕ ${node.cg.id}' : 'CG · ${node.cg.id}',
                 palette,

@@ -96,10 +96,11 @@ void main() {
       expect(c.flags, contains('died:death_line'));
     });
 
-    test('every death node is reachable from some lethal choice', () {
+    test('every choice-death node is reachable from a lethal choice', () {
+      // death_time is triggered by the night timer, not a choice.
       final Set<String> deathIds = <String>{
         for (final VnNode n in actOneScript.values)
-          if (n.isDeath) n.id,
+          if (n.isDeath && n.id != 'death_time') n.id,
       };
       final Set<String> targeted = <String>{
         for (final VnNode n in actOneScript.values)
@@ -107,6 +108,38 @@ void main() {
             if (actOneScript[ch.goto]?.isDeath ?? false) ch.goto,
       };
       expect(targeted, containsAll(deathIds));
+    });
+  });
+
+  group('Night timer', () {
+    test('clock reads 03:14 at start and 03:47 at the deadline', () {
+      final VnController c =
+          VnController(script: actOneScript, startId: kActOneStart);
+      expect(c.nightClock, '03:14');
+      expect(c.isTimeUp, isFalse);
+
+      c.tickNight(VnController.nightSeconds / 2);
+      expect(c.nightProgress, closeTo(0.5, 0.01));
+
+      c.tickNight(VnController.nightSeconds); // overshoot the deadline
+      expect(c.isTimeUp, isTrue);
+      expect(c.nightProgress, 1.0);
+      expect(c.nightClock, '03:47');
+    });
+
+    test('timeout routes to the "Время вышло" death; loop resets the night', () {
+      final VnController c =
+          VnController(script: actOneScript, startId: kActOneStart);
+      c.tickNight(VnController.nightSeconds + 1);
+      c.triggerTimeUp();
+      expect(c.current.id, 'death_time');
+      expect(c.current.isDeath, isTrue);
+
+      c.loopFromDeath(c.current.id);
+      expect(c.current.id, kActOneStart);
+      expect(c.isTimeUp, isFalse);
+      expect(c.nightProgress, 0.0);
+      expect(c.nightClock, '03:14');
     });
   });
 }

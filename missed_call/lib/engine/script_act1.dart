@@ -188,6 +188,27 @@ final Map<String, VnNode> actOneScript = <String, VnNode>{
       VnLine(Speaker.mira, 'ты звал. я пришёл. теперь я не уйду.'),
     ],
   ),
+  // Time-up death — triggered by the night timer, not a choice (see controller).
+  'death_time': const VnNode(
+    id: 'death_time',
+    isDeath: true,
+    cg: CgSpec(
+      id: 'death_time',
+      mood: Mood.dread,
+      brief:
+          'Комната растворяется по краям, как недогруженная картинка. Трещина '
+          'бежит по экрану телефона и по отражению.',
+    ),
+    lines: <VnLine>[
+      VnLine(Speaker.narration, 'Часы на тумбе щёлкают: 03:46… 03:47.'),
+      VnLine(Speaker.narration,
+          'На телефоне вспыхивает «Прочитано 03:47». Больше М. не отвечает. '
+          'Никогда.'),
+      VnLine(Speaker.narration,
+          'Комната растворяется по краям. Трещина бежит по экрану, по зеркалу, '
+          'по твоему лицу — и рывком тебя выбрасывает обратно.'),
+    ],
+  ),
   'memory': const VnNode(
     id: 'memory',
     cg: CgSpec(

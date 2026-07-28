@@ -24,6 +24,27 @@ class VnController extends ChangeNotifier {
   /// How many times a death has thrown the night back to the start.
   int loopCount = 0;
 
+  // --- Night timer: the night runs 03:14 -> 03:47 (the immovable deadline). ---
+  /// Real seconds the whole night lasts. Short for the slice; the full game
+  /// runs it close to real time (~33 min). See docs/design.md.
+  static const double nightSeconds = 150;
+
+  double _nightElapsed = 0;
+  bool _timeUpTriggered = false;
+
+  double get nightProgress => (_nightElapsed / nightSeconds).clamp(0.0, 1.0);
+  bool get isTimeUp => _nightElapsed >= nightSeconds;
+
+  /// In-game wall clock, 03:14 at start → 03:47 at the deadline, as "HH:MM".
+  String get nightClock {
+    const int startMin = 3 * 60 + 14; // 194
+    const int endMin = 3 * 60 + 47; // 227
+    final int total = (startMin + (endMin - startMin) * nightProgress).round();
+    final String hh = (total ~/ 60).toString().padLeft(2, '0');
+    final String mm = (total % 60).toString().padLeft(2, '0');
+    return '$hh:$mm';
+  }
+
   VnNode get current => _script[_currentId]!;
 
   /// Move to the next linear node. No-op when the node offers choices.
@@ -46,12 +67,39 @@ class VnController extends ChangeNotifier {
     }
   }
 
+  /// Advance the night clock by [dtSeconds] of real time (driven by the UI).
+  void tickNight(double dtSeconds) {
+    if (isTimeUp) {
+      return;
+    }
+    _nightElapsed += dtSeconds;
+    if (_nightElapsed > nightSeconds) {
+      _nightElapsed = nightSeconds;
+    }
+  }
+
+  /// The deadline hit 03:47 — route into the "Время вышло" horror death.
+  void triggerTimeUp() {
+    if (_timeUpTriggered || !_script.containsKey('death_time')) {
+      return;
+    }
+    _timeUpTriggered = true;
+    _currentId = 'death_time';
+    notifyListeners();
+  }
+
+  void _resetNight() {
+    _nightElapsed = 0;
+    _timeUpTriggered = false;
+  }
+
   /// A horror death: the night snaps back to 03:14, but knowledge stays.
   /// Records that this death was seen (used later for hybrid carry-over).
   void loopFromDeath(String diedFrom) {
     flags.add('died:$diedFrom');
     loopCount++;
     _currentId = _startId;
+    _resetNight();
     notifyListeners();
   }
 
@@ -60,6 +108,7 @@ class VnController extends ChangeNotifier {
     _currentId = _startId;
     flags.clear();
     loopCount = 0;
+    _resetNight();
     notifyListeners();
   }
 }
