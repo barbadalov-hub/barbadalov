@@ -7,6 +7,7 @@ import '../engine/fragments.dart';
 import '../engine/models.dart';
 import '../engine/script_act1.dart';
 import '../engine/vn_controller.dart';
+import '../i18n/l10n.dart';
 import 'mood_palette.dart';
 
 /// The visual-novel player: a mood-tinted CG stage on top, a dialogue box
@@ -31,7 +32,10 @@ class _VnScreenState extends State<VnScreen>
   bool _safeMode = false;
   bool _reduceMotion = false;
   bool _flash = false;
+  String _lang = 'ru';
   Timer? _flashTimer;
+
+  L10n get _l => L10n(_lang);
 
   @override
   void initState() {
@@ -145,6 +149,7 @@ class _VnScreenState extends State<VnScreen>
                   ? _MemoryHub(
                       controller: _controller,
                       palette: palette,
+                      l: _l,
                       onRecall: _recall,
                       onContinue: _controller.leaveMemoryHub,
                     )
@@ -160,6 +165,7 @@ class _VnScreenState extends State<VnScreen>
                         _DialogueBox(
                           node: _node,
                           palette: palette,
+                          l: _l,
                           lineIndex: _lineIndex,
                           showChoices: _showChoices,
                           isDeathEnd: _deathEnd,
@@ -206,7 +212,7 @@ class _VnScreenState extends State<VnScreen>
       children: <Widget>[
         if (_controller.loopCount > 0)
           Text(
-            'круг ${_controller.loopCount + 1}',
+            _l.tp('loop', <String, String>{'n': '${_controller.loopCount + 1}'}),
             style: TextStyle(
               color: palette.text.withValues(alpha: 0.5),
               fontSize: 11,
@@ -215,9 +221,20 @@ class _VnScreenState extends State<VnScreen>
           ),
         const Spacer(),
         TextButton(
+          onPressed: () => setState(() => _lang = L10n.next(_lang)),
+          child: Text(
+            _lang.toUpperCase(),
+            style: TextStyle(
+              color: palette.text.withValues(alpha: 0.6),
+              fontSize: 11,
+              letterSpacing: 1,
+            ),
+          ),
+        ),
+        TextButton(
           onPressed: () => setState(() => _safeMode = !_safeMode),
           child: Text(
-            _safeMode ? 'щадящий: вкл' : 'щадящий: выкл',
+            _l.t(_safeMode ? 'safe.on' : 'safe.off'),
             style: TextStyle(
               color: palette.accent.withValues(alpha: 0.8),
               fontSize: 11,
@@ -357,12 +374,14 @@ class _MemoryHub extends StatefulWidget {
   const _MemoryHub({
     required this.controller,
     required this.palette,
+    required this.l,
     required this.onRecall,
     required this.onContinue,
   });
 
   final VnController controller;
   final MoodPalette palette;
+  final L10n l;
   final void Function(MemoryFragment) onRecall;
   final VoidCallback onContinue;
 
@@ -382,6 +401,7 @@ class _MemoryHubState extends State<_MemoryHub> {
   Widget build(BuildContext context) {
     final MoodPalette p = widget.palette;
     final VnController c = widget.controller;
+    final L10n l = widget.l;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 66, 16, 14),
       child: Column(
@@ -390,7 +410,7 @@ class _MemoryHubState extends State<_MemoryHub> {
           Row(
             children: <Widget>[
               Text(
-                'ПАМЯТЬ',
+                l.t('memory'),
                 style: TextStyle(
                   color: p.accent,
                   fontSize: 12,
@@ -400,7 +420,10 @@ class _MemoryHubState extends State<_MemoryHub> {
               ),
               const Spacer(),
               Text(
-                'собрано ${c.fragmentsFound}/${kFragments.length}',
+                l.tp('collected', <String, String>{
+                  'n': '${c.fragmentsFound}',
+                  't': '${kFragments.length}',
+                }),
                 style: TextStyle(
                   color: p.text.withValues(alpha: 0.6),
                   fontSize: 12,
@@ -410,7 +433,7 @@ class _MemoryHubState extends State<_MemoryHub> {
           ),
           const SizedBox(height: 4),
           Text(
-            'Вспоминать — долго. Известное всплывает мгновенно.',
+            l.t('memory.hint'),
             style: TextStyle(
               color: p.text.withValues(alpha: 0.45),
               fontSize: 12,
@@ -466,7 +489,7 @@ class _MemoryHubState extends State<_MemoryHub> {
             ),
           const SizedBox(height: 10),
           _HubButton(
-            label: c.allFragmentsFound ? 'Сложить всё вместе  ›' : 'Продолжить  ›',
+            label: l.t(c.allFragmentsFound ? 'assemble' : 'continue'),
             palette: p,
             onTap: widget.onContinue,
           ),
@@ -506,7 +529,12 @@ class _MemoryHubState extends State<_MemoryHub> {
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  known ? 'мгновенно ✓' : '${f.clock} · −${f.cost}с',
+                  known
+                      ? widget.l.t('instant')
+                      : widget.l.tp('cost', <String, String>{
+                          'clock': f.clock,
+                          'cost': '${f.cost}',
+                        }),
                   style: TextStyle(
                     color: known
                         ? p.accent.withValues(alpha: 0.85)
@@ -571,6 +599,7 @@ class _DialogueBox extends StatelessWidget {
   const _DialogueBox({
     required this.node,
     required this.palette,
+    required this.l,
     required this.lineIndex,
     required this.showChoices,
     required this.isDeathEnd,
@@ -581,6 +610,7 @@ class _DialogueBox extends StatelessWidget {
 
   final VnNode node;
   final MoodPalette palette;
+  final L10n l;
   final int lineIndex;
   final bool showChoices;
   final bool isDeathEnd;
@@ -638,7 +668,7 @@ class _DialogueBox extends StatelessWidget {
               ),
             if (isDeathEnd) ...<Widget>[
               const SizedBox(height: 14),
-              _WakeButton(palette: palette, onTap: onWake),
+              _WakeButton(label: l.t('wake'), palette: palette, onTap: onWake),
             ] else if (showChoices) ...<Widget>[
               const SizedBox(height: 14),
               ...node.choices.map((VnChoice c) => _ChoiceButton(
@@ -650,7 +680,7 @@ class _DialogueBox extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(top: 12),
                 child: Text(
-                  'нажми, чтобы продолжить ›',
+                  l.t('tap'),
                   style: TextStyle(
                     color: palette.text.withValues(alpha: 0.4),
                     fontSize: 11,
@@ -666,8 +696,13 @@ class _DialogueBox extends StatelessWidget {
 }
 
 class _WakeButton extends StatelessWidget {
-  const _WakeButton({required this.palette, required this.onTap});
+  const _WakeButton({
+    required this.label,
+    required this.palette,
+    required this.onTap,
+  });
 
+  final String label;
   final MoodPalette palette;
   final VoidCallback onTap;
 
@@ -687,7 +722,7 @@ class _WakeButton extends StatelessWidget {
             border: Border.all(color: palette.accent),
           ),
           child: Text(
-            'Проснуться в 03:14  ↻',
+            label,
             textAlign: TextAlign.center,
             style: TextStyle(
               color: palette.accent,

@@ -71,6 +71,6 @@ docs/
 5. True ending «Голосовое», gated on all 7 fragments — **done**.
 6. Loop anchors/checkpoints (resume mid-night) — **done**.
 7. Branch endings «Это был ты» / «Оставить как есть» — **done** (more of the 14 to come).
-8. Localization en/ru/uk for the UI chrome.
-9. Full Act I dialogue + remaining death/ending beats.
+8. Localization en/ru/uk for the UI chrome (in-app language toggle) — **done** (`lib/i18n/`).
+9. Full Act I dialogue + remaining death/ending beats; narrative strings onto keys.
 10. Real anime CGs from the character/scene briefs.
