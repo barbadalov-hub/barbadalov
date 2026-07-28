@@ -18,9 +18,15 @@ class VnController extends ChangeNotifier {
   final String _startId;
   String _currentId;
 
+  /// The latest checkpoint reached; a death loop resumes here, not at the start.
+  String? _resumeAnchor;
+
   /// Flags the player has tripped (viewed CGs, remembered fragments, deaths).
   /// These persist across a death loop — the "hybrid" knowledge carry-over.
   final Set<String> flags = <String>{};
+
+  /// Whether the current loop resumed from a checkpoint rather than 03:14.
+  bool get resumedFromAnchor => _resumeAnchor != null;
 
   /// How many times a death has thrown the night back to the start.
   int loopCount = 0;
@@ -56,6 +62,7 @@ class VnController extends ChangeNotifier {
     final String? nextId = current.next;
     if (nextId != null && _script.containsKey(nextId)) {
       _currentId = nextId;
+      _recordAnchor();
       notifyListeners();
     }
   }
@@ -64,7 +71,16 @@ class VnController extends ChangeNotifier {
   void choose(VnChoice choice) {
     if (_script.containsKey(choice.goto)) {
       _currentId = choice.goto;
+      _recordAnchor();
       notifyListeners();
+    }
+  }
+
+  void _recordAnchor() {
+    final String? label = current.anchor;
+    if (label != null) {
+      _resumeAnchor = _currentId;
+      flags.add('anchor:$label');
     }
   }
 
@@ -128,7 +144,7 @@ class VnController extends ChangeNotifier {
   void loopFromDeath(String diedFrom) {
     flags.add('died:$diedFrom');
     loopCount++;
-    _currentId = _startId;
+    _currentId = _resumeAnchor ?? _startId;
     _resetNight();
     notifyListeners();
   }
@@ -138,6 +154,7 @@ class VnController extends ChangeNotifier {
     _currentId = _startId;
     flags.clear();
     loopCount = 0;
+    _resumeAnchor = null;
     _resetNight();
     notifyListeners();
   }

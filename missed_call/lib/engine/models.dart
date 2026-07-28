@@ -67,6 +67,8 @@ class VnNode {
     this.next,
     this.isDeath = false,
     this.isMemoryHub = false,
+    this.anchor,
+    this.endsNight = false,
   });
 
   final String id;
@@ -81,6 +83,13 @@ class VnNode {
   /// A memory screen: the player recalls fragments (each costs night time,
   /// known ones are free) before continuing to [next].
   final bool isMemoryHub;
+
+  /// A checkpoint label. Once passed, a death loop resumes here (skipping the
+  /// earlier beats) instead of the very start.
+  final String? anchor;
+
+  /// A terminal narrative beat (an ending). The night timer pauses here.
+  final bool endsNight;
 
   bool get isEnding => choices.isEmpty && next == null && !isDeath;
 }

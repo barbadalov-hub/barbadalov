@@ -69,6 +69,8 @@ docs/
 3. Night timer 03:14 → 03:47 + time-up death — **done** (`docs/design.md`).
 4. Memory screen — 7 fragments, hybrid instant-recall — **done** (`docs/design.md`).
 5. True ending «Голосовое», gated on all 7 fragments — **done**.
-6. Loop anchors/checkpoints; more of the 14 endings.
-7. Full Act I dialogue + remaining death beats.
-8. Real anime CGs from the character/scene briefs.
+6. Loop anchors/checkpoints (resume mid-night) — **done**.
+7. Branch endings «Это был ты» / «Оставить как есть» — **done** (more of the 14 to come).
+8. Localization en/ru/uk for the UI chrome.
+9. Full Act I dialogue + remaining death/ending beats.
+10. Real anime CGs from the character/scene briefs.

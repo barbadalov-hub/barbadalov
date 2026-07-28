@@ -62,6 +62,7 @@ final Map<String, VnNode> actOneScript = <String, VnNode>{
   ),
   'message': const VnNode(
     id: 'message',
+    anchor: 'A', // checkpoint: after this, a death loop skips the wake montage.
     cg: CgSpec(
       id: 'cg04_message',
       mood: Mood.night,
@@ -89,6 +90,10 @@ final Map<String, VnNode> actOneScript = <String, VnNode>{
           label: 'Кто ты вообще? Откуда у тебя мой номер?',
           goto: 'branch_who',
           tag: 'доверие −'),
+      VnChoice(
+          label: 'Отложить телефон и не отвечать.',
+          goto: 'ending_leave',
+          tag: 'уйти'),
     ],
   ),
   'branch_where': const VnNode(
@@ -101,8 +106,19 @@ final Map<String, VnNode> actOneScript = <String, VnNode>{
     lines: <VnLine>[
       VnLine(Speaker.mira, 'Кухня. Свет горит, чайник ещё тёплый.'),
       VnLine(Speaker.mira, 'У него открыт чат… и это переписка не со мной.'),
+      VnLine(Speaker.thought,
+          'Рядом — его телефон. Иконка пропущенных вызовов мигает красным.'),
     ],
-    next: 'memory',
+    choices: <VnChoice>[
+      VnChoice(
+          label: 'Прочитать сообщения и осмотреться.',
+          goto: 'memory',
+          tag: 'расследование'),
+      VnChoice(
+          label: 'Открыть историю звонков.',
+          goto: 'ending_guilt',
+          tag: 'правда'),
+    ],
   ),
   'branch_call': const VnNode(
     id: 'branch_call',
@@ -231,6 +247,7 @@ final Map<String, VnNode> actOneScript = <String, VnNode>{
   'memory_hub': const VnNode(
     id: 'memory_hub',
     isMemoryHub: true,
+    anchor: 'B', // deeper checkpoint: resume straight into the memory phase.
     cg: CgSpec(
       id: 'memory_hub',
       mood: Mood.memory,
@@ -238,9 +255,49 @@ final Map<String, VnNode> actOneScript = <String, VnNode>{
     ),
     next: 'slice_end',
   ),
+  // --- Endings (see docs/story.md for the full map of 14). ---
+  'ending_guilt': const VnNode(
+    id: 'ending_guilt',
+    endsNight: true,
+    cg: CgSpec(
+      id: 'ending_guilt',
+      mood: Mood.dread,
+      brief: 'История звонков крупным планом. Три строки «пропущенный» — все тебе.',
+    ),
+    lines: <VnLine>[
+      VnLine(Speaker.narration,
+          'Ты открываешь историю звонков Артёма. Три пропущенных: 23:14, 23:19, '
+          '23:31.'),
+      VnLine(Speaker.narration,
+          'Все — тебе. Он звонил тебе последним, а ты не взял трубку.'),
+      VnLine(Speaker.mira, 'Я всё ждала, когда ты сам это увидишь.'),
+    ],
+    choices: <VnChoice>[
+      VnChoice(label: 'Прожить ночь заново', goto: 'ring', tag: 'петля'),
+    ],
+  ),
+  'ending_leave': const VnNode(
+    id: 'ending_leave',
+    endsNight: true,
+    cg: CgSpec(
+      id: 'ending_leave',
+      mood: Mood.night,
+      brief: 'Телефон ложится экраном вниз. Свет гаснет. Комната в темноте.',
+    ),
+    lines: <VnLine>[
+      VnLine(Speaker.narration,
+          'Ты кладёшь телефон экраном вниз. Некоторые двери лучше не открывать.'),
+      VnLine(Speaker.narration,
+          'Утром ты не узнаешь правды — и научишься с этим жить. Это тоже выбор.'),
+    ],
+    choices: <VnChoice>[
+      VnChoice(label: '…или всё-таки ответить', goto: 'ring', tag: 'петля'),
+    ],
+  ),
   // True ending — reached only when all 7 fragments are collected.
   'ending_true': const VnNode(
     id: 'ending_true',
+    endsNight: true,
     cg: CgSpec(
       id: 'ending_voice',
       mood: Mood.dawn,
@@ -268,6 +325,7 @@ final Map<String, VnNode> actOneScript = <String, VnNode>{
   ),
   'slice_end': const VnNode(
     id: 'slice_end',
+    endsNight: true,
     cg: CgSpec(
       id: 'cg01_ring',
       mood: Mood.night,

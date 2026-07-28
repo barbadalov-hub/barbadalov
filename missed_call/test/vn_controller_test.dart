@@ -47,9 +47,11 @@ void main() {
     test('choosing jumps to the branch and reaches the memory insert', () {
       final VnController c =
           VnController(script: actOneScript, startId: 'message');
-      c.choose(c.current.choices.first); // -> branch_where
+      c.choose(c.current.choices
+          .firstWhere((VnChoice ch) => ch.goto == 'branch_where'));
       expect(c.current.id, 'branch_where');
-      c.advance(); // -> memory
+      c.choose(
+          c.current.choices.firstWhere((VnChoice ch) => ch.goto == 'memory'));
       expect(c.current.id, 'memory');
       expect(c.current.cg.mood, Mood.memory);
     });
@@ -77,12 +79,12 @@ void main() {
       expect(c.current.cg.mood, Mood.dread);
     });
 
-    test('loopFromDeath returns to 03:14, keeps flags and counts the loop', () {
+    test('loopFromDeath loops back, keeps flags and counts the loop', () {
       final VnController c =
           VnController(script: actOneScript, startId: kActOneStart);
       c.advance(); // ring -> wake
       c.advance(); // wake -> clock
-      c.advance(); // clock -> message
+      c.advance(); // clock -> message (anchor A)
       c.choose(c.current.choices
           .firstWhere((VnChoice ch) => ch.goto == 'branch_call'));
       c.choose(
@@ -91,7 +93,7 @@ void main() {
 
       c.flags.add('fragment:mirror');
       c.loopFromDeath(c.current.id);
-      expect(c.current.id, kActOneStart);
+      expect(c.current.id, 'message'); // resumes at the anchor, keeps knowledge
       expect(c.loopCount, 1);
       expect(c.flags, contains('fragment:mirror')); // knowledge persists
       expect(c.flags, contains('died:death_line'));
@@ -191,6 +193,59 @@ void main() {
       expect(c.current.id, 'ending_true');
       expect(c.current.cg.mood, Mood.dawn);
       expect(c.current.choices, isNotEmpty);
+    });
+  });
+
+  group('Anchors', () {
+    test('a death loop resumes from the last checkpoint, not 03:14', () {
+      final VnController c =
+          VnController(script: actOneScript, startId: kActOneStart);
+      c.advance(); // ring -> wake
+      c.advance(); // wake -> clock
+      c.advance(); // clock -> message (anchor A)
+      expect(c.current.id, 'message');
+      expect(c.resumedFromAnchor, isTrue);
+
+      c.choose(c.current.choices
+          .firstWhere((VnChoice ch) => ch.goto == 'branch_who'));
+      c.choose(
+          c.current.choices.firstWhere((VnChoice ch) => ch.tag == 'тупик'));
+      expect(c.current.isDeath, isTrue);
+
+      c.loopFromDeath(c.current.id);
+      expect(c.current.id, 'message'); // resumed at anchor A, not 'ring'
+      expect(c.loopCount, 1);
+    });
+
+    test('restart clears the checkpoint', () {
+      final VnController c =
+          VnController(script: actOneScript, startId: kActOneStart);
+      c.advance();
+      c.advance();
+      c.advance(); // message -> anchor A
+      c.restart();
+      expect(c.resumedFromAnchor, isFalse);
+      expect(c.current.id, kActOneStart);
+    });
+  });
+
+  group('Branch endings', () {
+    test('opening the call history reaches «Это был ты»', () {
+      final VnController c =
+          VnController(script: actOneScript, startId: 'branch_where');
+      c.choose(
+          c.current.choices.firstWhere((VnChoice ch) => ch.tag == 'правда'));
+      expect(c.current.id, 'ending_guilt');
+      expect(c.current.endsNight, isTrue);
+    });
+
+    test('putting the phone down reaches «Оставить как есть»', () {
+      final VnController c =
+          VnController(script: actOneScript, startId: 'message');
+      c.choose(
+          c.current.choices.firstWhere((VnChoice ch) => ch.goto == 'ending_leave'));
+      expect(c.current.id, 'ending_leave');
+      expect(c.current.endsNight, isTrue);
     });
   });
 }

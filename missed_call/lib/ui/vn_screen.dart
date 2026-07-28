@@ -47,15 +47,10 @@ class _VnScreenState extends State<VnScreen>
     _reduceMotion = MediaQuery.of(context).disableAnimations;
   }
 
-  static const Set<String> _timerPausedNodes = <String>{
-    'slice_end',
-    'ending_true',
-  };
-
   bool get _timerActive =>
       !_node.isDeath &&
       !_node.isMemoryHub &&
-      !_timerPausedNodes.contains(_node.id) &&
+      !_node.endsNight &&
       !_controller.isTimeUp;
 
   /// Recall a memory in the hub: charge its time, refresh the clock, and if the
