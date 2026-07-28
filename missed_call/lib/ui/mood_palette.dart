@@ -20,6 +20,15 @@ class MoodPalette {
   final Color text;
   final Color accent;
 
+  /// Special palette for horror death beats — near-black with a blood accent.
+  static const MoodPalette death = MoodPalette(
+    bgTop: Color(0xFF140A0A),
+    bgBottom: Color(0xFF050303),
+    panel: Color(0xFF1A0C0D),
+    text: Color(0xFFE6D2CC),
+    accent: Color(0xFFD24A3A),
+  );
+
   static MoodPalette of(Mood mood) {
     switch (mood) {
       case Mood.night:

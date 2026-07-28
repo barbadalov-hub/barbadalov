@@ -65,6 +65,7 @@ class VnNode {
     this.lines = const <VnLine>[],
     this.choices = const <VnChoice>[],
     this.next,
+    this.isDeath = false,
   });
 
   final String id;
@@ -73,5 +74,8 @@ class VnNode {
   final List<VnChoice> choices;
   final String? next;
 
-  bool get isEnding => choices.isEmpty && next == null;
+  /// A horror dead-end: playing it out loops the night back to 03:14.
+  final bool isDeath;
+
+  bool get isEnding => choices.isEmpty && next == null && !isDeath;
 }

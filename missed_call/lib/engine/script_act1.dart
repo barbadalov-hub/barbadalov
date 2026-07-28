@@ -115,7 +115,13 @@ final Map<String, VnNode> actOneScript = <String, VnNode>{
       VnLine(Speaker.mira, 'Не надо. Пожалуйста, не звони ему.'),
       VnLine(Speaker.mira, 'Просто… доверься мне ещё пару минут.'),
     ],
-    next: 'memory',
+    choices: <VnChoice>[
+      VnChoice(label: 'Хорошо. Пару минут.', goto: 'memory', tag: 'доверие +'),
+      VnChoice(
+          label: 'Я всё равно наберу его номер.',
+          goto: 'death_line',
+          tag: 'тупик'),
+    ],
   ),
   'branch_who': const VnNode(
     id: 'branch_who',
@@ -128,7 +134,59 @@ final Map<String, VnNode> actOneScript = <String, VnNode>{
       VnLine(Speaker.mira, 'Ты правда не помнишь?'),
       VnLine(Speaker.mira, '…Тогда не спрашивай меня. Смотри вокруг.'),
     ],
-    next: 'memory',
+    choices: <VnChoice>[
+      VnChoice(label: 'Ладно… осмотрюсь.', goto: 'memory', tag: 'расследование'),
+      VnChoice(
+          label: 'Хватит игр. Отвечай, кто ты!',
+          goto: 'death_paralysis',
+          tag: 'тупик'),
+    ],
+  ),
+  // --- Horror dead-ends: playing them out loops the night back to 03:14. ---
+  'death_paralysis': const VnNode(
+    id: 'death_paralysis',
+    isDeath: true,
+    cg: CgSpec(
+      id: 'death_sleep',
+      mood: Mood.dread,
+      brief:
+          'Сонный паралич. Почти чёрный кадр, туннельная виньетка. У изножья '
+          'сгущается силуэт; матрас проминается — оно забирается на кровать.',
+    ),
+    lines: <VnLine>[
+      VnLine(Speaker.narration,
+          'Ты моргнул — и глаза открылись не там. Ты снова в кровати, но не '
+          'можешь пошевелиться.'),
+      VnLine(Speaker.narration,
+          'Телефон звонит. Рука не слушается. Матрас проминается у изножья — '
+          'оно забирается на кровать.'),
+      VnLine(Speaker.mira,
+          'Не надо было спрашивать. Некоторые двери держат закрытыми не просто так.'),
+      VnLine(Speaker.narration,
+          'Оно садится тебе на грудь и наклоняется к лицу. Это твоё лицо. Пустое.'),
+    ],
+  ),
+  'death_line': const VnNode(
+    id: 'death_line',
+    isDeath: true,
+    cg: CgSpec(
+      id: 'death_caller',
+      mood: Mood.dread,
+      brief:
+          'Экран телефона крупно, гаснет сам. В чёрном стекле — твоё отражение, '
+          'улыбающееся не в такт.',
+    ),
+    lines: <VnLine>[
+      VnLine(Speaker.narration,
+          'Гудок. Ещё. На третьем — снимают. Но это не голос: дыхание, помехи, '
+          'ветер как из трубы.'),
+      VnLine(Speaker.narration,
+          'Оно произносит твоё имя — правильно, с маминым ударением. Экран '
+          'гаснет сам.'),
+      VnLine(Speaker.narration,
+          'В чёрном зеркале стекла — твоё отражение. Оно улыбается не в такт.'),
+      VnLine(Speaker.mira, 'ты звал. я пришёл. теперь я не уйду.'),
+    ],
   ),
   'memory': const VnNode(
     id: 'memory',

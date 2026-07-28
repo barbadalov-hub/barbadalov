@@ -13,8 +13,10 @@ a night-long **timer** counts down and each failure loops him back.
 ## Status
 
 Playable **vertical slice of the Act I prologue**: wake → first contact with
-«М.» → a branching first choice → a warm memory insert → loop. CG art is
-represented by mood-tinted placeholders + art briefs until real anime
+«М.» → a branching first choice → a warm memory insert → loop. Two branches are
+lethal **horror dead-ends** (sleep paralysis, "the one on the line") that loop
+the night back to 03:14 while keeping your knowledge — with a **safe mode**
+toggle. CG art is mood-tinted placeholders + art briefs until real anime
 illustrations are produced from the character sheets.
 
 ## Run
@@ -48,6 +50,7 @@ docs/
   story.md                  the tangled plot, 5 layers, 14 endings
   characters.md             Дан · Артём · «М.» · Ирина (+ AI art prompts)
   design.md                 loop, 33-min timer, anchors, 7 fragments, art direction
+  horror.md                 dead-end = death = loop, 6 death beats, safe mode
 ```
 
 ## How to add content
@@ -62,7 +65,8 @@ docs/
 ## Roadmap
 
 1. Act I prologue slice — **done**.
-2. Night timer + loop + anchors (see `docs/design.md`).
-3. Memory screen with progressive room reveal (7 fragments).
-4. Full Act I dialogue + first endings.
-5. Real anime CGs from the character/scene briefs.
+2. Horror dead-ends + death loop + safe mode — **done** (`docs/horror.md`).
+3. Night timer + loop + anchors (see `docs/design.md`).
+4. Memory screen with progressive room reveal (7 fragments).
+5. Full Act I dialogue + remaining death beats + first endings.
+6. Real anime CGs from the character/scene briefs.

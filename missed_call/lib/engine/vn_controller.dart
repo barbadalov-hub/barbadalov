@@ -17,9 +17,12 @@ class VnController extends ChangeNotifier {
   final String _startId;
   String _currentId;
 
-  /// Flags the player has tripped (viewed CGs, remembered fragments, etc.).
-  /// Reused later for the loop's "hybrid" knowledge carry-over.
+  /// Flags the player has tripped (viewed CGs, remembered fragments, deaths).
+  /// These persist across a death loop — the "hybrid" knowledge carry-over.
   final Set<String> flags = <String>{};
+
+  /// How many times a death has thrown the night back to the start.
+  int loopCount = 0;
 
   VnNode get current => _script[_currentId]!;
 
@@ -43,11 +46,20 @@ class VnController extends ChangeNotifier {
     }
   }
 
-  /// Restart the act. Knowledge (flags) resets in this slice; the full game
-  /// keeps it across loops (see missed_call/docs/design.md).
+  /// A horror death: the night snaps back to 03:14, but knowledge stays.
+  /// Records that this death was seen (used later for hybrid carry-over).
+  void loopFromDeath(String diedFrom) {
+    flags.add('died:$diedFrom');
+    loopCount++;
+    _currentId = _startId;
+    notifyListeners();
+  }
+
+  /// Full restart of the slice — clears everything (menu-style).
   void restart() {
     _currentId = _startId;
     flags.clear();
+    loopCount = 0;
     notifyListeners();
   }
 }

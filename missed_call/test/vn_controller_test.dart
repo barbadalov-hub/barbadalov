@@ -63,4 +63,50 @@ void main() {
       expect(c.flags, isEmpty);
     });
   });
+
+  group('Horror dead-ends', () {
+    test('a lethal choice leads to a death node', () {
+      final VnController c =
+          VnController(script: actOneScript, startId: 'branch_who');
+      final VnChoice lethal =
+          c.current.choices.firstWhere((VnChoice ch) => ch.tag == 'тупик');
+      c.choose(lethal);
+      expect(c.current.isDeath, isTrue);
+      expect(c.current.isEnding, isFalse);
+      expect(c.current.cg.mood, Mood.dread);
+    });
+
+    test('loopFromDeath returns to 03:14, keeps flags and counts the loop', () {
+      final VnController c =
+          VnController(script: actOneScript, startId: kActOneStart);
+      c.advance(); // ring -> wake
+      c.advance(); // wake -> clock
+      c.advance(); // clock -> message
+      c.choose(c.current.choices
+          .firstWhere((VnChoice ch) => ch.goto == 'branch_call'));
+      c.choose(
+          c.current.choices.firstWhere((VnChoice ch) => ch.tag == 'тупик'));
+      expect(c.current.id, 'death_line');
+
+      c.flags.add('fragment:mirror');
+      c.loopFromDeath(c.current.id);
+      expect(c.current.id, kActOneStart);
+      expect(c.loopCount, 1);
+      expect(c.flags, contains('fragment:mirror')); // knowledge persists
+      expect(c.flags, contains('died:death_line'));
+    });
+
+    test('every death node is reachable from some lethal choice', () {
+      final Set<String> deathIds = <String>{
+        for (final VnNode n in actOneScript.values)
+          if (n.isDeath) n.id,
+      };
+      final Set<String> targeted = <String>{
+        for (final VnNode n in actOneScript.values)
+          for (final VnChoice ch in n.choices)
+            if (actOneScript[ch.goto]?.isDeath ?? false) ch.goto,
+      };
+      expect(targeted, containsAll(deathIds));
+    });
+  });
 }
