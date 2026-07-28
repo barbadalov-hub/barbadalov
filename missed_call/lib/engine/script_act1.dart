@@ -238,6 +238,34 @@ final Map<String, VnNode> actOneScript = <String, VnNode>{
     ),
     next: 'slice_end',
   ),
+  // True ending — reached only when all 7 fragments are collected.
+  'ending_true': const VnNode(
+    id: 'ending_true',
+    cg: CgSpec(
+      id: 'ending_voice',
+      mood: Mood.dawn,
+      brief:
+          'Возврат цвета, рассвет в окне. На телефоне — непрослушанное '
+          'голосовое, записанное для тебя.',
+    ),
+    lines: <VnLine>[
+      VnLine(Speaker.narration,
+          'Семь осколков сложились в одно. Ты наконец решаешься нажать «play».'),
+      VnLine(Speaker.narration,
+          'Голос Артёма — тёплый, живой, записанный за минуты до.'),
+      VnLine(Speaker.artem,
+          'Что бы ни случилось — это не твоя вина. Слышишь? Не твоя. Живи.'),
+      VnLine(Speaker.narration,
+          'Впервые за всю ночь — тишина, в которой можно дышать. За окном '
+          'светлеет. Часы идут дальше.'),
+    ],
+    choices: <VnChoice>[
+      VnChoice(
+          label: 'Проснуться — по-настоящему',
+          goto: 'ring',
+          tag: 'новый круг'),
+    ],
+  ),
   'slice_end': const VnNode(
     id: 'slice_end',
     cg: CgSpec(

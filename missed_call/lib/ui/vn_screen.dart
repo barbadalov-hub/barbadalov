@@ -47,10 +47,15 @@ class _VnScreenState extends State<VnScreen>
     _reduceMotion = MediaQuery.of(context).disableAnimations;
   }
 
+  static const Set<String> _timerPausedNodes = <String>{
+    'slice_end',
+    'ending_true',
+  };
+
   bool get _timerActive =>
       !_node.isDeath &&
       !_node.isMemoryHub &&
-      _node.id != 'slice_end' &&
+      !_timerPausedNodes.contains(_node.id) &&
       !_controller.isTimeUp;
 
   /// Recall a memory in the hub: charge its time, refresh the clock, and if the
@@ -146,7 +151,7 @@ class _VnScreenState extends State<VnScreen>
                       controller: _controller,
                       palette: palette,
                       onRecall: _recall,
-                      onContinue: _controller.advance,
+                      onContinue: _controller.leaveMemoryHub,
                     )
                   : Column(
                       children: <Widget>[
@@ -466,7 +471,7 @@ class _MemoryHubState extends State<_MemoryHub> {
             ),
           const SizedBox(height: 10),
           _HubButton(
-            label: 'Продолжить  ›',
+            label: c.allFragmentsFound ? 'Сложить всё вместе  ›' : 'Продолжить  ›',
             palette: p,
             onTap: widget.onContinue,
           ),

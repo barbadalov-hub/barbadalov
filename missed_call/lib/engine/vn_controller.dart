@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import 'fragments.dart';
 import 'models.dart';
 
 /// Drives the visual novel: keeps the current node, advances linear beats and
@@ -98,6 +99,19 @@ class VnController extends ChangeNotifier {
 
   int get fragmentsFound =>
       flags.where((String f) => f.startsWith('fragment:')).length;
+
+  bool get allFragmentsFound => fragmentsFound >= kFragments.length;
+
+  /// Leave the memory hub: collecting all seven fragments unlocks the true
+  /// ending «Голосовое»; otherwise continue to the next node.
+  void leaveMemoryHub() {
+    if (allFragmentsFound && _script.containsKey('ending_true')) {
+      _currentId = 'ending_true';
+      notifyListeners();
+    } else {
+      advance();
+    }
+  }
 
   /// Recall a memory. The first time it costs [MemoryFragment.cost] seconds of
   /// the night; once known it is instant and free (persists across death loops).

@@ -170,4 +170,27 @@ void main() {
       expect(c.fragmentsFound, 1);
     });
   });
+
+  group('True ending', () {
+    test('leaving the hub without all fragments continues to slice_end', () {
+      final VnController c =
+          VnController(script: actOneScript, startId: 'memory_hub');
+      expect(c.allFragmentsFound, isFalse);
+      c.leaveMemoryHub();
+      expect(c.current.id, 'slice_end');
+    });
+
+    test('collecting all seven fragments unlocks «Голосовое»', () {
+      final VnController c =
+          VnController(script: actOneScript, startId: 'memory_hub');
+      for (final MemoryFragment f in kFragments) {
+        c.recall(f);
+      }
+      expect(c.allFragmentsFound, isTrue);
+      c.leaveMemoryHub();
+      expect(c.current.id, 'ending_true');
+      expect(c.current.cg.mood, Mood.dawn);
+      expect(c.current.choices, isNotEmpty);
+    });
+  });
 }
