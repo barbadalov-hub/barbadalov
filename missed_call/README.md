@@ -25,9 +25,13 @@ illustrations are produced from the character sheets.
 cd missed_call
 flutter pub get
 flutter run            # web / android / desktop
-flutter analyze        # analyzed as its own package
-flutter test
+flutter build web --release   # verified: builds to build/web
+flutter analyze        # analyzed as its own package (strict, mirrors LifeOS)
+flutter test           # 25 tests (engine + widget smoke)
 ```
+
+The web target is scaffolded (`web/`); the app builds and boots (a widget test
+pumps `MissedCallApp` and checks the first line renders).
 
 Zero third-party dependencies — the whole novel is a data-driven scene graph
 rendered with the Flutter SDK only, so the build stays **plugin-free** (no

@@ -17,6 +17,9 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+  # Recommended lint set (the module's analysis_options mirrors LifeOS strictness).
+  flutter_lints: ^4.0.0
+
 flutter:
   uses-material-design: true
   # Real anime CG art will live here once produced from the character briefs.
