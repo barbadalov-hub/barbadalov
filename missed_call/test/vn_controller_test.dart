@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:missed_call/engine/fragments.dart';
 import 'package:missed_call/engine/models.dart';
 import 'package:missed_call/engine/script_act1.dart';
 import 'package:missed_call/engine/vn_controller.dart';
@@ -140,6 +141,33 @@ void main() {
       expect(c.isTimeUp, isFalse);
       expect(c.nightProgress, 0.0);
       expect(c.nightClock, '03:14');
+    });
+  });
+
+  group('Memory fragments', () {
+    test('recalling an unknown fragment costs night time and marks it known', () {
+      final VnController c =
+          VnController(script: actOneScript, startId: kActOneStart);
+      final MemoryFragment f = kFragments.first;
+      expect(c.isFragmentKnown(f.id), isFalse);
+      final double before = c.nightProgress;
+      c.recall(f);
+      expect(c.isFragmentKnown(f.id), isTrue);
+      expect(c.fragmentsFound, 1);
+      expect(c.nightProgress, greaterThan(before));
+    });
+
+    test('a known fragment recalls for free — even after a death loop', () {
+      final VnController c =
+          VnController(script: actOneScript, startId: kActOneStart);
+      final MemoryFragment f = kFragments.first;
+      c.recall(f); // charged
+      c.loopFromDeath('death_time'); // night resets, knowledge persists
+      expect(c.isFragmentKnown(f.id), isTrue);
+      final double before = c.nightProgress; // 0 after reset
+      c.recall(f); // instant recall — no cost
+      expect(c.nightProgress, before);
+      expect(c.fragmentsFound, 1);
     });
   });
 }

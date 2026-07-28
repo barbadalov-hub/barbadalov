@@ -93,6 +93,22 @@ class VnController extends ChangeNotifier {
     _timeUpTriggered = false;
   }
 
+  // --- Memory fragments (hybrid loop): known fragments recall for free. ---
+  bool isFragmentKnown(String id) => flags.contains('fragment:$id');
+
+  int get fragmentsFound =>
+      flags.where((String f) => f.startsWith('fragment:')).length;
+
+  /// Recall a memory. The first time it costs [MemoryFragment.cost] seconds of
+  /// the night; once known it is instant and free (persists across death loops).
+  void recall(MemoryFragment fragment) {
+    if (isFragmentKnown(fragment.id)) {
+      return;
+    }
+    tickNight(fragment.cost.toDouble());
+    flags.add('fragment:${fragment.id}');
+  }
+
   /// A horror death: the night snaps back to 03:14, but knowledge stays.
   /// Records that this death was seen (used later for hybrid carry-over).
   void loopFromDeath(String diedFrom) {

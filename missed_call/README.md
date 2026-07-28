@@ -67,7 +67,7 @@ docs/
 1. Act I prologue slice — **done**.
 2. Horror dead-ends + death loop + safe mode — **done** (`docs/horror.md`).
 3. Night timer 03:14 → 03:47 + time-up death — **done** (`docs/design.md`).
-4. Loop anchors/checkpoints + hybrid knowledge carry-over.
-5. Memory screen with progressive room reveal (7 fragments).
+4. Memory screen — 7 fragments, hybrid instant-recall — **done** (`docs/design.md`).
+5. Loop anchors/checkpoints; true ending gated on all 7 fragments.
 6. Full Act I dialogue + remaining death beats + first endings.
 7. Real anime CGs from the character/scene briefs.

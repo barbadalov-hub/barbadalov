@@ -226,6 +226,16 @@ final Map<String, VnNode> actOneScript = <String, VnNode>{
           'Потом гаснет. Синий свет телефона возвращается.'),
       VnLine(Speaker.thought, 'Почему я вспомнил именно это?'),
     ],
+    next: 'memory_hub',
+  ),
+  'memory_hub': const VnNode(
+    id: 'memory_hub',
+    isMemoryHub: true,
+    cg: CgSpec(
+      id: 'memory_hub',
+      mood: Mood.memory,
+      brief: 'Твоя память — тёмная комната. Что-то в ней ещё можно разглядеть.',
+    ),
     next: 'slice_end',
   ),
   'slice_end': const VnNode(

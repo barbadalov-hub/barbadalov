@@ -66,6 +66,7 @@ class VnNode {
     this.choices = const <VnChoice>[],
     this.next,
     this.isDeath = false,
+    this.isMemoryHub = false,
   });
 
   final String id;
@@ -77,5 +78,33 @@ class VnNode {
   /// A horror dead-end: playing it out loops the night back to 03:14.
   final bool isDeath;
 
+  /// A memory screen: the player recalls fragments (each costs night time,
+  /// known ones are free) before continuing to [next].
+  final bool isMemoryHub;
+
   bool get isEnding => choices.isEmpty && next == null && !isDeath;
+}
+
+/// One of the seven memories that reconstruct the night. Recalling an unknown
+/// fragment costs [cost] seconds of the night; a known one is free (the hybrid
+/// loop's "instant recall").
+@immutable
+class MemoryFragment {
+  const MemoryFragment({
+    required this.id,
+    required this.title,
+    required this.clock,
+    required this.brief,
+    required this.cost,
+  });
+
+  final String id;
+  final String title;
+
+  /// The in-fiction time this memory sits at (display only).
+  final String clock;
+  final String brief;
+
+  /// Seconds of the night it costs to dredge this up for the first time.
+  final int cost;
 }

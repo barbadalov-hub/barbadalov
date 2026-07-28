@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show Ticker;
 
+import '../engine/fragments.dart';
 import '../engine/models.dart';
 import '../engine/script_act1.dart';
 import '../engine/vn_controller.dart';
@@ -47,7 +48,22 @@ class _VnScreenState extends State<VnScreen>
   }
 
   bool get _timerActive =>
-      !_node.isDeath && _node.id != 'slice_end' && !_controller.isTimeUp;
+      !_node.isDeath &&
+      !_node.isMemoryHub &&
+      _node.id != 'slice_end' &&
+      !_controller.isTimeUp;
+
+  /// Recall a memory in the hub: charge its time, refresh the clock, and if the
+  /// deadline is crossed, fall into the time-up death.
+  void _recall(MemoryFragment fragment) {
+    _controller.recall(fragment);
+    _progress.value = _controller.nightProgress;
+    if (_controller.isTimeUp) {
+      _controller.triggerTimeUp();
+    } else {
+      setState(() {});
+    }
+  }
 
   void _onTick(Duration elapsed) {
     final double dt = (elapsed - _lastTick).inMicroseconds / 1000000.0;
@@ -125,27 +141,34 @@ class _VnScreenState extends State<VnScreen>
               ),
             ),
             child: SafeArea(
-              child: Column(
-                children: <Widget>[
-                  Expanded(
-                    child: _CgStage(
-                      node: _node,
+              child: _node.isMemoryHub
+                  ? _MemoryHub(
+                      controller: _controller,
                       palette: palette,
-                      onTap: _onTapStage,
+                      onRecall: _recall,
+                      onContinue: _controller.advance,
+                    )
+                  : Column(
+                      children: <Widget>[
+                        Expanded(
+                          child: _CgStage(
+                            node: _node,
+                            palette: palette,
+                            onTap: _onTapStage,
+                          ),
+                        ),
+                        _DialogueBox(
+                          node: _node,
+                          palette: palette,
+                          lineIndex: _lineIndex,
+                          showChoices: _showChoices,
+                          isDeathEnd: _deathEnd,
+                          onTapContinue: _onTapStage,
+                          onChoose: _controller.choose,
+                          onWake: () => _controller.loopFromDeath(_node.id),
+                        ),
+                      ],
                     ),
-                  ),
-                  _DialogueBox(
-                    node: _node,
-                    palette: palette,
-                    lineIndex: _lineIndex,
-                    showChoices: _showChoices,
-                    isDeathEnd: _deathEnd,
-                    onTapContinue: _onTapStage,
-                    onChoose: _controller.choose,
-                    onWake: () => _controller.loopFromDeath(_node.id),
-                  ),
-                ],
-              ),
             ),
           ),
           Align(
@@ -323,6 +346,221 @@ class _CgStage extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// The memory screen: recall fragments (each costs night time; known ones are
+/// free — the hybrid loop's "instant recall"), then continue.
+class _MemoryHub extends StatefulWidget {
+  const _MemoryHub({
+    required this.controller,
+    required this.palette,
+    required this.onRecall,
+    required this.onContinue,
+  });
+
+  final VnController controller;
+  final MoodPalette palette;
+  final void Function(MemoryFragment) onRecall;
+  final VoidCallback onContinue;
+
+  @override
+  State<_MemoryHub> createState() => _MemoryHubState();
+}
+
+class _MemoryHubState extends State<_MemoryHub> {
+  MemoryFragment? _shown;
+
+  void _tap(MemoryFragment fragment) {
+    setState(() => _shown = fragment);
+    widget.onRecall(fragment);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final MoodPalette p = widget.palette;
+    final VnController c = widget.controller;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 66, 16, 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              Text(
+                'ПАМЯТЬ',
+                style: TextStyle(
+                  color: p.accent,
+                  fontSize: 12,
+                  letterSpacing: 2,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                'собрано ${c.fragmentsFound}/${kFragments.length}',
+                style: TextStyle(
+                  color: p.text.withValues(alpha: 0.6),
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Вспоминать — долго. Известное всплывает мгновенно.',
+            style: TextStyle(
+              color: p.text.withValues(alpha: 0.45),
+              fontSize: 12,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: kFragments
+                    .map((MemoryFragment f) => _tile(f, c.isFragmentKnown(f.id)))
+                    .toList(),
+              ),
+            ),
+          ),
+          if (_shown != null)
+            Container(
+              width: double.infinity,
+              margin: const EdgeInsets.only(top: 10),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+              decoration: BoxDecoration(
+                color: p.panel.withValues(alpha: 0.9),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: p.accent.withValues(alpha: 0.3)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text(
+                    '${_shown!.title.toUpperCase()} · ${_shown!.clock}',
+                    style: TextStyle(
+                      color: p.accent,
+                      fontSize: 10,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    _shown!.brief,
+                    style: TextStyle(
+                      color: p.text,
+                      fontSize: 15,
+                      height: 1.45,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          const SizedBox(height: 10),
+          _HubButton(
+            label: 'Продолжить  ›',
+            palette: p,
+            onTap: widget.onContinue,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _tile(MemoryFragment f, bool known) {
+    final MoodPalette p = widget.palette;
+    final Color edge = known ? p.accent : p.accent.withValues(alpha: 0.4);
+    return SizedBox(
+      width: 152,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _tap(f),
+          borderRadius: BorderRadius.circular(11),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
+            decoration: BoxDecoration(
+              color: known ? p.accent.withValues(alpha: 0.1) : Colors.transparent,
+              borderRadius: BorderRadius.circular(11),
+              border: Border.all(color: edge),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Text(
+                  f.title,
+                  style: TextStyle(
+                    color: p.text,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  known ? 'мгновенно ✓' : '${f.clock} · −${f.cost}с',
+                  style: TextStyle(
+                    color: known
+                        ? p.accent.withValues(alpha: 0.85)
+                        : p.text.withValues(alpha: 0.5),
+                    fontSize: 11,
+                    letterSpacing: 0.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HubButton extends StatelessWidget {
+  const _HubButton({
+    required this.label,
+    required this.palette,
+    required this.onTap,
+  });
+
+  final String label;
+  final MoodPalette palette;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(11),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: palette.accent.withValues(alpha: 0.14),
+            borderRadius: BorderRadius.circular(11),
+            border: Border.all(color: palette.accent),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: palette.accent,
+              fontSize: 14.5,
+              letterSpacing: 0.6,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
       ),
     );
   }
