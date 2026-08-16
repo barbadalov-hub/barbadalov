@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:lifeos/core/constants/app_constants.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:lifeos/core/utils/download_file.dart';
 import 'package:lifeos/features/money/application/transaction_csv.dart';
@@ -87,7 +88,8 @@ Future<void> _exportCsv(BuildContext context, WidgetRef ref) async {
   if (list.isEmpty) return;
   final csv = buildTransactionsCsv(list);
   final stamp = DateTime.now().toIso8601String().split('T').first;
-  final downloaded = downloadTextFile('lifeos-transactions-$stamp.csv', csv);
+  final downloaded = downloadTextFile(
+      '${AppConstants.brandSlug}-transactions-$stamp.csv', csv);
   if (!downloaded) await Clipboard.setData(ClipboardData(text: csv));
   if (!context.mounted) return;
   ScaffoldMessenger.of(context)

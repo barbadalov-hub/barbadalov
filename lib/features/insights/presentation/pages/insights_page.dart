@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:lifeos/core/constants/app_constants.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:lifeos/features/insights/domain/cross_insights.dart';
 import 'package:lifeos/features/insights/domain/insight_engine.dart';
@@ -537,7 +538,7 @@ class _InsightShareSheetState extends State<_InsightShareSheet> {
               width: double.infinity,
               child: FilledButton.icon(
                 onPressed: () => shareBoundaryPng(
-                    context, _shareKey, 'lifeos_insights.png',
+                    context, _shareKey, '${AppConstants.brandSlug}_insights.png',
                     popAfter: true),
                 icon: const Icon(Icons.ios_share),
                 label: Text(context.tr('wrapped.share')),

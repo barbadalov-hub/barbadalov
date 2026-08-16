@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:lifeos/core/constants/app_constants.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:lifeos/core/utils/share_image.dart';
 
@@ -136,7 +137,9 @@ class ShareCard extends StatelessWidget {
                 ),
               ),
           const SizedBox(height: 16),
-          Text('lifeos',
+          // Wordmark derives from the app name so a rebrand can never leave
+          // shared images (the most public artefact) on the old brand.
+          Text(AppConstants.appName.toLowerCase(),
               style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w800,

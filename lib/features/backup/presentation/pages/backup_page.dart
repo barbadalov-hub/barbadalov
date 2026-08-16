@@ -1,7 +1,8 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
+﻿import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lifeos/core/constants/app_constants.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:lifeos/core/utils/download_file.dart';
 import 'package:lifeos/core/utils/pick_file.dart';
@@ -38,7 +39,8 @@ class _BackupPageState extends ConsumerState<BackupPage> {
   void _download() {
     final json = ref.read(localBackupProvider).exportJson();
     final stamp = DateTime.now().toIso8601String().split('T').first;
-    final ok = downloadTextFile('lifeos-backup-$stamp.json', json);
+    final ok =
+        downloadTextFile('${AppConstants.brandSlug}-backup-$stamp.json', json);
     ref.read(backupStatusProvider.notifier).markExported();
     _toast(ok ? context.tr('backup.downloaded') : context.tr('backup.copyHint'));
   }

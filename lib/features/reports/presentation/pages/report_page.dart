@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lifeos/core/constants/app_constants.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:lifeos/features/reports/presentation/providers/report_providers.dart';
 import 'package:lifeos/shared/widgets/animated_backdrop.dart';
@@ -209,7 +210,8 @@ class _ReportShareSheetState extends State<_ReportShareSheet> {
               width: double.infinity,
               child: FilledButton.icon(
                 onPressed: () =>
-                    shareBoundaryPng(context, _shareKey, 'lifeos_week.png',
+                    shareBoundaryPng(
+                        context, _shareKey, '${AppConstants.brandSlug}_week.png',
                         popAfter: true),
                 icon: const Icon(Icons.ios_share),
                 label: Text(context.tr('wrapped.share')),

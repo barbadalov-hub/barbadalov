@@ -291,7 +291,9 @@ class _WrappedPageState extends ConsumerState<WrappedPage> {
               Expanded(
                 child: FilledButton.icon(
                   onPressed: () => shareBoundaryPng(
-                      context, _shareKey, 'lifeos_wrapped_${s.year}.png'),
+                      context,
+                      _shareKey,
+                      '${AppConstants.brandSlug}_wrapped_${s.year}.png'),
                   icon: const Icon(Icons.ios_share),
                   label: Text(context.tr('wrapped.share')),
                 ),

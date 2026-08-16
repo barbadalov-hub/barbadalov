@@ -6,6 +6,11 @@ class AppConstants {
   const AppConstants._();
 
   static const String appName = 'Lumo';
+
+  /// Lowercase brand slug for generated artefacts (shared image filenames,
+  /// exports). Derived from [appName] so a rebrand updates them automatically.
+  static String get brandSlug => appName.toLowerCase();
+
   static const String defaultCurrency = 'USD';
 
   /// When false, every account starts with **zero activity** — no sample
