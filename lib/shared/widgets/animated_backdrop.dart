@@ -45,37 +45,43 @@ class _AnimatedBackdropState extends State<AnimatedBackdrop>
   @override
   Widget build(BuildContext context) {
     final palette = _palette(widget.color);
+    // The paper skin is calm by design: warm ground, a whisper of section
+    // colour, and none of the space particles. Stars and drifting coins belong
+    // to the night sky — on paper they would fight the ink for contrast, which
+    // is exactly how text became unreadable before.
+    final dark = Theme.of(context).brightness == Brightness.dark;
     return Stack(
       children: [
-        // Base: a living aurora — a deep, section-tinted gradient with soft
-        // drifting colour clouds. This is what gives every section its own
-        // mood while keeping one cohesive, modern world.
+        // Base: a living aurora at night, a tinted sheet of paper by day.
         Positioned.fill(
           child: RepaintBoundary(
-            child: CustomPaint(painter: _AuroraPainter(_controller, palette)),
+            child: CustomPaint(
+              painter: _AuroraPainter(_controller, palette, dark),
+            ),
           ),
         ),
-        if (widget.stars && widget.style != BackdropStyle.galaxy)
+        if (dark && widget.stars && widget.style != BackdropStyle.galaxy)
           Positioned.fill(
             child: RepaintBoundary(
               child: CustomPaint(painter: _StarsPainter(_controller)),
             ),
           ),
-        Positioned.fill(
-          child: RepaintBoundary(
-            child: CustomPaint(
-              painter: switch (widget.style) {
-                BackdropStyle.coins =>
-                  _CoinsPainter(_controller, widget.color),
-                BackdropStyle.pulse =>
-                  _PulsePainter(_controller, widget.color),
-                BackdropStyle.orbs => _OrbsPainter(_controller, widget.color),
-                BackdropStyle.galaxy =>
-                  _GalaxyPainter(_controller, widget.color),
-              },
+        if (dark)
+          Positioned.fill(
+            child: RepaintBoundary(
+              child: CustomPaint(
+                painter: switch (widget.style) {
+                  BackdropStyle.coins =>
+                    _CoinsPainter(_controller, widget.color),
+                  BackdropStyle.pulse =>
+                    _PulsePainter(_controller, widget.color),
+                  BackdropStyle.orbs => _OrbsPainter(_controller, widget.color),
+                  BackdropStyle.galaxy =>
+                    _GalaxyPainter(_controller, widget.color),
+                },
+              ),
             ),
           ),
-        ),
         widget.child,
       ],
     );
@@ -101,29 +107,44 @@ List<Color> _palette(Color base) {
 class _AuroraPainter extends CustomPainter {
   final Animation<double> t;
   final List<Color> palette;
-  _AuroraPainter(this.t, this.palette) : super(repaint: t);
+  final bool dark;
+  _AuroraPainter(this.t, this.palette, this.dark) : super(repaint: t);
 
   static const _base = Color(0xFF07030F);
+
+  // Paper ground: warm cream, a touch lighter at the top like a lit page.
+  static const _paper = Color(0xFFF4F1E9);
+  static const _paperDeep = Color(0xFFEDE8DC);
 
   @override
   void paint(Canvas canvas, Size size) {
     final rect = Offset.zero & size;
 
-    // Ground: near-black, faintly tinted by the section hue at the top so the
-    // whole screen feels like it belongs to this section.
-    final topTint = Color.lerp(_base, palette[0], 0.16)!;
+    // Ground: near-black at night / warm paper by day, faintly tinted by the
+    // section hue at the top so the whole screen belongs to this section.
+    // A colour wash reads far stronger on a light ground than on black, so the
+    // paper tint is a fraction of the night one — otherwise the page stops
+    // looking like warm paper and starts looking tinted.
+    final topTint = dark
+        ? Color.lerp(_base, palette[0], 0.16)!
+        : Color.lerp(_paper, palette[0], 0.035)!;
     canvas.drawRect(
       rect,
       Paint()
         ..shader = LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [topTint, _base, const Color(0xFF050208)],
+          colors: dark
+              ? [topTint, _base, const Color(0xFF050208)]
+              : [topTint, _paper, _paperDeep],
           stops: const [0.0, 0.62, 1.0],
         ).createShader(rect),
     );
 
-    // Drifting aurora clouds — big, blurred, breathing radial glows.
+    // Drifting aurora clouds — big, blurred, breathing radial glows. On paper
+    // they are barely-there watercolour washes, so ink stays legible.
+    final cloudAlpha = dark ? 0.13 : 0.022;
+    final cloudSpread = dark ? 0.05 : 0.012;
     const blobs = 4;
     for (var i = 0; i < blobs; i++) {
       final drift = t.value * 2 * math.pi * (0.12 + 0.06 * i);
@@ -139,7 +160,8 @@ class _AuroraPainter extends CustomPainter {
         Offset(cx, cy),
         r,
         Paint()
-          ..color = color.withValues(alpha: 0.13 + 0.05 * _hash(i, 64))
+          ..color =
+              color.withValues(alpha: cloudAlpha + cloudSpread * _hash(i, 64))
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 60),
       );
     }
@@ -149,13 +171,13 @@ class _AuroraPainter extends CustomPainter {
       Offset(size.width * 0.5, -size.height * 0.08),
       size.width * 0.7,
       Paint()
-        ..color = palette[0].withValues(alpha: 0.06)
+        ..color = palette[0].withValues(alpha: dark ? 0.06 : 0.015)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 80),
     );
   }
 
   @override
-  bool shouldRepaint(covariant _AuroraPainter old) => false;
+  bool shouldRepaint(covariant _AuroraPainter old) => old.dark != dark;
 }
 
 /// Deterministic pseudo-random per particle index (no per-frame allocation).

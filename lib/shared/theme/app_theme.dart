@@ -8,6 +8,20 @@ class AppTheme {
 
   static const _seed = Color(0xFF7C6BFF); // cosmic violet (default accent)
 
+  // --- Paper skin ---------------------------------------------------------
+  /// The warm page the light theme is printed on.
+  static const paperBg = Color(0xFFF4F1E9);
+
+  /// Raised surfaces (cards) sit *above* the page, toward white.
+  static const paperRaised = Color(0xFFFBF9F4);
+
+  /// Recessed tiles (quiet chips, wells) sit just below the page.
+  static const paperTile = Color(0xFFEBE6DA);
+
+  static const paperInk = Color(0xFF1E1C19);
+  static const paperMuted = Color(0xFF7C776C);
+  static const paperBorder = Color(0xFFDFD9CA);
+
   static ThemeData light([Color seed = _seed]) => _build(Brightness.light, seed);
   static ThemeData dark([Color seed = _seed]) => _build(Brightness.dark, seed);
 
@@ -16,14 +30,32 @@ class AppTheme {
       seedColor: seed,
       brightness: brightness,
     );
-    // Deep-space dark: near-black void with a nebula tint on surfaces. The
-    // primary is a brightened tint of the chosen accent so it pops on black.
     if (brightness == Brightness.dark) {
+      // Deep-space dark: near-black void with a nebula tint on surfaces. The
+      // primary is a brightened tint of the chosen accent so it pops on black.
       scheme = scheme.copyWith(
         surface: const Color(0xFF05070D),
         surfaceContainerHighest: const Color(0xFF1B2138),
         surfaceContainerHigh: const Color(0xFF141A2C),
         primary: Color.lerp(seed, Colors.white, 0.35),
+      );
+    } else {
+      // Paper: warm cream page, ink text, and a deepened accent so it holds
+      // contrast against the light ground. Surfaces step *up* toward white
+      // (raised cards) rather than down toward black, which is the opposite of
+      // the dark scheme — getting this backwards is what makes light themes
+      // look muddy.
+      scheme = scheme.copyWith(
+        surface: paperBg,
+        surfaceContainerLowest: paperRaised,
+        surfaceContainerLow: paperRaised,
+        surfaceContainerHigh: paperRaised,
+        surfaceContainerHighest: paperTile,
+        onSurface: paperInk,
+        onSurfaceVariant: paperMuted,
+        outline: paperMuted,
+        outlineVariant: paperBorder,
+        primary: Color.lerp(seed, const Color(0xFF1E1C19), 0.34),
       );
     }
     // Bolder display numbers + tighter headings (Ivy-Wallet-style type scale).
@@ -95,9 +127,17 @@ class AppTheme {
       ),
       cardTheme: CardThemeData(
         elevation: 0,
-        color: scheme.surfaceContainerHighest.withValues(alpha: 0.4),
+        // Night: a translucent pane floating over the aurora. Paper: an opaque
+        // sheet raised toward white with a hairline edge — translucency on a
+        // light ground just looks dirty.
+        color: brightness == Brightness.dark
+            ? scheme.surfaceContainerHighest.withValues(alpha: 0.4)
+            : paperRaised,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
+          side: brightness == Brightness.dark
+              ? BorderSide.none
+              : const BorderSide(color: Color(0xFFE3DDCE), width: 0.5),
         ),
         margin: EdgeInsets.zero,
       ),

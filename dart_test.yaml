@@ -1,0 +1,6 @@
+tags:
+  capture:
+    # Renders screens to PNGs under build/skin for eyeballing the design.
+    # Slow and produces artefacts, so it stays out of the normal suite.
+    # Run it on demand: flutter test test/capture_skin_test.dart --tags capture
+    skip: "opt-in: run with --tags capture"
