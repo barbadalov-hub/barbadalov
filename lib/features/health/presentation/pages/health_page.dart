@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:flutter/services.dart';
@@ -79,6 +79,31 @@ class HealthPage extends ConsumerWidget {
             ),
       voice: _voice(context, day, goals),
       tools: [
+        // The room owns the whole body domain — food and cycle used to sit in
+        // the More hub, far from the numbers they explain.
+        RoomTool(
+          icon: Icons.restaurant_outlined,
+          label: context.tr('diet.title'),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => const DietPage()),
+          ),
+        ),
+        RoomTool(
+          icon: Icons.kitchen_outlined,
+          label: context.tr('more.food'),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => const FoodPage()),
+          ),
+        ),
+        RoomTool(
+          icon: Icons.spa_outlined,
+          label: context.tr(ref.watch(profileProvider)?.sex == Sex.female
+              ? 'cycle.title'
+              : 'wellness.title'),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => const WellnessPage()),
+          ),
+        ),
         RoomTool(
           icon: Icons.monitor_heart_outlined,
           label: context.tr('health.metrics'),

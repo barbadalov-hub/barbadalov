@@ -2,6 +2,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
+import 'package:lifeos/features/achievements/presentation/pages/achievements_page.dart';
+import 'package:lifeos/features/history/presentation/pages/history_page.dart';
+import 'package:lifeos/features/reports/presentation/pages/forecast_page.dart';
+import 'package:lifeos/features/reports/presentation/pages/report_page.dart';
 import 'package:lifeos/features/insights/presentation/pages/insights_page.dart';
 import 'package:lifeos/features/insights/presentation/providers/insights_providers.dart';
 import 'package:lifeos/features/lifeweeks/presentation/pages/life_weeks_page.dart';
@@ -84,6 +88,43 @@ class TelescopePage extends ConsumerWidget {
               subtitle: context.tr('wrapped.moreSub'),
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(builder: (_) => const WrappedPage()),
+              ),
+            ),
+            const SizedBox(height: 10),
+            _Shortcut(
+              emoji: '🏅',
+              title: context.tr('ach.title'),
+              subtitle: context.tr('ach.moreSub'),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                    builder: (_) => const AchievementsPage()),
+              ),
+            ),
+            const SizedBox(height: 10),
+            _Shortcut(
+              emoji: '📜',
+              title: context.tr('hist.title'),
+              subtitle: context.tr('hist.moreSub'),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const HistoryPage()),
+              ),
+            ),
+            const SizedBox(height: 10),
+            _Shortcut(
+              emoji: '📊',
+              title: context.tr('report.title'),
+              subtitle: context.tr('report.moreSub'),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const ReportPage()),
+              ),
+            ),
+            const SizedBox(height: 10),
+            _Shortcut(
+              emoji: '🔭',
+              title: context.tr('forecast.title'),
+              subtitle: context.tr('forecast.moreSub'),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const ForecastPage()),
               ),
             ),
             const SizedBox(height: 10),

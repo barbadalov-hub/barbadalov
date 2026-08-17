@@ -41,14 +41,40 @@ void main() {
 
     // Categories are shown as cards; individual modules are NOT on the page
     // until you open a category (their names only appear inside the sheet).
-    expect(find.text('Progress & recaps'), findsOneWidget);
-    expect(find.text('Achievements'), findsNothing);
+    expect(find.text('Settings'), findsOneWidget);
+    expect(find.text('Backup & restore'), findsNothing);
 
     // Tapping a category opens a sheet listing its modules.
-    await tester.tap(find.text('Progress & recaps'));
+    await tester.tap(find.text('Settings'));
+    await settle(tester);
+    expect(find.text('Backup & restore'), findsOneWidget);
+    expect(find.text('Appearance'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('the hub no longer duplicates what rooms and the zoom own',
+      (tester) async {
+    await boot(tester);
+
+    // These moved into their room or onto the telescope. Finding them here
+    // again means the hub has started collecting duplicates a second time.
+    for (final gone in const [
+      'Progress & recaps',
+      'Nutrition',
+      'Mind',
+      'Mood journal',
+    ]) {
+      expect(find.text(gone), findsNothing,
+          reason: '"$gone" belongs to a room or the zoom tab now');
+    }
+
+    // ...and the zoom tab is where looking back happens.
+    await tester.tap(find.descendant(
+      of: find.byType(NavigationBar),
+      matching: find.text('Zoom'),
+    ));
     await settle(tester);
     expect(find.text('Achievements'), findsOneWidget);
-    expect(find.text('Life timeline'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

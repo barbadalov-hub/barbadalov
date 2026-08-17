@@ -5,27 +5,15 @@ import 'package:lifeos/core/i18n/locale_controller.dart';
 import 'package:lifeos/features/ai/presentation/pages/ai_page.dart';
 import 'package:lifeos/features/backup/presentation/pages/backup_page.dart';
 import 'package:lifeos/features/cloud/presentation/pages/account_page.dart';
-import 'package:lifeos/features/food/presentation/pages/diet_page.dart';
-import 'package:lifeos/features/food/presentation/pages/food_page.dart';
 import 'package:lifeos/features/food/presentation/providers/expiry_alert_provider.dart';
 import 'package:lifeos/features/money/presentation/providers/budget_limits_providers.dart';
 import 'package:lifeos/features/money/presentation/providers/recurring_providers.dart';
-import 'package:lifeos/features/history/presentation/pages/history_page.dart';
 import 'package:lifeos/features/history/presentation/providers/history_providers.dart';
-import 'package:lifeos/features/lifeweeks/presentation/pages/life_weeks_page.dart';
-import 'package:lifeos/features/achievements/presentation/pages/achievements_page.dart';
 import 'package:lifeos/features/achievements/presentation/providers/achievements_providers.dart';
 import 'package:lifeos/features/appearance/presentation/pages/appearance_page.dart';
 import 'package:lifeos/features/coach/presentation/pages/coach_page.dart';
-import 'package:lifeos/features/insights/presentation/pages/insights_page.dart';
-import 'package:lifeos/features/wrapped/presentation/pages/wrapped_page.dart';
-import 'package:lifeos/features/reports/presentation/pages/forecast_page.dart';
-import 'package:lifeos/features/reports/presentation/pages/report_page.dart';
 import 'package:lifeos/features/reports/presentation/providers/report_providers.dart';
-import 'package:lifeos/features/profile/domain/entities/user_profile.dart';
 import 'package:lifeos/features/profile/presentation/pages/profile_page.dart';
-import 'package:lifeos/features/profile/presentation/providers/profile_providers.dart';
-import 'package:lifeos/features/wellness/presentation/pages/wellness_page.dart';
 import 'package:lifeos/features/wellness/presentation/providers/wellness_providers.dart';
 import 'package:lifeos/features/goals/presentation/pages/goals_page.dart';
 import 'package:lifeos/features/health/presentation/pages/health_page.dart';
@@ -36,7 +24,6 @@ import 'package:lifeos/features/rooms/presentation/pages/rooms_page.dart';
 import 'package:lifeos/features/telescope/presentation/pages/telescope_page.dart';
 import 'package:lifeos/features/search/presentation/pages/command_palette.dart';
 import 'package:lifeos/features/mind/presentation/pages/mind_page.dart';
-import 'package:lifeos/features/mind/presentation/pages/mood_journal_page.dart';
 import 'package:lifeos/features/monetization/presentation/pages/pro_page.dart';
 import 'package:lifeos/features/money/presentation/pages/money_page.dart';
 import 'package:lifeos/features/notifications/presentation/pages/notifications_page.dart';
@@ -48,7 +35,8 @@ import 'package:lifeos/shared/theme/app_theme.dart';
 import 'package:lifeos/shared/widgets/animated_backdrop.dart';
 import 'package:lifeos/shared/widgets/glass_card.dart';
 
-/// Root navigation. Five primary destinations; the "More" hub reaches the rest.
+/// Root navigation. Four destinations: the rooms grid, today, the time
+/// telescope, and a small "More" hub for what belongs to none of them.
 class HomeShell extends ConsumerStatefulWidget {
   const HomeShell({super.key});
 
@@ -148,23 +136,16 @@ class _HomeShellState extends ConsumerState<HomeShell> {
   }
 }
 
-/// Hub for everything outside the four primary tabs. Kept compact: the ~20
-/// modules are grouped into a handful of categories, each opening a bottom
-/// sheet — so the hub reads as a short, scannable list instead of a long wall
-/// of tiles. The tutorial sits on top as its own card.
+/// What belongs to no life area: you, the assistant, signals and settings.
+/// Everything about a pillar now lives in its room, and everything about
+/// looking back lives on the telescope — so this hub stays short by design
+/// rather than by hiding things in sheets.
 class MorePage extends ConsumerWidget {
   const MorePage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final unread = ref.watch(unreadCountProvider);
-    final sex = ref.watch(profileProvider)?.sex;
-    final wellnessEmoji = sex == Sex.female ? '🌸' : '⚡';
-    final wellnessTitle = context.tr(sex == null
-        ? 'wellness.title'
-        : sex == Sex.female
-            ? 'cycle.title'
-            : 'vitality.title');
 
     // Push a full page from a More entry.
     _MoreEntry page(String emoji, String title, Widget target,
@@ -180,15 +161,11 @@ class MorePage extends ConsumerWidget {
         );
 
     final cats = <_MoreCat>[
+      // Everything that belongs to a life area now lives in its room, and
+      // everything about looking back lives on the telescope. What is left here
+      // is genuinely "the rest": you, the assistant, signals and settings.
       _MoreCat('🧑', context.tr('moreCat.you'), [
         page('👤', context.tr('profile.title'), const ProfilePage()),
-        page(wellnessEmoji, wellnessTitle, const WellnessPage()),
-      ]),
-      _MoreCat('🥗', context.tr('moreCat.body'), [
-        page('🥦', context.tr('diet.title'), const DietPage()),
-        page('🍎', context.tr('more.food'), const FoodPage()),
-        page('🧠', context.tr('mind.title'), const MindPage()),
-        page('📔', context.tr('mood.title'), const MoodJournalPage()),
       ]),
       _MoreCat('🤖', context.tr('moreCat.ai'), [
         page('🤖', context.tr('ai.title'), const AiPage()),
@@ -199,22 +176,6 @@ class MorePage extends ConsumerWidget {
             trailing: unread > 0 ? Badge(label: Text('$unread')) : null),
         page('⏰', context.tr('reminder.title'), const RemindersPage()),
       ], badge: unread),
-      _MoreCat('📊', context.tr('moreCat.progress'), [
-        page('🔮', context.tr('forecast.title'), const ForecastPage(),
-            section: context.tr('moreSec.analytics')),
-        page('📊', context.tr('report.title'), const ReportPage(),
-            section: context.tr('moreSec.analytics')),
-        page('🔮', context.tr('insight.title'), const InsightsPage(),
-            section: context.tr('moreSec.analytics')),
-        page('📜', context.tr('hist.title'), const HistoryPage(),
-            section: context.tr('moreSec.retro')),
-        page('⏳', context.tr('weeks.title'), const LifeWeeksPage(),
-            section: context.tr('moreSec.retro')),
-        page('✨', context.tr('wrapped.title'), const WrappedPage(),
-            section: context.tr('moreSec.retro')),
-        page('🏅', context.tr('ach.title'), const AchievementsPage(),
-            section: context.tr('moreSec.retro')),
-      ]),
       _MoreCat('⚙️', context.tr('moreCat.settings'), [
         page('☁️', context.tr('cloud.title'), const AccountPage(),
             section: context.tr('moreSec.account')),

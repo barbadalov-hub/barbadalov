@@ -2020,6 +2020,11 @@ const Map<String, Map<String, String>> _values = {
   },
   'planner.pushTitle': {'en': 'On your plan now', 'ru': 'Сейчас по плану', 'uk': 'Зараз за планом'},
   'planner.moreSub': {'en': 'Your day, hour by hour', 'ru': 'Твой день по часам', 'uk': 'Твій день по годинах'},
+  'forecast.moreSub': {
+    'en': 'Where this month is heading',
+    'ru': 'Куда идёт этот месяц',
+    'uk': 'Куди йде цей місяць'
+  },
 
   // --- Telescope (the time zoom) ------------------------------------------
   'nav.telescope': {'en': 'Zoom', 'ru': 'Периоды', 'uk': 'Періоди'},
@@ -2701,7 +2706,7 @@ const Map<String, Map<String, String>> _values = {
   'oss.moreSub': {'en': 'Fonts & libraries', 'ru': 'Шрифты и библиотеки', 'uk': 'Шрифти та бібліотеки'},
 
   // --- More hub categories -----------------------------------------------
-  'moreCat.you': {'en': 'You & health', 'ru': 'Ты и здоровье', 'uk': 'Ти та здоров’я'},
+  'moreCat.you': {'en': 'You', 'ru': 'Ты', 'uk': 'Ти'},
   'moreCat.food': {'en': 'Food', 'ru': 'Питание', 'uk': 'Харчування'},
   'moreCat.mind': {'en': 'Mind', 'ru': 'Разум', 'uk': 'Розум'},
   'moreCat.body': {'en': 'Food & mind', 'ru': 'Питание и разум', 'uk': 'Харчування і розум'},
