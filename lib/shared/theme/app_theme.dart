@@ -174,7 +174,13 @@ class LifeColors {
   static const finance = Color(0xFF24855A);
   static const financeDanger = Color(0xFFE5484D);
   static const health = Color(0xFFE5484D);
-  static const mind = Color(0xFF8E5BFF);
+  /// A generic violet accent — sleep charts, diet cards, the forecast line.
+  ///
+  /// **Not the Mind room's colour.** That room is blue (see `kLifeRooms`). This
+  /// used to be called `mind` while being used for anything that needed a
+  /// fourth hue — a trap, since reaching for the obvious name would have
+  /// painted the blue room violet.
+  static const violet = Color(0xFF8E5BFF);
   static const goals = Color(0xFFB07408);
 
   /// A calm blue for informational marks (water, carbs, "day" accents). It had
@@ -194,7 +200,7 @@ class LifeColors {
     'finance': finance,
     'financeDanger': financeDanger,
     'health': health,
-    'mind': mind,
+    'violet': violet,
     'goals': goals,
     'info': info,
   };

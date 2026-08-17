@@ -15,6 +15,7 @@ import 'package:lifeos/features/health/presentation/pages/health_page.dart';
 import 'package:lifeos/features/home/presentation/pages/today_page.dart';
 import 'package:lifeos/features/mind/presentation/pages/mind_page.dart';
 import 'package:lifeos/features/money/presentation/pages/money_page.dart';
+import 'package:lifeos/features/planner/presentation/pages/planner_page.dart';
 import 'package:lifeos/features/rooms/domain/life_room.dart';
 import 'package:lifeos/features/rooms/domain/room_attention.dart';
 import 'package:lifeos/features/rooms/presentation/pages/rooms_page.dart';
@@ -183,6 +184,13 @@ void main() {
     'paper': Brightness.light,
     'night': Brightness.dark,
   }.entries) {
+    testWidgets('the planner in the ${skin.key} skin', (t) async {
+      await capture(t, skin.value, 'planner_${skin.key}',
+          lead: null, home: const PlannerPage());
+      expect(File('build/skin/planner_${skin.key}.png').lengthSync(),
+          greaterThan(1000));
+    });
+
     testWidgets('the today screen in the ${skin.key} skin', (t) async {
       await capture(t, skin.value, 'today_${skin.key}',
           lead: null, home: const TodayPage(), frozen: false);

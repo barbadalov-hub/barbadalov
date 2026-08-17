@@ -43,7 +43,7 @@ class _ForecastPageState extends ConsumerState<ForecastPage> {
       appBar: AppBar(title: Text(context.tr('forecast.title'))),
       body: AnimatedBackdrop(
         style: BackdropStyle.galaxy,
-        color: LifeColors.mind,
+        color: LifeColors.violet,
         child: (a == null || profile == null)
             ? Center(
                 child: Padding(

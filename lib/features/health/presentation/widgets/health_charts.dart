@@ -190,7 +190,7 @@ class SleepWeekCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) => MetricWeekCard(
         titleKey: 'health.sleepWeek',
         goal: ref.watch(healthGoalsProvider).sleep,
-        barColor: LifeColors.mind,
+        barColor: LifeColors.violet,
         value: (d) => d.sleepHours,
       );
 }

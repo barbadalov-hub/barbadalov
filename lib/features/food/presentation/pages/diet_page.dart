@@ -430,7 +430,7 @@ class _ChooseDietCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return SectionCard(
       onTap: onTap,
-      color: LifeColors.mind.withValues(alpha: 0.12),
+      color: LifeColors.violet.withValues(alpha: 0.12),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       child: Row(
         children: [
@@ -587,7 +587,7 @@ class _DietPlanCard extends ConsumerWidget {
       color: isSelected
           ? LifeColors.finance.withValues(alpha: 0.14)
           : recommended
-              ? LifeColors.mind.withValues(alpha: 0.12)
+              ? LifeColors.violet.withValues(alpha: 0.12)
               : null,
       onTap: () => _DietDetailSheet.show(context, plan),
       child: Column(
@@ -620,7 +620,7 @@ class _DietPlanCard extends ConsumerWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: LifeColors.mind,
+                    color: LifeColors.violet,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(context.tr('diet.recommended'),

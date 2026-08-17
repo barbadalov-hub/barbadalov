@@ -31,7 +31,6 @@ import 'package:lifeos/features/notifications/presentation/providers/notificatio
 import 'package:lifeos/features/onboarding/presentation/pages/guide_page.dart';
 import 'package:lifeos/features/reminders/presentation/pages/reminders_page.dart';
 import 'package:lifeos/features/security/presentation/pages/security_settings_page.dart';
-import 'package:lifeos/shared/theme/app_theme.dart';
 import 'package:lifeos/shared/widgets/animated_backdrop.dart';
 import 'package:lifeos/shared/widgets/glass_card.dart';
 
@@ -75,15 +74,11 @@ class _HomeShellState extends ConsumerState<HomeShell> {
     // App-level unread badge (Telegram-style): visible from any tab so you
     // never miss that "something arrived", even away from the notifications hub.
     final unread = ref.watch(unreadCountProvider);
-    // Each tab tints the selection pill with its screen's pillar colour, so the
-    // nav bar feels tied to wherever you are.
-    const pillars = [
-      Color(0xFF7B5CFF), // Rooms — the home grid, all four pillars at once
-      LifeColors.info, // Day
-      Color(0xFF9C6BFF), // Telescope
-      LifeColors.mind, // More
-    ];
-    final accent = pillars[index];
+    // The selection pill takes the app's own accent. It used to hold four
+    // "pillar" colours, but three of them were near-identical violets — two
+    // hardcoded outside the palette — so the tint distinguished nothing and
+    // just added stray colours to the most-looked-at chrome in the app.
+    final accent = Theme.of(context).colorScheme.primary;
     final pages = [
       RoomsPage(onOpenRoom: (room) => _openRoom(context, room)),
       const TodayPage(),

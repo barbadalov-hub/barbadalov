@@ -211,7 +211,7 @@ class _CrossCard extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 10, vertical: 8),
                     decoration: BoxDecoration(
-                      color: LifeColors.mind.withValues(alpha: 0.10),
+                      color: LifeColors.violet.withValues(alpha: 0.10),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Row(

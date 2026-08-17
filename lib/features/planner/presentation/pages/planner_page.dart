@@ -8,7 +8,6 @@ import 'package:lifeos/features/mind/domain/entities/day_task.dart';
 import 'package:lifeos/features/mind/presentation/providers/mind_providers.dart';
 import 'package:lifeos/shared/providers/core_providers.dart';
 import 'package:lifeos/shared/widgets/animated_backdrop.dart';
-import 'package:lifeos/shared/widgets/section_card.dart';
 
 /// The day as one rail of time: what already happened above the "now" line,
 /// what is planned below it. Same tasks as the Mind room — this is the view
@@ -73,37 +72,40 @@ class PlannerPage extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 14),
-            if (tasks.isEmpty)
-              SectionCard(
-                child: Column(
-                  children: [
-                    const Text('🗓️', style: TextStyle(fontSize: 38)),
-                    const SizedBox(height: 10),
-                    Text(context.tr('planner.empty'),
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodyMedium),
-                  ],
-                ),
-              )
-            else ...[
-              for (final t in timed)
+            if (tasks.isEmpty) ...[
+              Text(context.tr('planner.empty'),
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.copyWith(color: Theme.of(context).colorScheme.outline)),
+              const SizedBox(height: 10),
+            ],
+            // The hours are always drawn, full or not. A day planner showing
+            // nothing but a message is a blank page: the shape of the day is
+            // the whole point, and an empty hour you can tap is an invitation
+            // where a void is a dead end.
+            for (final hour in _railHours(timed))
+              _HourBlock(
+                hour: hour,
+                tasks: [
+                  for (final t in timed)
+                    if (t.hour == hour) t,
+                ],
+                nowMinutes: nowMinutes,
+                onToggle: (t) => ref.read(toggleTaskProvider).call(t),
+                onAdd: () => _addDialog(context, ref, now, atHour: hour),
+              ),
+            if (untimed.isNotEmpty) ...[
+              const SizedBox(height: 14),
+              Text(context.tr('planner.anytime'),
+                  style: Theme.of(context).textTheme.titleSmall),
+              const SizedBox(height: 4),
+              for (final t in untimed)
                 _RailRow(
                   task: t,
-                  past: t.atMinutes! <= nowMinutes,
+                  past: false,
                   onToggle: () => ref.read(toggleTaskProvider).call(t),
                 ),
-              if (untimed.isNotEmpty) ...[
-                const SizedBox(height: 14),
-                Text(context.tr('planner.anytime'),
-                    style: Theme.of(context).textTheme.titleSmall),
-                const SizedBox(height: 4),
-                for (final t in untimed)
-                  _RailRow(
-                    task: t,
-                    past: false,
-                    onToggle: () => ref.read(toggleTaskProvider).call(t),
-                  ),
-              ],
             ],
           ],
         ),
@@ -112,9 +114,15 @@ class PlannerPage extends ConsumerWidget {
   }
 
   Future<void> _addDialog(
-      BuildContext context, WidgetRef ref, DateTime now) async {
+    BuildContext context,
+    WidgetRef ref,
+    DateTime now, {
+    /// Set when the user tapped an empty hour on the rail, so the dialog opens
+    /// already pointing at the slot they chose.
+    int? atHour,
+  }) async {
     final controller = TextEditingController();
-    TimeOfDay? time = TimeOfDay(hour: now.hour, minute: 0);
+    TimeOfDay? time = TimeOfDay(hour: atHour ?? now.hour, minute: 0);
     var notify = true;
 
     final created = await showDialog<bool>(
@@ -205,6 +213,93 @@ class PlannerPage extends ConsumerWidget {
 }
 
 /// One stop on the day's rail: the time, a state dot, the task, a bell.
+/// Which hours the rail draws.
+///
+/// A waking day by default, widened to cover anything scheduled outside it —
+/// a 6am run or a task at midnight must not fall off the rail.
+List<int> _railHours(List<DayTask> timed) {
+  var from = 7;
+  var to = 22;
+  for (final t in timed) {
+    final h = t.hour;
+    if (h == null) continue;
+    if (h < from) from = h;
+    if (h > to) to = h;
+  }
+  return [for (var h = from; h <= to; h++) h];
+}
+
+/// One hour of the day: what is planned in it, or an invitation to plan.
+class _HourBlock extends StatelessWidget {
+  final int hour;
+  final List<DayTask> tasks;
+  final int nowMinutes;
+  final void Function(DayTask task) onToggle;
+  final VoidCallback onAdd;
+
+  const _HourBlock({
+    required this.hour,
+    required this.tasks,
+    required this.nowMinutes,
+    required this.onToggle,
+    required this.onAdd,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    if (tasks.isNotEmpty) {
+      return Column(
+        children: [
+          for (final t in tasks)
+            _RailRow(
+              task: t,
+              past: t.atMinutes! <= nowMinutes,
+              onToggle: () => onToggle(t),
+            ),
+        ],
+      );
+    }
+
+    // An hour already gone is drawn fainter and not offered: planning the past
+    // is not a thing anyone wants to be invited to do.
+    final past = (hour + 1) * 60 <= nowMinutes;
+    return InkWell(
+      onTap: past ? null : onAdd,
+      borderRadius: BorderRadius.circular(10),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 4),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 42,
+              child: Text(
+                '${hour.toString().padLeft(2, '0')}:00',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: past
+                      ? scheme.outlineVariant
+                      : scheme.outline,
+                ),
+              ),
+            ),
+            Expanded(
+              child: Container(
+                height: 1,
+                color: scheme.outlineVariant.withValues(alpha: past ? 0.4 : 1),
+              ),
+            ),
+            if (!past) ...[
+              const SizedBox(width: 10),
+              Icon(Icons.add, size: 16, color: scheme.outline),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _RailRow extends StatelessWidget {
   final DayTask task;
   final bool past;
