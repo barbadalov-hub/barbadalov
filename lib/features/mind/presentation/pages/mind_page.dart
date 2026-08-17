@@ -7,15 +7,31 @@ import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:lifeos/features/mind/domain/achievements.dart';
 import 'package:lifeos/features/mind/domain/book_recommendations.dart';
 import 'package:lifeos/features/mind/domain/entities/book.dart';
+import 'package:lifeos/features/mind/domain/entities/habit.dart';
 import 'package:lifeos/features/mind/presentation/pages/habit_detail_page.dart';
+import 'package:lifeos/features/mind/presentation/pages/mood_journal_page.dart';
 import 'package:lifeos/features/mind/presentation/providers/mind_providers.dart';
+import 'package:lifeos/features/rooms/domain/life_room.dart';
+import 'package:lifeos/features/rooms/presentation/widgets/room_scaffold.dart';
 import 'package:lifeos/shared/providers/core_providers.dart';
-import 'package:lifeos/shared/widgets/animated_backdrop.dart';
 import 'package:lifeos/shared/widgets/gradient_card.dart';
 import 'package:lifeos/shared/widgets/section_card.dart';
 
 class MindPage extends ConsumerWidget {
   const MindPage({super.key});
+
+  /// One sentence about discipline: the streak worth protecting, or a nudge to
+  /// start one.
+  String _voice(BuildContext context, List<Habit> habits) {
+    if (habits.isEmpty) return context.tr('mind.voiceNone');
+    final best = habits.fold(0, (m, h) => h.streak > m ? h.streak : m);
+    final left = habits.where((h) => !h.doneToday).length;
+    if (left == 0) return context.tr('mind.voiceAllDone');
+    if (best >= 2) {
+      return context.trp('mind.voiceStreak', {'n': best, 'left': left});
+    }
+    return context.trp('mind.voiceLeft', {'left': left});
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -23,21 +39,57 @@ class MindPage extends ConsumerWidget {
     final tasks = ref.watch(tasksProvider);
     final books = ref.watch(booksProvider);
     final now = ref.watch(clockProvider).now();
+    final room = roomById(RoomId.mind);
+    final accent = room.colorFor(Theme.of(context).brightness);
+    final habitList = habits.valueOrNull ?? const <Habit>[];
+    final doneToday = habitList.where((Habit h) => h.doneToday).length;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(context.tr('mind.title'))),
+    return RoomScaffold(
+      room: room,
+      title: context.tr('mind.title'),
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'fab-mind',
         onPressed: () => _addTaskDialog(context, ref),
         icon: const Icon(Icons.add_task),
         label: Text(context.tr('mind.task')),
       ),
-      body: AnimatedBackdrop(
-        style: BackdropStyle.orbs,
-        color: LifeGradients.mind.first,
-        child: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
+      hero: habitList.isEmpty
+          ? null
+          : RoomHero(
+              label: context.tr('mind.habits'),
+              value: '$doneToday/${habitList.length}',
+              accent: accent,
+              progress: doneToday / habitList.length,
+              caption: context.tr('room.mind.sub'),
+            ),
+      voice: _voice(context, habitList),
+      actions: [
+        RoomAction(
+          icon: Icons.add,
+          label: context.tr('mind.habit'),
+          onTap: () => _addHabitDialog(context, ref),
+        ),
+        RoomAction(
+          icon: Icons.add_task,
+          label: context.tr('mind.task'),
+          onTap: () => _addTaskDialog(context, ref),
+        ),
+        RoomAction(
+          icon: Icons.menu_book_outlined,
+          label: context.tr('mind.book'),
+          onTap: () => _addBookDialog(context, ref),
+        ),
+      ],
+      tools: [
+        RoomTool(
+          icon: Icons.mood,
+          label: context.tr('mood.title'),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => const MoodJournalPage()),
+          ),
+        ),
+      ],
+      children: [
           const _AchievementsCard(),
           const SizedBox(height: 12),
           const _FocusTimerCard(),
@@ -200,10 +252,7 @@ class MindPage extends ConsumerWidget {
           const _ReadingStatsCard(),
           const SizedBox(height: 20),
           const _RecommendedBooks(),
-          const SizedBox(height: 80),
-        ],
-        ),
-      ),
+      ],
     );
   }
 

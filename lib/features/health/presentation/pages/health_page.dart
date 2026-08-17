@@ -17,7 +17,8 @@ import 'package:lifeos/features/profile/domain/entities/user_profile.dart';
 import 'package:lifeos/features/profile/presentation/providers/profile_providers.dart';
 import 'package:lifeos/features/wellness/presentation/pages/wellness_page.dart';
 import 'package:lifeos/shared/theme/app_theme.dart';
-import 'package:lifeos/shared/widgets/animated_backdrop.dart';
+import 'package:lifeos/features/rooms/domain/life_room.dart';
+import 'package:lifeos/features/rooms/presentation/widgets/room_scaffold.dart';
 import 'package:lifeos/shared/widgets/motion.dart';
 import 'package:lifeos/shared/widgets/section_card.dart';
 
@@ -31,10 +32,14 @@ class HealthPage extends ConsumerWidget {
     final goals = ref.watch(healthGoalsProvider);
     final log = ref.read(logHealthProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(context.tr('nav.health')),
-        actions: [
+    final room = roomById(RoomId.body);
+    final accent = room.colorFor(Theme.of(context).brightness);
+    final day = health.valueOrNull;
+
+    return RoomScaffold(
+      room: room,
+      title: context.tr('nav.health'),
+      appBarActions: [
           IconButton(
             icon: const Icon(Icons.tune),
             tooltip: context.tr('health.editGoals'),
@@ -62,35 +67,51 @@ class HealthPage extends ConsumerWidget {
               }
             },
           ),
-        ],
-      ),
-      body: AnimatedBackdrop(
-        style: BackdropStyle.pulse,
-        color: LifeColors.health,
-        child: health.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('$e')),
-        data: (day) => ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            SectionCard(
-              color: LifeColors.health.withValues(alpha: 0.12),
-              child: Row(
-                children: [
-                  Text('$score',
-                      style: Theme.of(context)
-                          .textTheme
-                          .displaySmall
-                          ?.copyWith(fontWeight: FontWeight.bold)),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text('${context.tr('health.scoreToday')}\n'
-                        '${context.tr('health.scoreSubtitle')}'),
-                  ),
-                ],
-              ),
+      ],
+      hero: day == null
+          ? null
+          : RoomHero(
+              label: context.tr('health.scoreToday'),
+              value: '$score',
+              accent: accent,
+              progress: score / 100,
+              caption: context.tr('health.scoreSubtitle'),
             ),
-            const SizedBox(height: 16),
+      voice: _voice(context, day, goals),
+      tools: [
+        RoomTool(
+          icon: Icons.monitor_heart_outlined,
+          label: context.tr('health.metrics'),
+          onTap: () => _MetricsSheet.show(context),
+        ),
+        RoomTool(
+          icon: Icons.show_chart,
+          label: context.tr('health.trends'),
+          onTap: () => _TrendsSheet.show(context),
+        ),
+        RoomTool(
+          icon: Icons.nightlight_outlined,
+          label: context.tr('sleep.tipsTitle'),
+          onTap: () => _SleepTipsSheet.show(context),
+        ),
+        RoomTool(
+          icon: Icons.fitness_center,
+          label: context.tr('wo.title'),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => const WorkoutsPage()),
+          ),
+        ),
+      ],
+      children: day == null
+          ? [
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(24),
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+            ]
+          : [
             Row(
               children: [
                 _Ring(
@@ -148,31 +169,6 @@ class HealthPage extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            Text(context.tr('health.exploreTitle'),
-                style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: 8,
-              crossAxisSpacing: 8,
-              childAspectRatio: 3.2,
-              children: [
-                _HubTile('🩺', context.tr('health.metrics'),
-                    () => _MetricsSheet.show(context)),
-                _HubTile('📈', context.tr('health.trends'),
-                    () => _TrendsSheet.show(context)),
-                _HubTile('🌙', context.tr('sleep.tipsTitle'),
-                    () => _SleepTipsSheet.show(context)),
-                _HubTile(
-                    '💪',
-                    context.tr('wo.title'),
-                    () => Navigator.of(context).push(MaterialPageRoute<void>(
-                        builder: (_) => const WorkoutsPage()))),
-              ],
-            ),
             const SizedBox(height: 20),
             const _HealthHub(),
             const SizedBox(height: 12),
@@ -183,10 +179,27 @@ class HealthPage extends ConsumerWidget {
                   ),
             ),
           ],
-        ),
-        ),
-      ),
     );
+  }
+
+  /// One sentence about the body: the metric furthest from its goal, so the
+  /// room says what to do rather than restating the rings.
+  String _voice(BuildContext context, HealthDay? day, HealthGoalSet goals) {
+    if (day == null) return context.tr('health.voiceNoData');
+    if (day.sleepHours > 0 && day.sleepHours < goals.sleep - 0.75) {
+      return context.trp('health.voiceSleep', {
+        'h': day.sleepHours.toStringAsFixed(1),
+      });
+    }
+    if (day.steps < goals.steps * 0.6) {
+      return context.trp('health.voiceSteps', {
+        'left': goals.steps - day.steps,
+      });
+    }
+    if (day.waterMl < goals.water * HealthDay.mlPerGlass * 0.6) {
+      return context.tr('health.voiceWater');
+    }
+    return context.tr('health.voiceGood');
   }
 
   /// Pick which wearable/platform to sync from. Real pairing (HealthKit /

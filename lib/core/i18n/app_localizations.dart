@@ -1932,6 +1932,73 @@ const Map<String, Map<String, String>> _values = {
   'search.workouts': {'en': 'Workouts', 'ru': 'Тренировки', 'uk': 'Тренування'},
   'search.doneWater': {'en': 'Added a glass of water 💧', 'ru': 'Добавлен стакан воды 💧', 'uk': 'Додано склянку води 💧'},
 
+  'health.voiceSleep': {
+    'en': 'You slept {h}h — short of your goal. An earlier night would help most.',
+    'ru': 'Ты спал {h} ч — меньше цели. Больше всего поможет лечь пораньше.',
+    'uk': 'Ти спав {h} год — менше цілі. Найбільше допоможе лягти раніше.'
+  },
+  'health.voiceSteps': {
+    'en': '{left} steps short of today\'s goal — a short walk closes most of it.',
+    'ru': 'До цели по шагам осталось {left} — короткая прогулка закроет почти всё.',
+    'uk': 'До цілі за кроками лишилося {left} — коротка прогулянка закриє майже все.'
+  },
+  'health.voiceWater': {
+    'en': 'Hydration is behind today. A glass now is the easiest win.',
+    'ru': 'Сегодня отстаёшь по воде. Стакан прямо сейчас — самая лёгкая победа.',
+    'uk': 'Сьогодні відстаєш по воді. Склянка просто зараз — найлегша перемога.'
+  },
+  'health.voiceGood': {
+    'en': 'Sleep, steps and water are all on track today.',
+    'ru': 'Сон, шаги и вода сегодня в порядке.',
+    'uk': 'Сон, кроки й вода сьогодні в порядку.'
+  },
+  'health.voiceNoData': {
+    'en': 'Nothing logged yet today — start with a glass of water.',
+    'ru': 'Сегодня ещё ничего не отмечено — начни со стакана воды.',
+    'uk': 'Сьогодні ще нічого не відмічено — почни зі склянки води.'
+  },
+  'mind.habit': {'en': 'Habit', 'ru': 'Привычка', 'uk': 'Звичка'},
+  'mind.book': {'en': 'Book', 'ru': 'Книга', 'uk': 'Книга'},
+  'mind.voiceStreak': {
+    'en': 'A {n}-day streak is riding on today — {left} habits still open.',
+    'ru': 'На сегодня завязана серия в {n} дней — осталось привычек: {left}.',
+    'uk': 'На сьогодні зав’язана серія у {n} днів — лишилося звичок: {left}.'
+  },
+  'mind.voiceLeft': {
+    'en': '{left} habits still waiting for you today.',
+    'ru': 'Сегодня тебя ещё ждут привычки: {left}.',
+    'uk': 'Сьогодні на тебе ще чекають звички: {left}.'
+  },
+  'mind.voiceAllDone': {
+    'en': 'Every habit is done today. That is a full day.',
+    'ru': 'Все привычки на сегодня закрыты. Это полный день.',
+    'uk': 'Усі звички на сьогодні закрито. Це повний день.'
+  },
+  'mind.voiceNone': {
+    'en': 'No habits yet — one small daily thing is enough to start.',
+    'ru': 'Привычек пока нет — начни с одного маленького дела в день.',
+    'uk': 'Звичок поки немає — почни з однієї маленької справи на день.'
+  },
+  'goals.heroCaption': {
+    'en': 'of {target} · {done} reached',
+    'ru': 'из {target} · достигнуто {done}',
+    'uk': 'з {target} · досягнуто {done}'
+  },
+  'goals.voiceClosest': {
+    'en': '"{title}" is the closest — {pct}% there, {left} to go.',
+    'ru': 'Ближе всего «{title}» — {pct}%, осталось {left}.',
+    'uk': 'Найближче «{title}» — {pct}%, лишилося {left}.'
+  },
+  'goals.voiceAllDone': {
+    'en': 'Every goal is reached. Time to set the next one.',
+    'ru': 'Все цели достигнуты. Пора поставить следующую.',
+    'uk': 'Усі цілі досягнуто. Час поставити наступну.'
+  },
+  'goals.voiceNone': {
+    'en': 'No goals yet — name one thing worth saving for.',
+    'ru': 'Целей пока нет — назови то, ради чего стоит копить.',
+    'uk': 'Цілей поки немає — назви те, заради чого варто збирати.'
+  },
   'money.heroCaption': {
     'en': '{spent} of {total} spent',
     'ru': 'потрачено {spent} из {total}',

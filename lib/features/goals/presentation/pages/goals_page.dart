@@ -1,58 +1,96 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:lifeos/features/goals/application/forecast_goal.dart';
 import 'package:lifeos/features/goals/domain/entities/goal.dart';
 import 'package:lifeos/features/goals/presentation/providers/goal_providers.dart';
+import 'package:lifeos/features/lifeweeks/presentation/pages/life_weeks_page.dart';
+import 'package:lifeos/features/rooms/domain/life_room.dart';
+import 'package:lifeos/features/rooms/presentation/widgets/room_scaffold.dart';
 import 'package:lifeos/shared/models/money.dart';
-import 'package:lifeos/shared/theme/app_theme.dart';
-import 'package:lifeos/shared/widgets/animated_backdrop.dart';
 import 'package:lifeos/shared/widgets/section_card.dart';
 
 class GoalsPage extends ConsumerWidget {
   const GoalsPage({super.key});
 
+  /// One sentence about where the goals stand: the closest one, or an
+  /// invitation when there is nothing to aim at yet.
+  String _voice(BuildContext context, List<Goal> goals) {
+    if (goals.isEmpty) return context.tr('goals.voiceNone');
+    final active = goals.where((g) => !g.isComplete).toList()
+      ..sort((a, b) => b.progress.compareTo(a.progress));
+    if (active.isEmpty) return context.tr('goals.voiceAllDone');
+    final closest = active.first;
+    return context.trp('goals.voiceClosest', {
+      'title': closest.title,
+      'pct': (closest.progress * 100).round(),
+      'left': closest.remaining.format(),
+    });
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final goals = ref.watch(goalsProvider);
-    return Scaffold(
-      appBar: AppBar(title: Text(context.tr('nav.goals'))),
+    final list = goals.valueOrNull ?? const <Goal>[];
+    final room = roomById(RoomId.goals);
+    final accent = room.colorFor(Theme.of(context).brightness);
+
+    final saved = list.fold(0, (s, g) => s + g.saved.minorUnits);
+    final target = list.fold(0, (s, g) => s + g.target.minorUnits);
+    final ratio = target <= 0 ? 0.0 : (saved / target).clamp(0.0, 1.0);
+
+    // Active goals first (by progress), completed ones at the bottom.
+    final sorted = [...list]..sort((a, b) {
+        if (a.isComplete != b.isComplete) return a.isComplete ? 1 : -1;
+        return b.progress.compareTo(a.progress);
+      });
+
+    return RoomScaffold(
+      room: room,
+      title: context.tr('nav.goals'),
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'fab-goals',
         onPressed: () => _addGoalDialog(context, ref),
         icon: const Icon(Icons.add),
         label: Text(context.tr('goals.goal')),
       ),
-      body: AnimatedBackdrop(
-        style: BackdropStyle.orbs,
-        color: LifeColors.goals,
-        child: goals.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(child: Text('$e')),
-          data: (list) {
-            if (list.isEmpty) {
-              return Center(child: Text(context.tr('goals.none')));
-            }
-            // Active goals first (by progress), completed ones at the bottom.
-            final sorted = [...list]..sort((a, b) {
-                if (a.isComplete != b.isComplete) return a.isComplete ? 1 : -1;
-                return b.progress.compareTo(a.progress);
-              });
-            return ListView(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
-              children: [
-                _GoalsSummary(goals: list),
-                const SizedBox(height: 12),
-                for (final g in sorted) ...[
-                  _GoalCard(goal: g),
-                  const SizedBox(height: 12),
-                ],
-              ],
-            );
-          },
+      hero: list.isEmpty
+          ? null
+          : RoomHero(
+              label: context.tr('goals.overall'),
+              value: Money(saved).format(),
+              accent: accent,
+              progress: ratio.toDouble(),
+              caption: context.trp('goals.heroCaption', {
+                'target': Money(target).format(),
+                'done': list.where((g) => g.isComplete).length,
+              }),
+            ),
+      voice: _voice(context, list),
+      tools: [
+        RoomTool(
+          icon: Icons.hourglass_bottom,
+          label: context.tr('weeks.title'),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => const LifeWeeksPage()),
+          ),
         ),
-      ),
+      ],
+      children: [
+        if (goals.isLoading)
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: CircularProgressIndicator(),
+            ),
+          )
+        else
+          for (final g in sorted) ...[
+            _GoalCard(goal: g),
+            const SizedBox(height: 12),
+          ],
+      ],
     );
   }
 
@@ -99,53 +137,6 @@ class GoalsPage extends ConsumerWidget {
   }
 }
 
-/// Overall progress across every goal.
-class _GoalsSummary extends StatelessWidget {
-  final List<Goal> goals;
-  const _GoalsSummary({required this.goals});
-
-  @override
-  Widget build(BuildContext context) {
-    final saved = goals.fold(0, (s, g) => s + g.saved.minorUnits);
-    final target = goals.fold(0, (s, g) => s + g.target.minorUnits);
-    final done = goals.where((g) => g.isComplete).length;
-    final ratio = target <= 0 ? 0.0 : (saved / target).clamp(0.0, 1.0);
-    return SectionCard(
-      color: LifeColors.goals.withValues(alpha: 0.12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(context.tr('goals.overall'),
-                  style: Theme.of(context).textTheme.titleMedium),
-              Text('${(ratio * 100).round()}%',
-                  style: const TextStyle(fontWeight: FontWeight.w800)),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text('${Money(saved).format()} / ${Money(target).format()}',
-              style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 8),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(6),
-            child: LinearProgressIndicator(
-                value: ratio.toDouble(),
-                minHeight: 8,
-                color: LifeColors.goals),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            context.trp('goals.summaryLine',
-                {'total': goals.length, 'done': done}),
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class _GoalCard extends ConsumerWidget {
   final Goal goal;
@@ -288,8 +279,8 @@ class _GoalCard extends ConsumerWidget {
     } else {
       final date = DateFormat.yMMM().format(f.projectedDate!);
       final flag = f.onTrackForTargetDate
-          ? '✅ ${context.tr('goals.onTrack')}'
-          : '⚠️ ${context.tr('goals.behind')}';
+          ? 'вњ… ${context.tr('goals.onTrack')}'
+          : 'вљ пёЏ ${context.tr('goals.behind')}';
       main = Text(
         context.trp('goals.forecast', {
           'months': f.monthsRemaining!,
