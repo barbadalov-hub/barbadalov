@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -7,6 +7,7 @@ import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:lifeos/core/services/clock.dart';
 import 'package:lifeos/features/health/presentation/pages/workouts_page.dart';
 import 'package:lifeos/features/money/presentation/pages/money_page.dart';
+import 'package:lifeos/features/rooms/presentation/widgets/room_scaffold.dart';
 import 'package:lifeos/shared/providers/core_providers.dart';
 
 /// Fixed "now" so date-dependent seeds/verdicts don't drift with the calendar.
@@ -81,9 +82,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 700));
 
     // Seeded month: 1090 spent in the first days of a 3200-income month →
-    // the analyzer must warn about pace and month-end projection.
+    // the analyzer must warn about pace and month-end projection. The strongest
+    // verdict is now the room's voice line (its message, not its title), and
+    // the remaining ones stay in the card below — none are lost.
     expect(find.textContaining('Розумні фінанси'), findsOneWidget);
-    expect(find.text('Витрачаєте швидше за план'), findsOneWidget);
+    expect(find.byType(RoomVoice), findsOneWidget);
     expect(find.text('Прогноз: перевитрата до кінця місяця'), findsOneWidget);
     expect(find.text('Де себе обмежити'), findsOneWidget);
   });

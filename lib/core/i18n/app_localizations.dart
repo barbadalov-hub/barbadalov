@@ -1932,6 +1932,12 @@ const Map<String, Map<String, String>> _values = {
   'search.workouts': {'en': 'Workouts', 'ru': 'Тренировки', 'uk': 'Тренування'},
   'search.doneWater': {'en': 'Added a glass of water 💧', 'ru': 'Добавлен стакан воды 💧', 'uk': 'Додано склянку води 💧'},
 
+  'money.heroCaption': {
+    'en': '{spent} of {total} spent',
+    'ru': 'потрачено {spent} из {total}',
+    'uk': 'витрачено {spent} з {total}'
+  },
+  'money.importCsv': {'en': 'Import', 'ru': 'Импорт', 'uk': 'Імпорт'},
   'nav.rooms': {'en': 'Rooms', 'ru': 'Комнаты', 'uk': 'Кімнати'},
   'nav.day': {'en': 'Day', 'ru': 'День', 'uk': 'День'},
 

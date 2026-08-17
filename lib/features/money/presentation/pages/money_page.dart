@@ -6,7 +6,6 @@ import 'package:lifeos/core/constants/app_constants.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:lifeos/core/utils/download_file.dart';
 import 'package:lifeos/features/money/application/transaction_csv.dart';
-import 'package:lifeos/features/money/domain/entities/budget.dart';
 import 'package:lifeos/features/money/domain/entities/category.dart';
 import 'package:lifeos/features/money/domain/entities/transaction.dart';
 import 'package:lifeos/features/money/presentation/pages/budget_limits_page.dart';
@@ -16,12 +15,11 @@ import 'package:lifeos/features/money/presentation/pages/receipt_page.dart';
 import 'package:lifeos/features/money/presentation/pages/recurring_page.dart';
 import 'package:lifeos/features/money/presentation/providers/money_providers.dart';
 import 'package:lifeos/features/money/presentation/widgets/add_transaction_sheet.dart';
+import 'package:lifeos/features/rooms/domain/life_room.dart';
+import 'package:lifeos/features/rooms/presentation/widgets/room_scaffold.dart';
 import 'package:lifeos/shared/models/money.dart';
 import 'package:lifeos/shared/providers/core_providers.dart';
 import 'package:lifeos/shared/theme/app_theme.dart';
-import 'package:lifeos/shared/widgets/animated_backdrop.dart';
-import 'package:lifeos/shared/widgets/gradient_card.dart';
-import 'package:lifeos/shared/widgets/motion.dart';
 import 'package:lifeos/shared/widgets/section_card.dart';
 
 /// MoneyOS home — the balance header plus the full transaction history. Adding a
@@ -29,58 +27,130 @@ import 'package:lifeos/shared/widgets/section_card.dart';
 class MoneyPage extends ConsumerWidget {
   const MoneyPage({super.key});
 
+  /// The room's one sentence: the strongest finance insight, phrased as a
+  /// conclusion. Falls back to the evergreen tip when there's nothing to say.
+  String _voice(BuildContext context, WidgetRef ref) {
+    final insights = ref.watch(smartFinanceProvider);
+    if (insights.isEmpty) return ref.watch(financeTipProvider);
+    final top = insights.first;
+    return context.trp(top.msgKey, {
+      ...top.params,
+      if (top.params['catId'] != null)
+        'cat': context.tr(top.params['catId']! as String),
+    });
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final transactions = ref.watch(transactionsProvider);
     final budget = ref.watch(currentBudgetProvider);
+    final room = roomById(RoomId.money);
+    final accent = room.colorFor(Theme.of(context).brightness);
+    final sorted = [
+      ...?transactions.valueOrNull,
+    ]..sort((a, b) => b.date.compareTo(a.date));
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(context.tr('nav.money')),
-      ),
+    final spendable =
+        budget.income.minorUnits - budget.reserve.minorUnits;
+    final spent = budget.expenses.minorUnits;
+
+    return RoomScaffold(
+      room: room,
+      title: context.tr('nav.money'),
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'fab-money',
         onPressed: () => AddTransactionSheet.show(context),
         icon: const Icon(Icons.add),
         label: Text(context.tr('common.add')),
       ),
-      body: AnimatedBackdrop(
-        style: BackdropStyle.coins,
-        color: LifeColors.finance,
-        child: transactions.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Something went wrong: $e')),
-        data: (list) {
-          final sorted = [...list]..sort((a, b) => b.date.compareTo(a.date));
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
-            children: [
-              _BalanceHeader(budget: budget),
-              const SizedBox(height: 12),
-              const _SmartFinanceCard(),
-              const SizedBox(height: 12),
-              const _FinanceTipCard(),
-              const SizedBox(height: 12),
-              // The four charts (trend, categories, comparison, calendar) live
-              // together in one popup so the main screen stays short.
-              _AnalyticsEntry(onTap: () => _showAnalyticsSheet(context)),
-              const SizedBox(height: 12),
-              _ToolsEntry(onTap: () => _showToolsSheet(context, ref)),
-              const SizedBox(height: 16),
-              Text(context.tr('money.history'),
-                  style: Theme.of(context).textTheme.titleMedium),
-              const SizedBox(height: 8),
-              const _HistoryControls(),
-              const SizedBox(height: 8),
-              _HistoryList(all: sorted),
-            ],
-          );
-        },
-        ),
+      hero: RoomHero(
+        label: context.tr('today.safeToSpend'),
+        value: budget.safeToSpendToday.format(),
+        accent: accent,
+        progress: spendable <= 0 ? null : spent / spendable,
+        caption: context.trp('money.heroCaption', {
+          'spent': budget.expenses.format(),
+          'total': budget.income.format(),
+        }),
       ),
+      voice: _voice(context, ref),
+      actions: [
+        RoomAction(
+          icon: Icons.remove,
+          label: context.tr('money.expense'),
+          onTap: () => AddTransactionSheet.show(context),
+        ),
+        RoomAction(
+          icon: Icons.add,
+          label: context.tr('money.income'),
+          onTap: () => AddTransactionSheet.show(context),
+        ),
+        RoomAction(
+          icon: Icons.receipt_long,
+          label: context.tr('receipt.title'),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => const ReceiptPage()),
+          ),
+        ),
+      ],
+      tools: [
+        RoomTool(
+          icon: Icons.tune,
+          label: context.tr('limit.title'),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => const BudgetLimitsPage()),
+          ),
+        ),
+        RoomTool(
+          icon: Icons.repeat,
+          label: context.tr('recurring.title'),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => const RecurringPage()),
+          ),
+        ),
+        RoomTool(
+          icon: Icons.sell_outlined,
+          label: context.tr('rules.title'),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => const CategoryRulesPage()),
+          ),
+        ),
+        RoomTool(
+          icon: Icons.download_outlined,
+          label: context.tr('money.importCsv'),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => const CsvImportPage()),
+          ),
+        ),
+        RoomTool(
+          icon: Icons.ios_share,
+          label: context.tr('money.exportCsv'),
+          onTap: () => _exportCsv(context, ref),
+        ),
+      ],
+      children: [
+        // The strongest verdict is the room's voice; the rest stay here so no
+        // advice is lost to the shorter layout.
+        const _MoreInsightsCard(),
+        // The four charts (trend, categories, comparison, calendar) live
+        // together in one popup so the room stays short.
+        _AnalyticsEntry(onTap: () => _showAnalyticsSheet(context)),
+        const SizedBox(height: 16),
+        Text(context.tr('money.history'),
+            style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+        const _HistoryControls(),
+        const SizedBox(height: 8),
+        if (transactions.isLoading)
+          const Center(child: Padding(
+            padding: EdgeInsets.all(24),
+            child: CircularProgressIndicator(),
+          ))
+        else
+          _HistoryList(all: sorted),
+      ],
     );
   }
-
 }
 
 Future<void> _exportCsv(BuildContext context, WidgetRef ref) async {
@@ -98,6 +168,66 @@ Future<void> _exportCsv(BuildContext context, WidgetRef ref) async {
       content: Text(
           context.tr(downloaded ? 'money.csvDownloaded' : 'money.csvCopied')),
     ));
+}
+
+/// The finance verdicts that didn't make it into the room's voice line. The
+/// first insight is already the voice, so this starts at the second — the
+/// advice is shortened, never dropped.
+class _MoreInsightsCard extends ConsumerWidget {
+  const _MoreInsightsCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final rest = ref.watch(smartFinanceProvider).skip(1).toList();
+    if (rest.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: SectionCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('🧠 ${context.tr('smart.title')}',
+                style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 10),
+            for (final insight in rest)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 5),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(insight.emoji, style: const TextStyle(fontSize: 18)),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(context.tr(insight.titleKey),
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                color: insight.positive
+                                    ? LifeColors.finance
+                                    : null,
+                              )),
+                          Text(
+                            context.trp(insight.msgKey, {
+                              ...insight.params,
+                              if (insight.params['catId'] != null)
+                                'cat': context
+                                    .tr(insight.params['catId']! as String),
+                            }),
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 /// Compact entry that opens all four money charts in one popup, keeping the
@@ -168,256 +298,6 @@ void _showAnalyticsSheet(BuildContext context) {
       ),
     ),
   );
-}
-
-class _ToolsEntry extends StatelessWidget {
-  final VoidCallback onTap;
-  const _ToolsEntry({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return SectionCard(
-      onTap: onTap,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      child: Row(
-        children: [
-          const Text('🧰', style: TextStyle(fontSize: 26)),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(context.tr('money.tools'),
-                    style: Theme.of(context).textTheme.titleMedium),
-                Text(
-                  context.tr('money.toolsSub'),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.outline,
-                      ),
-                ),
-              ],
-            ),
-          ),
-          const Icon(Icons.chevron_right),
-        ],
-      ),
-    );
-  }
-}
-
-/// All the money tools (receipts, limits, recurring, rules, import/export)
-/// gathered into one sheet, so the main screen and app bar stay uncluttered.
-void _showToolsSheet(BuildContext context, WidgetRef ref) {
-  void go(Widget page) {
-    Navigator.of(context).pop();
-    Navigator.of(context)
-        .push(MaterialPageRoute<void>(builder: (_) => page));
-  }
-
-  showModalBottomSheet<void>(
-    context: context,
-    showDragHandle: true,
-    builder: (ctx) => SafeArea(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(ctx.tr('money.tools'),
-                  style: Theme.of(ctx).textTheme.headlineSmall),
-            ),
-          ),
-          ListTile(
-            leading: const Text('🧾', style: TextStyle(fontSize: 22)),
-            title: Text(ctx.tr('receipt.title')),
-            onTap: () => go(const ReceiptPage()),
-          ),
-          ListTile(
-            leading: const Text('🎯', style: TextStyle(fontSize: 22)),
-            title: Text(ctx.tr('limit.pageTitle')),
-            onTap: () => go(const BudgetLimitsPage()),
-          ),
-          ListTile(
-            leading: const Text('🔁', style: TextStyle(fontSize: 22)),
-            title: Text(ctx.tr('recurring.title')),
-            onTap: () => go(const RecurringPage()),
-          ),
-          ListTile(
-            leading: const Text('🏷️', style: TextStyle(fontSize: 22)),
-            title: Text(ctx.tr('rules.title')),
-            onTap: () => go(const CategoryRulesPage()),
-          ),
-          ListTile(
-            leading: const Text('📥', style: TextStyle(fontSize: 22)),
-            title: Text(ctx.tr('csv.title')),
-            onTap: () => go(const CsvImportPage()),
-          ),
-          ListTile(
-            leading: const Text('📄', style: TextStyle(fontSize: 22)),
-            title: Text(ctx.tr('money.exportCsv')),
-            onTap: () {
-              Navigator.of(ctx).pop();
-              _exportCsv(context, ref);
-            },
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-class _BalanceHeader extends StatelessWidget {
-  final Budget budget;
-  const _BalanceHeader({required this.budget});
-
-  @override
-  Widget build(BuildContext context) {
-    return GradientCard(
-      colors: LifeGradients.finance,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(context.tr('money.availableThisMonth'),
-              style: const TextStyle(color: Colors.white70)),
-          const SizedBox(height: 4),
-          AnimatedCounter(
-            value: budget.available.major,
-            format: (v) => Money.fromMajor(
-              v,
-              currency: budget.available.currency,
-            ).format(),
-            style: Theme.of(context)
-                .textTheme
-                .displaySmall
-                ?.copyWith(color: Colors.white),
-          ),
-          const SizedBox(height: 12),
-          LinearProgressIndicator(
-            value: budget.spendProgress.clamp(0.0, 1.0).toDouble(),
-            minHeight: 8,
-            borderRadius: BorderRadius.circular(4),
-            color: Colors.white,
-            backgroundColor: Colors.white.withValues(alpha: 0.25),
-          ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _stat(context, context.tr('money.income'), budget.income.format()),
-              _stat(context, context.tr('money.spent'), budget.expenses.format()),
-              _stat(
-                  context, context.tr('money.reserve'), budget.reserve.format()),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _stat(BuildContext context, String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label,
-            style: const TextStyle(fontSize: 12, color: Colors.white70)),
-        Text(value,
-            style: const TextStyle(
-                fontWeight: FontWeight.w700, color: Colors.white)),
-      ],
-    );
-  }
-}
-
-/// "Smart finance" — the analyzer's plain-language verdicts about pace,
-/// month-end projection, what to squeeze, and goal impact.
-class _SmartFinanceCard extends ConsumerWidget {
-  const _SmartFinanceCard();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final insights = ref.watch(smartFinanceProvider);
-    if (insights.isEmpty) return const SizedBox.shrink();
-    return SectionCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('🧠 ${context.tr('smart.title')}',
-              style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 10),
-          for (final insight in insights)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 5),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(insight.emoji, style: const TextStyle(fontSize: 18)),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(context.tr(insight.titleKey),
-                            style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              color: insight.positive
-                                  ? LifeColors.finance
-                                  : null,
-                            )),
-                        Text(
-                          context.trp(insight.msgKey, {
-                            ...insight.params,
-                            if (insight.params['catId'] != null)
-                              'cat': context
-                                  .tr(insight.params['catId']! as String),
-                          }),
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-/// A single evergreen money tip, rotated daily.
-class _FinanceTipCard extends ConsumerWidget {
-  const _FinanceTipCard();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final tipKey = ref.watch(financeTipProvider);
-    return SectionCard(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('💡', style: TextStyle(fontSize: 20)),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(context.tr('smart.tipTitle'),
-                    style: const TextStyle(
-                        fontWeight: FontWeight.w700, fontSize: 13)),
-                const SizedBox(height: 2),
-                Text(context.tr(tipKey),
-                    style: Theme.of(context).textTheme.bodyMedium),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 /// 6-month income vs expense bars — custom painted, no chart package.
