@@ -52,10 +52,16 @@ class GradientCard extends StatelessWidget {
 class LifeGradients {
   const LifeGradients._();
 
-  static const money = [Color(0xFF3B5BFE), Color(0xFF7B3BFE)];
-  static const finance = [Color(0xFF11998E), Color(0xFF38EF7D)];
-  static const health = [Color(0xFFF5576C), Color(0xFFF093FB)];
-  static const diet = [Color(0xFF0BA360), Color(0xFF3CBA92)];
-  static const goals = [Color(0xFFF7971E), Color(0xFFFFD200)];
-  static const mind = [Color(0xFF7F53AC), Color(0xFF647DEE)];
+  // Each pillar's gradient is its room's ink colour, deepened by about a
+  // quarter. They used to be unrelated cosmic pairs left from the old
+  // branding — "safe to spend" was a blue-violet card while the money room is
+  // green — so a card never told you which room it came from. The lighter stop
+  // is the exact room accent, which theme_contrast_test already holds to
+  // carrying white type.
+  static const money = [Color(0xFF0F6E56), Color(0xFF0B5441)];
+  static const finance = money;
+  static const health = [Color(0xFF993C1D), Color(0xFF742E16)];
+  static const diet = health;
+  static const goals = [Color(0xFF854F0B), Color(0xFF653C08)];
+  static const mind = [Color(0xFF185FA5), Color(0xFF12487D)];
 }

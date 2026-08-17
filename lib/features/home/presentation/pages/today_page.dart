@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:lifeos/core/services/life_score_service.dart';
 import 'package:lifeos/features/ai/domain/ai_insight.dart';
+import 'package:lifeos/features/rooms/domain/life_room.dart';
 import 'package:lifeos/features/ai/presentation/providers/ai_providers.dart';
 import 'package:lifeos/features/food/presentation/pages/diet_page.dart';
 import 'package:lifeos/features/food/presentation/providers/diet_providers.dart';
@@ -335,17 +336,25 @@ class _LifeScoreCard extends StatelessWidget {
                 Text(context.tr('today.lifeScore'),
                     style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 8),
+                // Each bar wears its own room's colour. All four were the
+                // theme violet, so the card showed four different things in
+                // one colour and said nothing about which was which.
                 _PillarBar(
                     label: context.tr('pillar.finance'),
-                    value: score.finance),
+                    value: score.finance,
+                    room: RoomId.money),
                 _PillarBar(
-                    label: context.tr('pillar.health'), value: score.health),
+                    label: context.tr('pillar.health'),
+                    value: score.health,
+                    room: RoomId.body),
                 _PillarBar(
                     label: context.tr('pillar.discipline'),
-                    value: score.discipline),
+                    value: score.discipline,
+                    room: RoomId.mind),
                 _PillarBar(
                     label: context.tr('pillar.productivity'),
-                    value: score.productivity),
+                    value: score.productivity,
+                    room: RoomId.goals),
               ],
             ),
           ),
@@ -361,10 +370,13 @@ class _ScoreRing extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return GradientRing(
       progress: value / 100,
       size: 76,
-      colors: LifeGradients.money,
+      // Deliberately not a room colour: the Life Score is the sum of all four,
+      // and now that green means money, a green ring claimed it was money.
+      colors: [scheme.primary, Color.lerp(scheme.primary, Colors.black, 0.25)!],
       center: Text('$value',
           style: Theme.of(context)
               .textTheme
@@ -377,25 +389,40 @@ class _ScoreRing extends StatelessWidget {
 class _PillarBar extends StatelessWidget {
   final String label;
   final int value;
-  const _PillarBar({required this.label, required this.value});
+  final RoomId room;
+  const _PillarBar({
+    required this.label,
+    required this.value,
+    required this.room,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final accent = roomById(room).colorFor(Theme.of(context).brightness);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 3),
       child: Row(
         children: [
           SizedBox(
-              width: 90,
-              child: Text(label, style: const TextStyle(fontSize: 12))),
+            // Sized for "Продуктивность", the longest pillar name the app
+            // ships. It was breaking across two lines mid-word at 90.
+            width: 112,
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 11.5),
+            ),
+          ),
           Expanded(
             child: ClipRRect(
               borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
                 value: value / 100,
                 minHeight: 6,
-                backgroundColor:
-                    Theme.of(context).colorScheme.surfaceContainerHighest,
+                color: accent,
+                backgroundColor: Color.lerp(accent, scheme.surface, 0.82),
               ),
             ),
           ),
@@ -625,7 +652,7 @@ class _BackupNudgeCard extends ConsumerWidget {
         MaterialPageRoute<void>(builder: (_) => const BackupPage()),
       ),
       child: GradientCard(
-        colors: const [Color(0xFF396AFC), Color(0xFF2948FF)],
+        colors: LifeGradients.mind,
         child: Row(
           children: [
             const Text('💾', style: TextStyle(fontSize: 30)),
@@ -1079,7 +1106,7 @@ class _LifeWeeksTeaser extends ConsumerWidget {
         MaterialPageRoute<void>(builder: (_) => const LifeWeeksPage()),
       ),
       child: GradientCard(
-        colors: const [Color(0xFF7F53AC), Color(0xFF647DEE)],
+        colors: LifeGradients.goals,
         child: Row(
           children: [
             const Text('⏳', style: TextStyle(fontSize: 30)),

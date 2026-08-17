@@ -4,6 +4,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lifeos/features/rooms/domain/life_room.dart';
 import 'package:lifeos/shared/theme/app_theme.dart';
+import 'package:lifeos/shared/widgets/gradient_card.dart';
+
+double _luminance(Color c) {
+  double channel(double v) =>
+      v <= 0.03928 ? v / 12.92 : math.pow((v + 0.055) / 1.055, 2.4).toDouble();
+  return 0.2126 * channel(c.r) +
+      0.7152 * channel(c.g) +
+      0.0722 * channel(c.b);
+}
+
+double _contrast(Color fg, Color bg) {
+  final a = _luminance(fg), b = _luminance(bg);
+  final light = math.max(a, b), dark = math.min(a, b);
+  return (light + 0.05) / (dark + 0.05);
+}
 
 /// How far apart two colours are in hue, in degrees, ignoring how light or
 /// saturated they are.
@@ -35,6 +50,31 @@ void main() {
         );
       }
     }
+  });
+
+  test('each pillar gradient belongs to its own room and carries white', () {
+    // These were unrelated cosmic pairs: "safe to spend" was a blue-violet
+    // card in an app whose money room is green, so a card never said which
+    // room it came from.
+    final pairs = {
+      RoomId.money: LifeGradients.money,
+      RoomId.body: LifeGradients.health,
+      RoomId.mind: LifeGradients.mind,
+      RoomId.goals: LifeGradients.goals,
+    };
+
+    pairs.forEach((id, gradient) {
+      final room = roomById(id).paper;
+      expect(gradient.first, room,
+          reason: '${id.name}: the gradient starts on a different colour '
+              'than the room itself');
+      for (final stop in gradient) {
+        expect(_hueGap(stop, room), lessThan(20),
+            reason: '${id.name}: a gradient stop drifted off-hue');
+        expect(_contrast(Colors.white, stop), greaterThanOrEqualTo(4.5),
+            reason: '${id.name}: white type on this card is unreadable');
+      }
+    });
   });
 
   test('the old theme-grey track really was off-hue for warm rooms', () {

@@ -12,11 +12,13 @@ import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:lifeos/core/services/key_value_store.dart';
 import 'package:lifeos/features/goals/presentation/pages/goals_page.dart';
 import 'package:lifeos/features/health/presentation/pages/health_page.dart';
+import 'package:lifeos/features/home/presentation/pages/today_page.dart';
 import 'package:lifeos/features/mind/presentation/pages/mind_page.dart';
 import 'package:lifeos/features/money/presentation/pages/money_page.dart';
 import 'package:lifeos/features/rooms/domain/life_room.dart';
 import 'package:lifeos/features/rooms/domain/room_attention.dart';
 import 'package:lifeos/features/rooms/presentation/pages/rooms_page.dart';
+import 'package:lifeos/features/telescope/presentation/pages/telescope_page.dart';
 import 'package:lifeos/features/rooms/presentation/providers/rooms_providers.dart';
 import 'package:lifeos/shared/providers/core_providers.dart';
 import 'package:lifeos/shared/theme/app_theme.dart';
@@ -93,6 +95,10 @@ void main() {
     String name, {
     required RoomAttention? lead,
     Widget home = const RoomsPage(),
+    // Today builds its cards inside FadeSlideIn, whose controller starts at
+    // zero opacity. Frozen, that page photographs as an empty backdrop — the
+    // screenshot looked like a bug in the app rather than in the harness.
+    bool frozen = true,
   }) async {
     await loadFonts(tester);
     tester.view.physicalSize = const Size(390, 844);
@@ -113,7 +119,7 @@ void main() {
       // already written by then, so the hang looks like a pass). Freezing every
       // ticker in the subtree renders the first frame statically instead.
       child: TickerMode(
-        enabled: false,
+        enabled: !frozen,
         child: RepaintBoundary(
         key: key,
         child: MaterialApp(
@@ -177,6 +183,20 @@ void main() {
     'paper': Brightness.light,
     'night': Brightness.dark,
   }.entries) {
+    testWidgets('the today screen in the ${skin.key} skin', (t) async {
+      await capture(t, skin.value, 'today_${skin.key}',
+          lead: null, home: const TodayPage(), frozen: false);
+      expect(File('build/skin/today_${skin.key}.png').lengthSync(),
+          greaterThan(1000));
+    });
+
+    testWidgets('the telescope in the ${skin.key} skin', (t) async {
+      await capture(t, skin.value, 'zoom_${skin.key}',
+          lead: null, home: const TelescopePage());
+      expect(File('build/skin/zoom_${skin.key}.png').lengthSync(),
+          greaterThan(1000));
+    });
+
     testWidgets('the goals room in the ${skin.key} skin', (t) async {
       await capture(t, skin.value, 'goals_${skin.key}',
           lead: null, home: const GoalsPage());
