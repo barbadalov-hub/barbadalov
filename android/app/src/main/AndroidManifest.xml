@@ -3,6 +3,15 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <!-- Receipt photo capture for on-device OCR. -->
     <uses-permission android:name="android.permission.CAMERA"/>
+    <!-- Dictating into text fields. Declared explicitly rather than inherited
+         from the plugin, so what the app asks for is visible in one place. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <!-- Lets the system speech recogniser be discovered on Android 11+. -->
+    <queries>
+        <intent>
+            <action android:name="android.speech.RecognitionService"/>
+        </intent>
+    </queries>
     <application
         android:label="Lumo"
         android:name="${applicationName}"

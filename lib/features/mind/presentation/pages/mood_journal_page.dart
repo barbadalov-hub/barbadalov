@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lifeos/shared/widgets/voice_input_button.dart';
 import 'package:lifeos/shared/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
@@ -232,6 +233,9 @@ class _MoodFormState extends State<_MoodForm> {
               labelText: context.tr('mood.note'),
               border: const OutlineInputBorder(),
               isDense: true,
+              // The one field in the app people write sentences into, and the
+              // one they are least likely to type at the end of a long day.
+              suffixIcon: VoiceInputButton(controller: _note),
             ),
           ),
           const SizedBox(height: 12),

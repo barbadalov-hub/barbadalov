@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lifeos/shared/widgets/voice_input_button.dart';
 import 'package:lifeos/shared/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -137,7 +138,10 @@ class PlannerPage extends ConsumerWidget {
                 controller: controller,
                 autofocus: true,
                 decoration:
-                    InputDecoration(labelText: ctx.tr('planner.what')),
+                    InputDecoration(
+                  labelText: ctx.tr('planner.what'),
+                  suffixIcon: VoiceInputButton(controller: controller),
+                ),
               ),
               const SizedBox(height: 8),
               ListTile(

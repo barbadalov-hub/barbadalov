@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lifeos/shared/widgets/voice_input_button.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
@@ -195,6 +196,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
             decoration: InputDecoration(
               labelText: context.tr('common.note'),
               border: const OutlineInputBorder(),
+              suffixIcon: VoiceInputButton(controller: _noteController),
             ),
           ),
           const SizedBox(height: 20),

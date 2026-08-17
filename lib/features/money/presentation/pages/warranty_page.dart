@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:lifeos/shared/widgets/voice_input_button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
@@ -476,8 +477,10 @@ class _PurchaseSheetState extends ConsumerState<PurchaseSheet> {
               controller: _title,
               autofocus: existing == null,
               decoration: InputDecoration(
-                  labelText: context.tr('warranty.what'),
-                  border: const OutlineInputBorder()),
+                labelText: context.tr('warranty.what'),
+                border: const OutlineInputBorder(),
+                suffixIcon: VoiceInputButton(controller: _title),
+              ),
             ),
             const SizedBox(height: 10),
             Row(
@@ -486,8 +489,10 @@ class _PurchaseSheetState extends ConsumerState<PurchaseSheet> {
                   child: TextField(
                     controller: _shop,
                     decoration: InputDecoration(
-                        labelText: context.tr('warranty.shop'),
-                        border: const OutlineInputBorder()),
+                      labelText: context.tr('warranty.shop'),
+                      border: const OutlineInputBorder(),
+                      suffixIcon: VoiceInputButton(controller: _shop),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 10),

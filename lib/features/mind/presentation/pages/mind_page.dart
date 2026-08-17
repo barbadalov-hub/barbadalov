@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:lifeos/shared/widgets/voice_input_button.dart';
 import 'package:lifeos/shared/theme/app_theme.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -287,7 +288,10 @@ class MindPage extends ConsumerWidget {
           children: [
             TextField(
               controller: titleController,
-              decoration: InputDecoration(labelText: ctx.tr('mind.bookTitle')),
+              decoration: InputDecoration(
+                labelText: ctx.tr('mind.bookTitle'),
+                suffixIcon: VoiceInputButton(controller: titleController),
+              ),
             ),
             TextField(
               controller: authorController,
@@ -429,7 +433,10 @@ class MindPage extends ConsumerWidget {
         content: TextField(
           controller: controller,
           autofocus: true,
-          decoration: InputDecoration(labelText: ctx.tr('mind.whatToDo')),
+          decoration: InputDecoration(
+            labelText: ctx.tr('mind.whatToDo'),
+            suffixIcon: VoiceInputButton(controller: controller),
+          ),
         ),
         actions: [
           TextButton(

@@ -13,6 +13,7 @@ import 'package:lifeos/features/rooms/domain/life_room.dart';
 import 'package:lifeos/features/rooms/presentation/widgets/room_scaffold.dart';
 import 'package:lifeos/shared/models/money.dart';
 import 'package:lifeos/shared/widgets/section_card.dart';
+import 'package:lifeos/shared/widgets/voice_input_button.dart';
 
 class GoalsPage extends ConsumerWidget {
   const GoalsPage({super.key});
@@ -111,7 +112,10 @@ class GoalsPage extends ConsumerWidget {
           children: [
             TextField(
               controller: titleController,
-              decoration: InputDecoration(labelText: ctx.tr('goals.title')),
+              decoration: InputDecoration(
+                labelText: ctx.tr('goals.title'),
+                suffixIcon: VoiceInputButton(controller: titleController),
+              ),
             ),
             TextField(
               controller: targetController,
@@ -358,7 +362,10 @@ class _GoalCard extends ConsumerWidget {
         content: TextField(
           controller: controller,
           autofocus: true,
-          decoration: InputDecoration(labelText: ctx.tr('goals.stageTitle')),
+          decoration: InputDecoration(
+            labelText: ctx.tr('goals.stageTitle'),
+            suffixIcon: VoiceInputButton(controller: controller),
+          ),
         ),
         actions: [
           TextButton(

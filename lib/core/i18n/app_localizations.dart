@@ -71,6 +71,13 @@ const Map<String, Map<String, String>> _values = {
   'common.soon': {'en': 'Soon', 'ru': 'Скоро', 'uk': 'Скоро'},
   'common.save': {'en': 'Save', 'ru': 'Сохранить', 'uk': 'Зберегти'},
   'common.delete': {'en': 'Delete', 'ru': 'Удалить', 'uk': 'Видалити'},
+  'voice.dictate': {'en': 'Dictate', 'ru': 'Продиктовать', 'uk': 'Продиктувати'},
+  'voice.stop': {'en': 'Stop', 'ru': 'Остановить', 'uk': 'Зупинити'},
+  'voice.unavailable': {
+    'en': 'Voice input is not available — the microphone was declined or the phone has no speech engine.',
+    'ru': 'Голосовой ввод недоступен — микрофон не разрешён или на телефоне нет распознавания речи.',
+    'uk': 'Голосове введення недоступне — мікрофон не дозволено або на телефоні немає розпізнавання мовлення.'
+  },
   'common.note': {'en': 'Note (optional)', 'ru': 'Заметка (необязательно)', 'uk': 'Нотатка (необовʼязково)'},
   'money.deleted': {'en': 'Transaction deleted', 'ru': 'Операция удалена', 'uk': 'Операцію видалено'},
 

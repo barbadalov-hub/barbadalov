@@ -67,6 +67,8 @@ dependencies:
   # recognition is Latin-script — it reads prices/digits from any receipt but
   # not Cyrillic product names.
   google_mlkit_text_recognition: ^0.13.1
+
+
   image_picker_platform_interface: ^2.10.0
   image_picker_android: ^0.8.12+20
   image_picker_ios: ^0.8.12+2
