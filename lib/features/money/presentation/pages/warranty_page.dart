@@ -8,7 +8,9 @@ import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:lifeos/core/services/doc_store.dart';
 import 'package:lifeos/core/services/ocr_gateway.dart';
 import 'package:lifeos/core/utils/share_image.dart';
+import 'package:lifeos/features/money/domain/entities/category.dart';
 import 'package:lifeos/features/money/domain/entities/purchase.dart';
+import 'package:lifeos/features/money/presentation/providers/money_providers.dart';
 import 'package:lifeos/features/money/presentation/providers/purchase_providers.dart';
 import 'package:lifeos/features/rooms/domain/life_room.dart';
 import 'package:lifeos/shared/models/money.dart';
@@ -367,6 +369,18 @@ class _PurchaseSheetState extends ConsumerState<PurchaseSheet> {
   Uint8List? _photo;
   bool _busy = false;
 
+  /// Whether saving should also record the money as spent.
+  ///
+  /// On by default for something bought today, because a purchase you are
+  /// entering now is money that just left. **Off for anything older**: people
+  /// catalogue old warranties in a sitting, and silently posting a year of
+  /// past purchases as expenses would wreck a history they already keep
+  /// correctly. The expense is dated to the purchase, never to today.
+  late bool _alsoExpense = widget.existing == null && _isFresh(_boughtAt);
+
+  static bool _isFresh(DateTime d) =>
+      DateTime.now().difference(d).inDays.abs() <= 1;
+
   @override
   void dispose() {
     _title.dispose();
@@ -406,6 +420,17 @@ class _PurchaseSheetState extends ConsumerState<PurchaseSheet> {
         kind: _kind,
         receiptBytes: _photo,
       );
+      if (_alsoExpense && major > 0) {
+        await ref.read(addTransactionProvider).call(
+              amount: Money.fromMajor(major),
+              type: TransactionType.expense,
+              categoryId: DefaultCategories.other.id,
+              note: [title, if (_shop.text.trim().isNotEmpty) _shop.text.trim()]
+                  .join(' · '),
+              // The day it was actually bought, not the day it was typed in.
+              date: _boughtAt,
+            );
+      }
     } else {
       var next = widget.existing!.copyWith(
         title: title,
@@ -577,6 +602,20 @@ class _PurchaseSheetState extends ConsumerState<PurchaseSheet> {
                     ),
                 ],
               ),
+            if (existing == null) ...[
+              const SizedBox(height: 4),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                secondary: const Icon(Icons.south_west),
+                value: _alsoExpense,
+                title: Text(context.tr('warranty.alsoExpense')),
+                // Naming the date leaves no doubt which month it lands in.
+                subtitle: Text(context.trp('warranty.alsoExpenseOn', {
+                  'date': DateFormat.yMMMd(lang).format(_boughtAt),
+                })),
+                onChanged: (v) => setState(() => _alsoExpense = v),
+              ),
+            ],
             const SizedBox(height: 16),
             Row(
               children: [

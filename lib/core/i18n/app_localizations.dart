@@ -1727,6 +1727,16 @@ const Map<String, Map<String, String>> _values = {
     'ru': 'Срок вышел {date}',
     'uk': 'Термін вийшов {date}'
   },
+  'warranty.alsoExpense': {
+    'en': 'Also record as an expense',
+    'ru': 'Записать ещё и как расход',
+    'uk': 'Записати ще й як витрату'
+  },
+  'warranty.alsoExpenseOn': {
+    'en': 'dated {date}, the day it was bought',
+    'ru': 'датой {date} — днём покупки',
+    'uk': 'датою {date} — днем покупки'
+  },
   'warranty.alertTitle': {
     'en': 'Warranty is running out',
     'ru': 'Гарантия заканчивается',

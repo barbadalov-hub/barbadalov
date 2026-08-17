@@ -2,10 +2,10 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "lifeos-web",
-      "runtimeExecutable": "node",
-      "runtimeArgs": [".claude/serve.js"],
-      "port": 8080
+      "name": "lumo-web",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8099", "--directory", "build/web"],
+      "port": 8099
     }
   ]
 }
