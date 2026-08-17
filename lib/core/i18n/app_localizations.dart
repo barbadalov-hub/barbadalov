@@ -2005,6 +2005,22 @@ const Map<String, Map<String, String>> _values = {
     'uk': 'витрачено {spent} з {total}'
   },
   'money.importCsv': {'en': 'Import', 'ru': 'Импорт', 'uk': 'Імпорт'},
+  // --- Planner (the day as an hour rail) ----------------------------------
+  'planner.title': {'en': 'Day plan', 'ru': 'План дня', 'uk': 'План дня'},
+  'planner.add': {'en': 'Add to the day', 'ru': 'Добавить в день', 'uk': 'Додати в день'},
+  'planner.what': {'en': 'What needs doing?', 'ru': 'Что нужно сделать?', 'uk': 'Що потрібно зробити?'},
+  'planner.anytime': {'en': 'Some time today', 'ru': 'Когда-нибудь сегодня', 'uk': 'Колись сьогодні'},
+  'planner.clearTime': {'en': 'Clear the time', 'ru': 'Убрать время', 'uk': 'Прибрати час'},
+  'planner.notify': {'en': 'Nudge me then', 'ru': 'Напомнить в это время', 'uk': 'Нагадати в цей час'},
+  'planner.progress': {'en': '{done} of {total} done', 'ru': 'сделано {done} из {total}', 'uk': 'зроблено {done} з {total}'},
+  'planner.empty': {
+    'en': 'Nothing planned yet. Give one thing an hour and the day gets a spine.',
+    'ru': 'План пока пуст. Назначь одному делу час — и у дня появится стержень.',
+    'uk': 'План поки порожній. Признач одній справі годину — і в дня з’явиться стрижень.'
+  },
+  'planner.pushTitle': {'en': 'On your plan now', 'ru': 'Сейчас по плану', 'uk': 'Зараз за планом'},
+  'planner.moreSub': {'en': 'Your day, hour by hour', 'ru': 'Твой день по часам', 'uk': 'Твій день по годинах'},
+
   // --- Telescope (the time zoom) ------------------------------------------
   'nav.telescope': {'en': 'Zoom', 'ru': 'Периоды', 'uk': 'Періоди'},
   'zoom.title': {'en': 'Your life, zoomed', 'ru': 'Твоя жизнь в масштабе', 'uk': 'Твоє життя в масштабі'},

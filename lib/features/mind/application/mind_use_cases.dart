@@ -83,11 +83,18 @@ class AddTask {
 
   const AddTask(this._repository, this._idService);
 
-  Result<DayTask> call(String title) {
+  /// [atMinutes] pins the task to a time on the planner rail; leaving it null
+  /// keeps the task in the loose "some time today" list.
+  Result<DayTask> call(String title, {int? atMinutes, bool notify = false}) {
     if (title.trim().isEmpty) {
       return const Err(ValidationFailure('Task cannot be empty.'));
     }
-    final task = DayTask(id: _idService.newId(), title: title.trim());
+    final task = DayTask(
+      id: _idService.newId(),
+      title: title.trim(),
+      atMinutes: atMinutes,
+      notify: atMinutes == null ? false : notify,
+    );
     _repository.addTask(task);
     return Ok(task);
   }

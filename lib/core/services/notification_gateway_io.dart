@@ -122,6 +122,37 @@ class NotificationGateway {
     }
   }
 
+  /// Fires once at [when] and never repeats — the planner's primitive. A task
+  /// at 17:00 today must not come back tomorrow, which is exactly what
+  /// [scheduleDaily]'s `matchDateTimeComponents` would do. Times already in the
+  /// past are ignored rather than firing immediately.
+  Future<void> scheduleAt({
+    required int id,
+    required String title,
+    required String body,
+    required DateTime when,
+  }) async {
+    if (!_supported) return;
+    if (!_ready) await init();
+    if (!_ready) return;
+    final at = tz.TZDateTime.from(when, tz.local);
+    if (!at.isAfter(tz.TZDateTime.now(tz.local))) return;
+    try {
+      await _plugin.zonedSchedule(
+        id,
+        title,
+        body,
+        at,
+        _details,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+      );
+    } catch (_) {
+      // Scheduling failures must stay silent.
+    }
+  }
+
   Future<void> cancel(int id) async {
     if (!_supported || !_ready) return;
     try {

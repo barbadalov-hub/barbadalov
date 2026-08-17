@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
@@ -41,6 +41,7 @@ import 'package:lifeos/features/coach/presentation/providers/coach_providers.dar
 import 'package:lifeos/features/insights/presentation/pages/insights_page.dart';
 import 'package:lifeos/features/insights/presentation/providers/insights_providers.dart';
 import 'package:lifeos/features/home/presentation/providers/today_layout_provider.dart';
+import 'package:lifeos/features/planner/presentation/pages/planner_page.dart';
 import 'package:lifeos/features/search/presentation/pages/command_palette.dart';
 import 'package:lifeos/shared/widgets/gradient_card.dart';
 import 'package:lifeos/shared/widgets/motion.dart';
@@ -176,6 +177,13 @@ class _Greeting extends ConsumerWidget {
           icon: const Icon(Icons.help_outline),
           tooltip: context.tr('tour.title'),
           onPressed: () => GuidePage.open(context),
+        ),
+        IconButton(
+          icon: const Icon(Icons.calendar_today_outlined),
+          tooltip: context.tr('planner.title'),
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => const PlannerPage()),
+          ),
         ),
         IconButton(
           icon: const Icon(Icons.tune),

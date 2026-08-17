@@ -8,7 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:lifeos/core/services/key_value_store.dart';
-import 'package:lifeos/features/telescope/presentation/pages/telescope_page.dart';
+import 'package:lifeos/features/planner/presentation/pages/planner_page.dart';
 import 'package:lifeos/shared/providers/core_providers.dart';
 import 'package:lifeos/shared/theme/app_theme.dart';
 
@@ -55,7 +55,7 @@ void main() {
           ],
           supportedLocales: AppLocalizations.supportedLocales,
           theme: b == Brightness.dark ? AppTheme.dark() : AppTheme.light(),
-          home: const TelescopePage(),
+          home: const PlannerPage(),
         ),
         ),
       ),

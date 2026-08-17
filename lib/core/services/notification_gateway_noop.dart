@@ -18,6 +18,13 @@ class NotificationGateway {
     required int minute,
   }) async {}
 
+  Future<void> scheduleAt({
+    required int id,
+    required String title,
+    required String body,
+    required DateTime when,
+  }) async {}
+
   Future<void> cancel(int id) async {}
 
   Future<void> cancelAll() async {}
