@@ -585,8 +585,11 @@ class _FoodBudgetCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(context.tr('food.budget'),
-                  style: Theme.of(context).textTheme.titleMedium),
+              Expanded(
+                child: Text(context.tr('food.budget'),
+                    style: Theme.of(context).textTheme.titleMedium,
+                    overflow: TextOverflow.ellipsis),
+              ),
               IconButton(
                 onPressed: onEdit,
                 icon: const Icon(Icons.edit, size: 18),
@@ -954,7 +957,11 @@ class _Header extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(title, style: Theme.of(context).textTheme.titleLarge),
+        Expanded(
+          child: Text(title,
+              style: Theme.of(context).textTheme.titleLarge,
+              overflow: TextOverflow.ellipsis),
+        ),
         IconButton.filledTonal(onPressed: onAdd, icon: const Icon(Icons.add)),
       ],
     );

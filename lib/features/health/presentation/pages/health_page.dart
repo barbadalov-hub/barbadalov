@@ -208,7 +208,12 @@ class HealthPage extends ConsumerWidget {
   /// One sentence about the body: the metric furthest from its goal, so the
   /// room says what to do rather than restating the rings.
   String _voice(BuildContext context, HealthDay? day, HealthGoalSet goals) {
-    if (day == null) return context.tr('health.voiceNoData');
+    // An untouched day arrives as a row of zeroes rather than as null, and
+    // scolding someone for "8000 steps short" before they have logged anything
+    // reads as an accusation. Nothing recorded means nothing to judge yet.
+    final blank = day == null ||
+        (day.steps == 0 && day.sleepHours == 0 && day.waterMl == 0);
+    if (blank) return context.tr('health.voiceNoData');
     if (day.sleepHours > 0 && day.sleepHours < goals.sleep - 0.75) {
       return context.trp('health.voiceSleep', {
         'h': day.sleepHours.toStringAsFixed(1),

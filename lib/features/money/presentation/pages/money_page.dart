@@ -139,8 +139,11 @@ class MoneyPage extends ConsumerWidget {
         Text(context.tr('money.history'),
             style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
-        const _HistoryControls(),
-        const SizedBox(height: 8),
+        // Search and filters are noise until there is something to search.
+        if (sorted.isNotEmpty) ...[
+          const _HistoryControls(),
+          const SizedBox(height: 8),
+        ],
         if (transactions.isLoading)
           const Center(child: Padding(
             padding: EdgeInsets.all(24),

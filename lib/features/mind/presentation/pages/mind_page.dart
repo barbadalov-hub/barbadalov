@@ -97,8 +97,11 @@ class MindPage extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(context.tr('mind.habits'),
-                  style: Theme.of(context).textTheme.titleLarge),
+              Expanded(
+                child: Text(context.tr('mind.habits'),
+                    style: Theme.of(context).textTheme.titleLarge,
+                    overflow: TextOverflow.ellipsis),
+              ),
               IconButton.filledTonal(
                 onPressed: () => _addHabitDialog(context, ref),
                 icon: const Icon(Icons.add),
@@ -203,8 +206,11 @@ class MindPage extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(context.tr('mind.books'),
-                  style: Theme.of(context).textTheme.titleLarge),
+              Expanded(
+                child: Text(context.tr('mind.books'),
+                    style: Theme.of(context).textTheme.titleLarge,
+                    overflow: TextOverflow.ellipsis),
+              ),
               IconButton.filledTonal(
                 onPressed: () => _addBookDialog(context, ref),
                 icon: const Icon(Icons.add),

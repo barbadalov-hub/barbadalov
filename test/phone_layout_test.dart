@@ -33,7 +33,11 @@ void main() {
     'goals': GoalsPage(),
   };
 
-  /// Renders one screen and returns whatever it threw while laying out.
+  /// Renders one screen at phone size and returns whatever it threw.
+  ///
+  /// Scrolling matters: these screens are lazy slivers, so a child below the
+  /// fold is never laid out and never gets the chance to overflow. The books
+  /// header on Mind hid behind exactly that blind spot.
   Future<Object?> render(
     WidgetTester tester,
     Widget screen, {
@@ -52,6 +56,7 @@ void main() {
             InMemoryKeyValueStore({'onboarding.done': 'true'})),
       ],
       child: MaterialApp(
+        // Russian: ~20% longer than English, so it is the honest stress test.
         locale: const Locale('ru'),
         localizationsDelegates: const [
           AppLocalizations.delegate,
@@ -71,10 +76,26 @@ void main() {
       ),
     ));
 
+    // Fixed pumps: the animated backdrops repeat forever, so settle never
+    // happens. Overflows surface during layout on the first frames.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
     await tester.pump(const Duration(seconds: 1));
-    return tester.takeException();
+    final onFirstScreen = tester.takeException();
+    if (onFirstScreen != null) return onFirstScreen;
+
+    // Walk down the page so everything below the fold gets laid out too.
+    final scrollable = find.byType(Scrollable);
+    if (scrollable.evaluate().isEmpty) return null;
+    for (var screenful = 0; screenful < 12; screenful++) {
+      await tester.drag(scrollable.first, const Offset(0, -600),
+          warnIfMissed: false);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
+      final thrown = tester.takeException();
+      if (thrown != null) return thrown;
+    }
+    return null;
   }
 
   // Accessibility: someone who has turned system text up should still be able
@@ -94,42 +115,11 @@ void main() {
     for (final brightness in Brightness.values) {
       testWidgets('${entry.key} fits a phone in ${brightness.name}',
           (tester) async {
-        // iPhone-ish logical size; the narrowest mainstream phone is 360.
-        tester.view.physicalSize = const Size(360, 780);
-        tester.view.devicePixelRatio = 1.0;
-        addTearDown(tester.view.resetPhysicalSize);
-        addTearDown(tester.view.resetDevicePixelRatio);
-
-        await tester.pumpWidget(ProviderScope(
-          overrides: [
-            keyValueStoreProvider.overrideWithValue(
-                InMemoryKeyValueStore({'onboarding.done': 'true'})),
-          ],
-          child: MaterialApp(
-            // Russian: ~20% longer than English, so it is the honest stress test.
-            locale: const Locale('ru'),
-            localizationsDelegates: const [
-              AppLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: AppLocalizations.supportedLocales,
-            theme: brightness == Brightness.dark
-                ? AppTheme.dark()
-                : AppTheme.light(),
-            home: entry.value,
-          ),
-        ));
-
-        // Fixed pumps: the animated backdrops repeat forever, so settle never
-        // happens. Overflows surface during layout on the first frames.
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 400));
-        await tester.pump(const Duration(seconds: 1));
-
-        expect(tester.takeException(), isNull,
-            reason: '${entry.key} overflows or throws at 360px wide');
+        expect(
+          await render(tester, entry.value, brightness: brightness),
+          isNull,
+          reason: '${entry.key} overflows or throws at 360px wide',
+        );
       });
     }
   }
