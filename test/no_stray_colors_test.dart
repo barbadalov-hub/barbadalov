@@ -16,6 +16,12 @@ const _banned = <String, String>{
   '0xFF3BA7FF': 'LifeColors.info',
 };
 
+/// Byte sequences that mean text was decoded with the wrong codepage and saved
+/// back. The goals room shipped `вњ… В графике` for a while — the ✅ was written
+/// as UTF-8, read back as CP1251, and re-saved as that garbage. It compiles, it
+/// analyses clean, and the only way to notice is to look at the screen.
+const _mojibake = ['вњ', 'вљ', 'рџ', 'СЂ', 'вЂ', 'Р°', 'Т‘'];
+
 /// A palette guard is only as good as its reach: a constant that half the app
 /// bypasses guards nothing. This is the other half of `theme_contrast_test` —
 /// that one proves the palette is legible, this one proves the app uses it.
@@ -43,6 +49,29 @@ void main() {
 
     expect(offenders, isEmpty,
         reason: 'retired colours are back in the source:\n'
+            '${offenders.join('\n')}');
+  });
+
+  test('no source file carries mis-decoded text', () {
+    final offenders = <String>[];
+
+    for (final entity in Directory('lib').listSync(recursive: true)) {
+      if (entity is! File || !entity.path.endsWith('.dart')) continue;
+      // This very list is written in the broken bytes on purpose.
+      if (entity.path.endsWith('no_stray_colors_test.dart')) continue;
+
+      final lines = entity.readAsLinesSync();
+      for (var i = 0; i < lines.length; i++) {
+        for (final bad in _mojibake) {
+          if (lines[i].contains(bad)) {
+            offenders.add('${entity.path}:${i + 1} contains "$bad"');
+          }
+        }
+      }
+    }
+
+    expect(offenders, isEmpty,
+        reason: 'text was decoded with the wrong codepage:\n'
             '${offenders.join('\n')}');
   });
 }

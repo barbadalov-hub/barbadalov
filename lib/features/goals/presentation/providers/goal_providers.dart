@@ -59,12 +59,28 @@ final monthlyNetProvider = Provider<Money>((ref) {
   return ref.watch(currentBudgetProvider).available;
 });
 
+/// How many goals are still competing for the same leftover money.
+final activeGoalCountProvider = Provider<int>((ref) {
+  final all = ref.watch(goalsProvider).valueOrNull ?? const <Goal>[];
+  return all.where((g) => !g.isComplete).length;
+});
+
 final goalForecastProvider = Provider.family<GoalForecast, Goal>((ref, goal) {
   final now = ref.watch(clockProvider).now();
   final monthlyNet = ref.watch(monthlyNetProvider);
+  final active = ref.watch(activeGoalCountProvider);
+
+  // One pot cannot fund every goal in full. Handing the whole leftover to each
+  // goal separately promised the same money three times over and told the user
+  // three different completion dates that could not all happen.
+  final share = active <= 1
+      ? monthlyNet
+      : Money((monthlyNet.minorUnits / active).floor(),
+          currency: monthlyNet.currency);
+
   return ref.watch(forecastGoalProvider).call(
         goal,
-        monthlyNet: monthlyNet,
+        monthlyNet: share,
         now: now,
       );
 });

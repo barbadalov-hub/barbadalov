@@ -4,8 +4,10 @@ import 'package:intl/intl.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:lifeos/features/goals/application/forecast_goal.dart';
 import 'package:lifeos/features/goals/domain/entities/goal.dart';
+import 'package:lifeos/features/goals/domain/goal_starters.dart';
 import 'package:lifeos/features/goals/presentation/providers/goal_providers.dart';
 import 'package:lifeos/features/lifeweeks/presentation/pages/life_weeks_page.dart';
+import 'package:lifeos/features/money/presentation/providers/money_providers.dart';
 import 'package:lifeos/features/rooms/domain/life_room.dart';
 import 'package:lifeos/features/rooms/presentation/widgets/room_scaffold.dart';
 import 'package:lifeos/shared/models/money.dart';
@@ -85,6 +87,8 @@ class GoalsPage extends ConsumerWidget {
               child: CircularProgressIndicator(),
             ),
           )
+        else if (list.isEmpty)
+          const _GoalStarters()
         else
           for (final g in sorted) ...[
             _GoalCard(goal: g),
@@ -138,6 +142,97 @@ class GoalsPage extends ConsumerWidget {
 }
 
 
+/// What the room offers when there is nothing in it.
+///
+/// The empty Goals room used to be one sentence, one tool tile and a screen of
+/// blank page. "Name a goal" is a instruction, not help: a blank field is
+/// exactly where people put the phone down.
+class _GoalStarters extends ConsumerWidget {
+  const _GoalStarters();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+    final accent = roomById(RoomId.goals).colorFor(Theme.of(context).brightness);
+    final spent = ref.watch(currentBudgetProvider).expenses.minorUnits;
+    final starters = GoalStarters.forUser(monthlyExpensesMinor: spent);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(context.tr('starter.title'),
+            style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 2),
+        Text(
+          context.tr('starter.sub'),
+          style: Theme.of(context)
+              .textTheme
+              .bodySmall
+              ?.copyWith(color: scheme.outline),
+        ),
+        const SizedBox(height: 12),
+        for (final s in starters) ...[
+          Material(
+            color: Color.lerp(accent, scheme.surfaceContainerLowest, 0.9),
+            borderRadius: BorderRadius.circular(14),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(14),
+              onTap: () => ref.read(addGoalProvider).call(
+                    title: context.tr(s.titleKey),
+                    target: Money(s.targetMinor),
+                    emoji: s.emoji,
+                  ),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                      color: accent.withValues(alpha: 0.35), width: 0.5),
+                ),
+                padding: const EdgeInsets.fromLTRB(13, 11, 13, 11),
+                child: Row(
+                  children: [
+                    Text(s.emoji, style: const TextStyle(fontSize: 20)),
+                    const SizedBox(width: 11),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(context.tr(s.titleKey),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                  fontSize: 14.5, fontWeight: FontWeight.w600)),
+                          if (s.personal)
+                            Text(
+                              context.tr('starter.personal'),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                  fontSize: 11.5, color: scheme.outline),
+                            ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      Money(s.targetMinor).format(),
+                      style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: accent),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
+      ],
+    );
+  }
+}
+
 class _GoalCard extends ConsumerWidget {
   final Goal goal;
   const _GoalCard({required this.goal});
@@ -174,7 +269,13 @@ class _GoalCard extends ConsumerWidget {
           const SizedBox(height: 6),
           Row(
             children: [
-              Expanded(child: _forecastLine(context, forecast)),
+              Expanded(
+                child: _forecastLine(
+                  context,
+                  forecast,
+                  sharedWith: ref.watch(activeGoalCountProvider),
+                ),
+              ),
               TextButton.icon(
                 onPressed: () => _contributeDialog(context, ref),
                 icon: const Icon(Icons.add, size: 18),
@@ -268,7 +369,11 @@ class _GoalCard extends ConsumerWidget {
     ref.read(addMilestoneProvider).call(goal, title);
   }
 
-  Widget _forecastLine(BuildContext context, GoalForecast f) {
+  Widget _forecastLine(
+    BuildContext context,
+    GoalForecast f, {
+    required int sharedWith,
+  }) {
     final style = Theme.of(context).textTheme.bodySmall;
     if (f.complete) {
       return Text(context.tr('goals.reached'), style: style);
@@ -279,8 +384,8 @@ class _GoalCard extends ConsumerWidget {
     } else {
       final date = DateFormat.yMMM().format(f.projectedDate!);
       final flag = f.onTrackForTargetDate
-          ? 'вњ… ${context.tr('goals.onTrack')}'
-          : 'вљ пёЏ ${context.tr('goals.behind')}';
+          ? '✅ ${context.tr('goals.onTrack')}'
+          : '⚠️ ${context.tr('goals.behind')}';
       main = Text(
         context.trp('goals.forecast', {
           'months': f.monthsRemaining!,
@@ -293,19 +398,28 @@ class _GoalCard extends ConsumerWidget {
     // When the goal has a deadline it isn't on pace for, show the monthly
     // contribution needed to still make it.
     final required = f.requiredMonthly;
-    if (required != null && !f.onTrackForTargetDate) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          main,
-          Text(
-            context.trp('goals.needMonthly', {'amount': required.format()}),
-            style: style?.copyWith(fontWeight: FontWeight.w600),
-          ),
-        ],
-      );
-    }
-    return main;
+    final extras = <Widget>[
+      if (required != null && !f.onTrackForTargetDate)
+        Text(
+          context.trp('goals.needMonthly', {'amount': required.format()}),
+          style: style?.copyWith(fontWeight: FontWeight.w600),
+        ),
+      // Say out loud that the leftover is being divided. Without this the date
+      // just looks pessimistic, and a number the user cannot explain is a
+      // number they stop believing.
+      if (sharedWith > 1 && f.monthsRemaining != null)
+        Text(
+          context.trp('goals.splitNote', {'n': sharedWith}),
+          style: style?.copyWith(
+              color: Theme.of(context).colorScheme.outline),
+        ),
+    ];
+
+    if (extras.isEmpty) return main;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [main, ...extras],
+    );
   }
 
   Future<void> _contributeDialog(BuildContext context, WidgetRef ref) async {

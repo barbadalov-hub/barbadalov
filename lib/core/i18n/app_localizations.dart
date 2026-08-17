@@ -1633,6 +1633,35 @@ const Map<String, Map<String, String>> _values = {
   'reminder.short.meal': {'en': 'Meals', 'ru': 'Еда', 'uk': 'Їжа'},
   'reminder.short.meds': {'en': 'Meds', 'ru': 'Лекарства', 'uk': 'Ліки'},
   'unit.hoursShort': {'en': 'h', 'ru': 'ч', 'uk': 'год'},
+  // --- Starter goals ------------------------------------------------------
+  'starter.title': {
+    'en': 'Start with one of these',
+    'ru': 'Начни с одной из этих',
+    'uk': 'Почни з однієї з цих'
+  },
+  'starter.sub': {
+    'en': 'One tap creates it. You can rename it and change the amount after.',
+    'ru': 'Одно нажатие — и она создана. Название и сумму можно поменять потом.',
+    'uk': 'Один дотик — і вона створена. Назву та суму можна змінити потім.'
+  },
+  'starter.cushion': {
+    'en': 'Safety cushion',
+    'ru': 'Подушка безопасности',
+    'uk': 'Подушка безпеки'
+  },
+  'starter.trip': {'en': 'A trip', 'ru': 'Поездка', 'uk': 'Подорож'},
+  'starter.gear': {'en': 'New gear', 'ru': 'Новая техника', 'uk': 'Нова техніка'},
+  'starter.home': {'en': 'Home deposit', 'ru': 'Взнос за жильё', 'uk': 'Внесок за житло'},
+  'starter.personal': {
+    'en': 'three months of your own spending',
+    'ru': 'три месяца твоих расходов',
+    'uk': 'три місяці твоїх витрат'
+  },
+  'goals.splitNote': {
+    'en': 'assuming the leftover is split evenly between {n} goals',
+    'ru': 'если делить свободный остаток поровну между {n} целями',
+    'uk': 'якщо ділити вільний залишок порівну між {n} цілями'
+  },
   'ach.next': {
     'en': 'Closest: {name} — {n} of {goal}.',
     'ru': 'Ближе всего: {name} — {n} из {goal}.',
