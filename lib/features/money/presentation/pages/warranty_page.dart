@@ -232,6 +232,107 @@ class _PurchaseCard extends ConsumerWidget {
   }
 }
 
+/// The kept receipt, shown rather than merely reported.
+///
+/// "The receipt is saved" is a claim; a thumbnail you can open is proof. If the
+/// photo came out unreadable, the user needs to find that out in the shop's car
+/// park — not eleven months later at the counter.
+class _ReceiptStrip extends ConsumerWidget {
+  /// A photo taken in this sheet and not yet written to disk.
+  final Uint8List? fresh;
+
+  /// A photo already on the shelf.
+  final String? docId;
+  final VoidCallback? onExport;
+
+  const _ReceiptStrip({this.fresh, this.docId, this.onExport});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+    final stored = docId == null
+        ? const AsyncValue<Uint8List?>.data(null)
+        : ref.watch(receiptImageProvider(docId!));
+    final bytes = fresh ?? stored.valueOrNull;
+
+    return Row(
+      children: [
+        if (bytes != null)
+          InkWell(
+            borderRadius: BorderRadius.circular(10),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => _ReceiptViewer(bytes: bytes),
+              ),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.memory(
+                bytes,
+                width: 54,
+                height: 54,
+                fit: BoxFit.cover,
+                // A corrupt file must not take the whole sheet down with it.
+                errorBuilder: (_, __, ___) => Container(
+                  width: 54,
+                  height: 54,
+                  color: scheme.surfaceContainerHighest,
+                  child: Icon(Icons.broken_image_outlined,
+                      size: 20, color: scheme.outline),
+                ),
+              ),
+            ),
+          )
+        else
+          const SizedBox(
+            width: 54,
+            height: 54,
+            child: Center(
+              child: SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
+          ),
+        const SizedBox(width: 11),
+        Expanded(
+          child: Text(
+            context.tr('warranty.receiptKept'),
+            style: TextStyle(fontSize: 12.5, color: scheme.onSurface),
+          ),
+        ),
+        if (onExport != null)
+          TextButton(
+            onPressed: onExport,
+            child: Text(context.tr('warranty.export')),
+          ),
+      ],
+    );
+  }
+}
+
+/// The receipt at full size, zoomable — the print on a shop receipt is small
+/// enough that a fixed-size view would be useless for reading the date.
+class _ReceiptViewer extends StatelessWidget {
+  final Uint8List bytes;
+  const _ReceiptViewer({required this.bytes});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(context.tr('warranty.viewReceipt'))),
+      backgroundColor: Colors.black,
+      body: Center(
+        child: InteractiveViewer(
+          maxScale: 6,
+          child: Image.memory(bytes, fit: BoxFit.contain),
+        ),
+      ),
+    );
+  }
+}
+
 /// Add or edit a kept purchase.
 class PurchaseSheet extends ConsumerStatefulWidget {
   final Purchase? existing;
@@ -325,7 +426,6 @@ class _PurchaseSheetState extends ConsumerState<PurchaseSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     final existing = widget.existing;
     final lang = Localizations.localeOf(context).languageCode;
 
@@ -362,25 +462,12 @@ class _PurchaseSheetState extends ConsumerState<PurchaseSheet> {
                 ],
               ),
               if (_photo != null || existing?.hasReceipt == true) ...[
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    const Icon(Icons.check_circle,
-                        size: 17, color: LifeColors.positive),
-                    const SizedBox(width: 7),
-                    Expanded(
-                      child: Text(
-                        context.tr('warranty.receiptKept'),
-                        style: TextStyle(
-                            fontSize: 12.5, color: scheme.onSurface),
-                      ),
-                    ),
-                    if (existing?.receiptDocId != null)
-                      TextButton(
-                        onPressed: () => _export(existing!),
-                        child: Text(context.tr('warranty.export')),
-                      ),
-                  ],
+                const SizedBox(height: 10),
+                _ReceiptStrip(
+                  fresh: _photo,
+                  docId: existing?.receiptDocId,
+                  onExport:
+                      existing?.receiptDocId == null ? null : () => _export(existing!),
                 ),
               ],
               const SizedBox(height: 12),

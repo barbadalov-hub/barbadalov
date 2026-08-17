@@ -1720,6 +1720,31 @@ const Map<String, Map<String, String>> _values = {
     'ru': 'Срок вышел {date}',
     'uk': 'Термін вийшов {date}'
   },
+  'warranty.alertTitle': {
+    'en': 'Warranty is running out',
+    'ru': 'Гарантия заканчивается',
+    'uk': 'Гарантія закінчується'
+  },
+  'warranty.alertExpiryTitle': {
+    'en': 'Use it before it goes off',
+    'ru': 'Успей использовать',
+    'uk': 'Встигни використати'
+  },
+  'warranty.alertBody': {
+    'en': '{name} — {n} days left. If anything is wrong with it, now is the time.',
+    'ru': '{name} — осталось {n} дн. Если с ней что-то не так, сейчас самое время.',
+    'uk': '{name} — лишилося {n} дн. Якщо з нею щось не так, зараз саме час.'
+  },
+  'warranty.alertBodyWithReceipt': {
+    'en': '{name} — {n} days left, and the receipt is here. Take it back while you still can.',
+    'ru': '{name} — осталось {n} дн., и чек на месте. Успей вернуть, пока можно.',
+    'uk': '{name} — лишилося {n} дн., і чек на місці. Встигни повернути, поки можна.'
+  },
+  'warranty.viewReceipt': {
+    'en': 'Receipt',
+    'ru': 'Чек',
+    'uk': 'Чек'
+  },
   'warranty.stateUnknown': {
     'en': 'No end date recorded',
     'ru': 'Дата окончания не указана',

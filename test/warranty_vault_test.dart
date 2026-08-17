@@ -154,18 +154,18 @@ void main() {
         Purchase(
           id: 'a',
           title: 'a',
-          price: Money.zero(),
+          price: const Money.zero(),
           boughtAt: now,
           until: DateTime(2026, 6, 20),
         ),
         Purchase(
           id: 'b',
           title: 'b',
-          price: Money.zero(),
+          price: const Money.zero(),
           boughtAt: now,
           until: DateTime(2030, 1, 1),
         ),
-        Purchase(id: 'c', title: 'c', price: Money.zero(), boughtAt: now),
+        Purchase(id: 'c', title: 'c', price: const Money.zero(), boughtAt: now),
       ],
       (p) => p.toJson(),
     );

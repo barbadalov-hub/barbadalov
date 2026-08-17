@@ -8,6 +8,7 @@ import 'package:lifeos/features/cloud/presentation/pages/account_page.dart';
 import 'package:lifeos/features/food/presentation/providers/expiry_alert_provider.dart';
 import 'package:lifeos/features/money/presentation/providers/budget_limits_providers.dart';
 import 'package:lifeos/features/money/presentation/providers/recurring_providers.dart';
+import 'package:lifeos/features/money/presentation/providers/warranty_alert_provider.dart';
 import 'package:lifeos/features/history/presentation/providers/history_providers.dart';
 import 'package:lifeos/features/achievements/presentation/providers/achievements_providers.dart';
 import 'package:lifeos/features/appearance/presentation/pages/appearance_page.dart';
@@ -67,6 +68,9 @@ class _HomeShellState extends ConsumerState<HomeShell> {
     ref.watch(recurringMaterializerProvider);
     ref.watch(weeklyReportServiceProvider);
     ref.watch(cyclePeriodAlertServiceProvider);
+    // Speak up while a warranty can still be used — a shelf you have to
+    // remember to check gets checked after the cover has run out.
+    ref.watch(warrantyAlertServiceProvider);
     // Archive each completed month so the life timeline grows over the years.
     ref.watch(historyArchiveServiceProvider);
     // Celebrate newly earned achievements with a push + feed entry.
