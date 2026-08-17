@@ -10,6 +10,61 @@ Windows desktop, Web and Android from the same code, no Developer Mode needed).
 
 ---
 
+## 📱 How it looks
+
+Every shot below is the real app, rendered from this commit — same widgets, same
+copy, same colours. Both skins ship: **paper** (a warm cream page with ink type)
+and **night**.
+
+### Home — a magazine front page
+
+One room can run a lead story: a full-bleed cover in its own colour with the
+headline and a single thing to do about it, over three quiet spines. Reading
+order never rearranges; only the lead is lifted out of it.
+
+When nothing needs you, **nothing leads** — the Life Score takes the top and all
+four rooms stay spines. That empty headline is the point, not a gap.
+
+| Lead story | A calm day |
+|---|---|
+| <img src="docs/screens/lead_paper.png" width="270"> | <img src="docs/screens/calm_paper.png" width="270"> |
+| <img src="docs/screens/lead_night.png" width="270"> | <img src="docs/screens/calm_night.png" width="270"> |
+
+### The four rooms
+
+| Money | Body |
+|---|---|
+| <img src="docs/screens/money_paper.png" width="270"> | <img src="docs/screens/body_paper.png" width="270"> |
+| <img src="docs/screens/money_night.png" width="270"> | <img src="docs/screens/body_night.png" width="270"> |
+
+| Mind | Goals |
+|---|---|
+| <img src="docs/screens/mind_paper.png" width="270"> | <img src="docs/screens/goals_paper.png" width="270"> |
+| <img src="docs/screens/mind_night.png" width="270"> | <img src="docs/screens/goals_night.png" width="270"> |
+
+- **Money** answers the one question the rest of the app cannot: *can I afford
+  this?* — in days of your remaining allowance, not in a percentage or a lecture.
+- **Body** carries the day's line (a different sentence for morning, midday and
+  evening, and a different one tomorrow) and one-tap care reminders that fire as
+  real phone notifications.
+- **Mind** holds habits, tasks, books and a focus timer, with the nearest
+  unearned badge named so an empty wall is a target rather than a tally.
+- **Goals** offers four goals to start from; only the safety cushion is worked
+  out from real spending, and only that one says so.
+
+### Day, plan, and the long view
+
+| Today | Planner | Telescope |
+|---|---|---|
+| <img src="docs/screens/today_paper.png" width="240"> | <img src="docs/screens/planner_paper.png" width="240"> | <img src="docs/screens/zoom_paper.png" width="240"> |
+
+The planner draws its hours whether or not anything is in them — the shape of the
+day is the point. A free hour is tappable and opens already pointing at that
+slot; an hour already gone is drawn fainter and is not, because planning the past
+is not something to invite anyone to do.
+
+---
+
 ## ✨ Highlights
 
 **Core pillars**
@@ -46,14 +101,15 @@ Windows desktop, Web and Android from the same code, no Developer Mode needed).
 
 ## 🚀 Getting started
 
-Built and verified on **Flutter 3.35.5 (stable)** — the version pinned by CI and
-the Claude Code web hook (SDK constraint `>=3.4.0 <4.0.0`). These checks run on
-every push and pull request via GitHub Actions.
+CI pins **Flutter 3.35.5 (stable)** and runs analyze, tests and the web/Android
+builds on every push and pull request (SDK constraint `>=3.4.0 <4.0.0`). Day-to-
+day development and the screenshots above are on **3.44.4 stable**, so the pin is
+the floor rather than the only version that works.
 
 ```bash
 flutter pub get
 flutter analyze     # → No issues found
-flutter test        # → 269 tests passing
+flutter test        # → 560 tests passing
 flutter run -d chrome        # or -d windows / an Android device
 ```
 
@@ -65,8 +121,14 @@ flutter build apk --release      # Android
 flutter build windows --release  # Windows host only (needs VS C++ toolchain)
 ```
 
-Status: `flutter analyze` clean · **269 tests passing** · Web, Android APK and
-Windows desktop all build.
+Status: `flutter analyze` clean · **560 tests passing** · Web, Android APK, an
+Android app bundle and Windows desktop all build.
+
+Several of those tests exist because a screenshot caught something the suite
+could not, and each one closes that whole class rather than the single bug:
+contrast on both skins, no retired colour literals anywhere in the source, no
+mis-decoded text, no raw localization key reaching the screen, one voice in the
+Russian copy, and every screen laid out at 360px and at 1.5× system text.
 
 > **Windows note:** the Dart analyzer LSP crashes on non-ASCII project paths, so
 > on a machine whose path contains non-ASCII characters, run tooling from an
