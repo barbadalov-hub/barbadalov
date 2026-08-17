@@ -33,6 +33,63 @@ void main() {
     'goals': GoalsPage(),
   };
 
+  /// Renders one screen and returns whatever it threw while laying out.
+  Future<Object?> render(
+    WidgetTester tester,
+    Widget screen, {
+    required Brightness brightness,
+    double textScale = 1.0,
+  }) async {
+    // iPhone-ish logical size; the narrowest mainstream phone is 360.
+    tester.view.physicalSize = const Size(360, 780);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(ProviderScope(
+      overrides: [
+        keyValueStoreProvider.overrideWithValue(
+            InMemoryKeyValueStore({'onboarding.done': 'true'})),
+      ],
+      child: MaterialApp(
+        locale: const Locale('ru'),
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        theme:
+            brightness == Brightness.dark ? AppTheme.dark() : AppTheme.light(),
+        builder: (context, child) => MediaQuery.withClampedTextScaling(
+          minScaleFactor: textScale,
+          maxScaleFactor: textScale,
+          child: child!,
+        ),
+        home: screen,
+      ),
+    ));
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump(const Duration(seconds: 1));
+    return tester.takeException();
+  }
+
+  // Accessibility: someone who has turned system text up should still be able
+  // to use the app, not just see it clip. 1.5x is a common setting.
+  for (final entry in screens.entries) {
+    testWidgets('${entry.key} survives 1.5x system text', (tester) async {
+      expect(
+        await render(tester, entry.value,
+            brightness: Brightness.light, textScale: 1.5),
+        isNull,
+        reason: '${entry.key} breaks when system text is enlarged',
+      );
+    });
+  }
+
   for (final entry in screens.entries) {
     for (final brightness in Brightness.values) {
       testWidgets('${entry.key} fits a phone in ${brightness.name}',

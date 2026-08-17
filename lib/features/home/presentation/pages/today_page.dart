@@ -1203,11 +1203,13 @@ class _CoachTipCard extends ConsumerWidget {
                   const SizedBox(height: 6),
                   Row(
                     children: [
-                      Text(context.tr('coach.tipCta'),
-                          style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: Theme.of(context).colorScheme.primary)),
+                      Flexible(
+                        child: Text(context.tr('coach.tipCta'),
+                            style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: Theme.of(context).colorScheme.primary)),
+                      ),
                       Icon(Icons.chevron_right,
                           size: 18,
                           color: Theme.of(context).colorScheme.primary),
