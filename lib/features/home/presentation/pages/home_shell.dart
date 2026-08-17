@@ -31,6 +31,8 @@ import 'package:lifeos/features/goals/presentation/pages/goals_page.dart';
 import 'package:lifeos/features/health/presentation/pages/health_page.dart';
 import 'package:lifeos/features/home/presentation/pages/today_page.dart';
 import 'package:lifeos/features/home/presentation/providers/home_tab_provider.dart';
+import 'package:lifeos/features/rooms/domain/life_room.dart';
+import 'package:lifeos/features/rooms/presentation/pages/rooms_page.dart';
 import 'package:lifeos/features/search/presentation/pages/command_palette.dart';
 import 'package:lifeos/features/mind/presentation/pages/mind_page.dart';
 import 'package:lifeos/features/mind/presentation/pages/mood_journal_page.dart';
@@ -54,13 +56,17 @@ class HomeShell extends ConsumerStatefulWidget {
 }
 
 class _HomeShellState extends ConsumerState<HomeShell> {
-  static const _pages = [
-    TodayPage(),
-    MoneyPage(),
-    HealthPage(),
-    GoalsPage(),
-    MorePage(),
-  ];
+  /// Opens the page that owns a room's whole feature set.
+  void _openRoom(BuildContext context, RoomId room) {
+    Navigator.of(context).push(MaterialPageRoute<void>(
+      builder: (_) => switch (room) {
+        RoomId.money => const MoneyPage(),
+        RoomId.body => const HealthPage(),
+        RoomId.mind => const MindPage(),
+        RoomId.goals => const GoalsPage(),
+      },
+    ));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -83,15 +89,18 @@ class _HomeShellState extends ConsumerState<HomeShell> {
     // Each tab tints the selection pill with its screen's pillar colour, so the
     // nav bar feels tied to wherever you are.
     const pillars = [
-      Color(0xFF3BA7FF), // Today
-      LifeColors.finance, // Money
-      LifeColors.health, // Health
-      LifeColors.goals, // Goals
+      Color(0xFF7B5CFF), // Rooms — the home grid, all four pillars at once
+      Color(0xFF3BA7FF), // Day
       LifeColors.mind, // More
     ];
     final accent = pillars[index];
+    final pages = [
+      RoomsPage(onOpenRoom: (room) => _openRoom(context, room)),
+      const TodayPage(),
+      const MorePage(),
+    ];
     return Scaffold(
-      body: IndexedStack(index: index, children: _pages),
+      body: IndexedStack(index: index, children: pages),
       bottomNavigationBar: NavigationBar(
         selectedIndex: index,
         onDestinationSelected: (i) =>
@@ -100,24 +109,14 @@ class _HomeShellState extends ConsumerState<HomeShell> {
         surfaceTintColor: Colors.transparent,
         destinations: [
           NavigationDestination(
+            icon: const Icon(Icons.grid_view_outlined),
+            selectedIcon: const Icon(Icons.grid_view),
+            label: context.tr('nav.rooms'),
+          ),
+          NavigationDestination(
             icon: const Icon(Icons.today_outlined),
             selectedIcon: const Icon(Icons.today),
-            label: context.tr('nav.today'),
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.account_balance_wallet_outlined),
-            selectedIcon: const Icon(Icons.account_balance_wallet),
-            label: context.tr('nav.money'),
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.favorite_outline),
-            selectedIcon: const Icon(Icons.favorite),
-            label: context.tr('nav.health'),
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.flag_outlined),
-            selectedIcon: const Icon(Icons.flag),
-            label: context.tr('nav.goals'),
+            label: context.tr('nav.day'),
           ),
           NavigationDestination(
             icon: _maybeBadge(unread, const Icon(Icons.grid_view_outlined)),

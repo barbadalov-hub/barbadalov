@@ -1,0 +1,62 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lifeos/features/goals/domain/entities/goal.dart';
+import 'package:lifeos/features/goals/presentation/providers/goal_providers.dart';
+import 'package:lifeos/features/health/presentation/providers/health_providers.dart';
+import 'package:lifeos/features/mind/presentation/providers/mind_providers.dart';
+import 'package:lifeos/features/money/presentation/providers/money_providers.dart';
+import 'package:lifeos/features/rooms/domain/life_room.dart';
+
+/// Compact step count: 7 420 → "7.4k", 940 → "940".
+String formatSteps(int steps) {
+  if (steps < 1000) return '$steps';
+  final k = steps / 1000;
+  return k >= 10 ? '${k.round()}k' : '${k.toStringAsFixed(1)}k';
+}
+
+/// Hours as "6ч 30м" style parts, locale-formatted by the caller.
+({int hours, int minutes}) splitHours(double hours) {
+  final total = (hours * 60).round();
+  return (hours: total ~/ 60, minutes: total % 60);
+}
+
+/// The four hero figures shown on the home grid, in [kLifeRooms] order.
+final roomSummariesProvider = Provider<List<RoomSummary>>((ref) {
+  final budget = ref.watch(currentBudgetProvider);
+  final health = ref.watch(todayHealthProvider).valueOrNull;
+  final habits = ref.watch(habitsProvider).valueOrNull ?? const [];
+  final goals = ref.watch(goalsProvider).valueOrNull ?? const <Goal>[];
+
+  final doneHabits = habits.where((h) => h.doneToday).length;
+  final sleep = splitHours(health?.sleepHours ?? 0);
+
+  final active = goals.where((g) => !g.isComplete).toList();
+  final goalPct = active.isEmpty
+      ? (goals.isEmpty ? 0 : 100)
+      : (active.first.progress * 100).round();
+
+  return [
+    RoomSummary(
+      id: RoomId.money,
+      hero: budget.safeToSpendToday.format(),
+      subtitleKey: 'room.money.sub',
+    ),
+    RoomSummary(
+      id: RoomId.body,
+      hero: formatSteps(health?.steps ?? 0),
+      subtitleKey: (health?.sleepHours ?? 0) > 0
+          ? 'room.body.sub'
+          : 'room.body.subNoSleep',
+      params: {'h': sleep.hours, 'm': sleep.minutes},
+    ),
+    RoomSummary(
+      id: RoomId.mind,
+      hero: habits.isEmpty ? '—' : '$doneHabits/${habits.length}',
+      subtitleKey: 'room.mind.sub',
+    ),
+    RoomSummary(
+      id: RoomId.goals,
+      hero: goals.isEmpty ? '—' : '$goalPct%',
+      subtitleKey: goals.isEmpty ? 'room.goals.subNone' : 'room.goals.sub',
+    ),
+  ];
+});

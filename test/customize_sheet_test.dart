@@ -31,7 +31,10 @@ void main() {
     ));
     await settle(tester);
 
-    // Open the customize sheet from Today's header.
+    // The customize sheet belongs to the Day screen, one tab over from home.
+    await tester.tap(find.text('Day').last);
+    await settle(tester);
+
     await tester.tap(find.byIcon(Icons.tune));
     await settle(tester);
 

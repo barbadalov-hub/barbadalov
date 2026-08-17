@@ -1932,6 +1932,46 @@ const Map<String, Map<String, String>> _values = {
   'search.workouts': {'en': 'Workouts', 'ru': 'Тренировки', 'uk': 'Тренування'},
   'search.doneWater': {'en': 'Added a glass of water 💧', 'ru': 'Добавлен стакан воды 💧', 'uk': 'Додано склянку води 💧'},
 
+  'nav.rooms': {'en': 'Rooms', 'ru': 'Комнаты', 'uk': 'Кімнати'},
+  'nav.day': {'en': 'Day', 'ru': 'День', 'uk': 'День'},
+
+  // --- Rooms (the four pillars, as the home grid) -------------------------
+  'room.money': {'en': 'Money', 'ru': 'Деньги', 'uk': 'Гроші'},
+  'room.body': {'en': 'Body', 'ru': 'Тело', 'uk': 'Тіло'},
+  'room.mind': {'en': 'Mind', 'ru': 'Разум', 'uk': 'Розум'},
+  'room.goals': {'en': 'Goals', 'ru': 'Цели', 'uk': 'Цілі'},
+  'room.score': {'en': 'score', 'ru': 'счёт', 'uk': 'бали'},
+  'room.money.sub': {
+    'en': 'left to spend today',
+    'ru': 'можно потратить сегодня',
+    'uk': 'можна витратити сьогодні'
+  },
+  'room.body.sub': {
+    'en': 'steps · slept {h}h {m}m',
+    'ru': 'шагов · сон {h}ч {m}м',
+    'uk': 'кроків · сон {h}год {m}хв'
+  },
+  'room.body.subNoSleep': {
+    'en': 'steps today',
+    'ru': 'шагов за сегодня',
+    'uk': 'кроків за сьогодні'
+  },
+  'room.mind.sub': {
+    'en': 'habits kept today',
+    'ru': 'привычек за сегодня',
+    'uk': 'звичок за сьогодні'
+  },
+  'room.goals.sub': {
+    'en': 'toward your goal',
+    'ru': 'до твоей цели',
+    'uk': 'до твоєї цілі'
+  },
+  'room.goals.subNone': {
+    'en': 'no goals yet',
+    'ru': 'целей пока нет',
+    'uk': 'цілей поки немає'
+  },
+
   // --- Appearance / theme -------------------------------------------------
   'theme.title': {'en': 'Appearance', 'ru': 'Оформление', 'uk': 'Оформлення'},
   'theme.moreSub': {'en': 'Accent & light/dark', 'ru': 'Акцент и свет/тёмная', 'uk': 'Акцент і світла/темна'},
