@@ -1624,6 +1624,40 @@ const Map<String, Map<String, String>> _values = {
   'reminder.customLabel': {'en': 'Reminder text', 'ru': 'Текст напоминания', 'uk': 'Текст нагадування'},
   'reminder.fire.title': {'en': 'Lumo reminder', 'ru': 'Напоминание Lumo', 'uk': 'Нагадування Lumo'},
   'reminder.kind.water': {'en': 'Drink water', 'ru': 'Выпить воды', 'uk': 'Випити води'},
+  // Chip-sized names for the care shelf. The kind labels above are the words
+  // the notification carries and are far too long for a button.
+  'reminder.short.water': {'en': 'Water', 'ru': 'Вода', 'uk': 'Вода'},
+  'reminder.short.move': {'en': 'Move', 'ru': 'Разминка', 'uk': 'Розминка'},
+  'reminder.short.posture': {'en': 'Posture', 'ru': 'Осанка', 'uk': 'Постава'},
+  'reminder.short.eyes': {'en': 'Eyes', 'ru': 'Глаза', 'uk': 'Очі'},
+  'reminder.short.meal': {'en': 'Meals', 'ru': 'Еда', 'uk': 'Їжа'},
+  'reminder.short.meds': {'en': 'Meds', 'ru': 'Лекарства', 'uk': 'Ліки'},
+  'unit.hoursShort': {'en': 'h', 'ru': 'ч', 'uk': 'год'},
+  'care.title': {'en': 'Care reminders', 'ru': 'Забота о себе', 'uk': 'Турбота про себе'},
+  'care.sub': {
+    'en': 'One tap arms a phone reminder. Tap again to switch it off.',
+    'ru': 'Одно нажатие включает напоминание на телефон. Нажми ещё раз — выключится.',
+    'uk': 'Один дотик вмикає нагадування на телефон. Торкнись ще раз — вимкнеться.'
+  },
+  'care.every': {'en': 'every {h} h', 'ru': 'каждые {h} ч', 'uk': 'кожні {h} год'},
+  'motiv.part.morning': {'en': 'Morning', 'ru': 'Утро', 'uk': 'Ранок'},
+  'motiv.part.day': {'en': 'Daytime', 'ru': 'День', 'uk': 'День'},
+  'motiv.part.evening': {'en': 'Evening', 'ru': 'Вечер', 'uk': 'Вечір'},
+  'reminder.kind.move': {
+    'en': 'Get up and walk a little',
+    'ru': 'Встать и немного пройтись',
+    'uk': 'Встати й трохи пройтися'
+  },
+  'reminder.kind.posture': {
+    'en': 'Straighten up and unclench your shoulders',
+    'ru': 'Выпрямись и расслабь плечи',
+    'uk': 'Випростайся й розслаб плечі'
+  },
+  'reminder.kind.eyes': {
+    'en': 'Look far away for twenty seconds',
+    'ru': 'Посмотри вдаль двадцать секунд',
+    'uk': 'Подивися вдалину двадцять секунд'
+  },
   'reminder.kind.meal': {'en': 'Time to eat', 'ru': 'Пора поесть', 'uk': 'Час поїсти'},
   'reminder.kind.workout': {'en': 'Time to work out', 'ru': 'Пора на тренировку', 'uk': 'Час на тренування'},
   'reminder.kind.meds': {'en': 'Vitamins / meds', 'ru': 'Витамины / лекарства', 'uk': 'Вітаміни / ліки'},
@@ -2126,6 +2160,191 @@ const Map<String, Map<String, String>> _values = {
     'ru': 'День закрыт — все привычки выполнены',
     'uk': 'День закрито — усі звички виконано'
   },
+  // --- The day's line -----------------------------------------------------
+  // Twelve per part of day, walked in a fixed stride so none comes back for
+  // twelve days. Morning sets an intention, midday interrupts a slump, evening
+  // closes the day kindly — deliberately three different jobs.
+  'motiv.morning.0': {
+    'en': 'The morning is the only part of the day you actually choose.',
+    'ru': 'Утро — единственная часть дня, которую ты выбираешь сам.',
+    'uk': 'Ранок — єдина частина дня, яку ти обираєш сам.'
+  },
+  'motiv.morning.1': {
+    'en': 'Start small. One thing done before noon holds up the rest.',
+    'ru': 'Начни с малого. Одно дело, сделанное до полудня, держит весь день.',
+    'uk': 'Почни з малого. Одна справа до полудня тримає весь день.'
+  },
+  'motiv.morning.2': {
+    'en': 'Your body wakes slower than your head. Give it water and ten minutes.',
+    'ru': 'Тело просыпается медленнее головы. Дай ему стакан воды и десять минут.',
+    'uk': 'Тіло прокидається повільніше за голову. Дай йому склянку води й десять хвилин.'
+  },
+  'motiv.morning.3': {
+    'en': 'Nothing is spoiled yet today. Not even yesterday’s you.',
+    'ru': 'Сегодня ещё ничего не испорчено. Даже вчерашним тобой.',
+    'uk': 'Сьогодні ще нічого не зіпсовано. Навіть учорашнім тобою.'
+  },
+  'motiv.morning.4': {
+    'en': 'Do not plan a perfect day. Plan the first hour.',
+    'ru': 'Не планируй идеальный день. Спланируй первый час.',
+    'uk': 'Не плануй ідеальний день. Сплануй першу годину.'
+  },
+  'motiv.morning.5': {
+    'en': 'You do not owe anyone productivity. You owe yourself honesty.',
+    'ru': 'Ты не обязан быть продуктивным. Ты обязан быть с собой честным.',
+    'uk': 'Ти не зобов’язаний бути продуктивним. Ти зобов’язаний бути чесним із собою.'
+  },
+  'motiv.morning.6': {
+    'en': 'Do the hardest thing first and the rest will feel like rest.',
+    'ru': 'Самое трудное дело сделай первым — остальное покажется отдыхом.',
+    'uk': 'Найважчу справу зроби першою — решта здасться відпочинком.'
+  },
+  'motiv.morning.7': {
+    'en': 'Waking up is already half of discipline.',
+    'ru': 'Проснуться — уже половина дисциплины.',
+    'uk': 'Прокинутися — це вже половина дисципліни.'
+  },
+  'motiv.morning.8': {
+    'en': 'A good day starts with breakfast more often than with motivation.',
+    'ru': 'Хороший день чаще начинается с завтрака, чем с мотивации.',
+    'uk': 'Хороший день частіше починається зі сніданку, ніж із мотивації.'
+  },
+  'motiv.morning.9': {
+    'en': 'Ask yourself: what one thing do I want to remember tonight?',
+    'ru': 'Спроси себя: что одно я хочу вспомнить об этом дне вечером?',
+    'uk': 'Запитай себе: що одне я хочу згадати про цей день увечері?'
+  },
+  'motiv.morning.10': {
+    'en': 'Move before you think. Your head will catch up.',
+    'ru': 'Двигайся раньше, чем начнёшь думать. Голова догонит.',
+    'uk': 'Рухайся раніше, ніж почнеш думати. Голова наздожене.'
+  },
+  'motiv.morning.11': {
+    'en': 'An hour of quiet in the morning is worth two at night.',
+    'ru': 'Час тишины утром стоит двух вечерних.',
+    'uk': 'Година тиші зранку варта двох вечірніх.'
+  },
+  'motiv.day.0': {
+    'en': 'Stand up. Walk. Your brain wants blood, not another coffee.',
+    'ru': 'Встань. Пройдись. Мозгу нужна кровь, а не ещё одна чашка кофе.',
+    'uk': 'Встань. Пройдися. Мозку потрібна кров, а не ще одна кава.'
+  },
+  'motiv.day.1': {
+    'en': 'Half the day is spent and cannot be redone. Take the other half.',
+    'ru': 'Половина дня позади, и её уже не переделать. Займись второй.',
+    'uk': 'Половина дня позаду, і її вже не переробити. Візьмися за другу.'
+  },
+  'motiv.day.2': {
+    'en': 'Afternoon tiredness is more often water than work.',
+    'ru': 'Усталость к обеду чаще от нехватки воды, чем от работы.',
+    'uk': 'Втома до обіду частіше від нестачі води, ніж від роботи.'
+  },
+  'motiv.day.3': {
+    'en': 'Stuck? Take the smallest step that still counts as a step.',
+    'ru': 'Застрял? Сделай самый маленький шаг, который всё ещё шаг.',
+    'uk': 'Застряг? Зроби найменший крок, який усе ще крок.'
+  },
+  'motiv.day.4': {
+    'en': 'Your back will thank you for standing up now instead of at six.',
+    'ru': 'Спина скажет спасибо, если встанешь сейчас, а не в шесть.',
+    'uk': 'Спина подякує, якщо встанеш зараз, а не о шостій.'
+  },
+  'motiv.day.5': {
+    'en': 'Busy is not the same as useful. What on that list actually matters?',
+    'ru': 'Не путай занятость с делом. Что из списка правда важно?',
+    'uk': 'Не плутай зайнятість зі справою. Що зі списку справді важливе?'
+  },
+  'motiv.day.6': {
+    'en': 'Five minutes of air beats half an hour of willpower.',
+    'ru': 'Пять минут воздуха меняют больше, чем полчаса силы воли.',
+    'uk': 'П’ять хвилин повітря змінюють більше, ніж пів години сили волі.'
+  },
+  'motiv.day.7': {
+    'en': 'You have already done something today. Count it, then carry on.',
+    'ru': 'Ты уже что-то сегодня сделал. Признай это и продолжай.',
+    'uk': 'Ти вже щось сьогодні зробив. Визнай це й продовжуй.'
+  },
+  'motiv.day.8': {
+    'en': 'Hunger is a bad advisor. Eat first, decide after.',
+    'ru': 'Голод — плохой советчик. Сначала поешь, потом решай.',
+    'uk': 'Голод — поганий порадник. Спершу поїж, потім вирішуй.'
+  },
+  'motiv.day.9': {
+    'en': 'One conversation beats ten messages.',
+    'ru': 'Один разговор лучше десяти сообщений.',
+    'uk': 'Одна розмова краща за десять повідомлень.'
+  },
+  'motiv.day.10': {
+    'en': 'A postponed task weighs more than a finished one. Go close it.',
+    'ru': 'Отложенное дело весит больше сделанного. Возьми и закрой.',
+    'uk': 'Відкладена справа важить більше за зроблену. Візьми й закрий.'
+  },
+  'motiv.day.11': {
+    'en': 'Look at something far away for twenty seconds. Eyes are not machines.',
+    'ru': 'Посмотри вдаль двадцать секунд — глаза не железные.',
+    'uk': 'Подивися вдалину двадцять секунд — очі не залізні.'
+  },
+  'motiv.evening.0': {
+    'en': 'The day is over. Not perfect — over is enough.',
+    'ru': 'День закончен. Не обязательно идеально — достаточно того, что закончен.',
+    'uk': 'День завершено. Не обов’язково ідеально — досить того, що завершено.'
+  },
+  'motiv.evening.1': {
+    'en': 'Name one thing that worked. The rest can wait for tomorrow.',
+    'ru': 'Отметь одно, что получилось. Остальное подождёт до завтра.',
+    'uk': 'Відзнач одне, що вдалося. Решта зачекає до завтра.'
+  },
+  'motiv.evening.2': {
+    'en': 'Sleep is not a reward for productivity. It is the condition for it.',
+    'ru': 'Сон — не награда за продуктивность, а её условие.',
+    'uk': 'Сон — не нагорода за продуктивність, а її умова.'
+  },
+  'motiv.evening.3': {
+    'en': 'You did more than you remember. Memory is stingy with the good parts.',
+    'ru': 'Ты сделал больше, чем помнишь. Память экономит на хорошем.',
+    'uk': 'Ти зробив більше, ніж пам’ятаєш. Пам’ять економить на хорошому.'
+  },
+  'motiv.evening.4': {
+    'en': 'Put the phone away an hour before bed — the cheapest upgrade your morning will get.',
+    'ru': 'Убери телефон за час до сна — это самый дешёвый апгрейд твоего утра.',
+    'uk': 'Прибери телефон за годину до сну — це найдешевше оновлення твого ранку.'
+  },
+  'motiv.evening.5': {
+    'en': 'Unfinished things do not get lighter overnight. Let them go until morning.',
+    'ru': 'Незакрытые дела не станут легче за ночь. Отпусти их до утра.',
+    'uk': 'Незакриті справи не стануть легшими за ніч. Відпусти їх до ранку.'
+  },
+  'motiv.evening.6': {
+    'en': 'Compare yourself to yesterday’s you. There is nobody else to compare to.',
+    'ru': 'Сравнивай себя с собой вчерашним. Больше не с кем.',
+    'uk': 'Порівнюй себе із собою вчорашнім. Більше нема з ким.'
+  },
+  'motiv.evening.7': {
+    'en': 'A quiet evening is also a result.',
+    'ru': 'Тихий вечер — это тоже результат.',
+    'uk': 'Тихий вечір — це теж результат.'
+  },
+  'motiv.evening.8': {
+    'en': 'Tomorrow begins with how you fall asleep tonight.',
+    'ru': 'Завтра начнётся с того, как ты уснёшь сегодня.',
+    'uk': 'Завтра почнеться з того, як ти заснеш сьогодні.'
+  },
+  'motiv.evening.9': {
+    'en': 'Forgive yourself this day. It was not the last one.',
+    'ru': 'Прости себе этот день. Он был не последний.',
+    'uk': 'Пробач собі цей день. Він був не останній.'
+  },
+  'motiv.evening.10': {
+    'en': 'Write down what was good, or it will not survive the night.',
+    'ru': 'Запиши, что было хорошего — иначе оно не сохранится.',
+    'uk': 'Запиши, що було доброго — інакше воно не збережеться.'
+  },
+  'motiv.evening.11': {
+    'en': 'The light is dimmer and the thoughts are quieter. Let the day end.',
+    'ru': 'Свет тусклее, мысли тише. Дай дню закончиться.',
+    'uk': 'Світло тьмяніше, думки тихіші. Дай дню завершитися.'
+  },
+
   'attn.hero.sleep': {'en': '{h} h', 'ru': '{h} ч', 'uk': '{h} год'},
   'attn.hero.water': {'en': '{l} l', 'ru': '{l} л', 'uk': '{l} л'},
   'attn.money.over': {

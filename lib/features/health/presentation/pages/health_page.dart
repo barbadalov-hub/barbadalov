@@ -2,6 +2,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:flutter/services.dart';
+import 'package:lifeos/features/health/domain/daily_motivation.dart';
 import 'package:lifeos/features/health/presentation/providers/health_goals_provider.dart';
 import 'package:lifeos/features/health/presentation/providers/health_providers.dart';
 import 'package:lifeos/features/health/presentation/providers/vitals_provider.dart';
@@ -12,8 +13,12 @@ import 'package:lifeos/features/health/presentation/widgets/health_charts.dart';
 import 'package:lifeos/features/food/presentation/pages/diet_page.dart';
 import 'package:lifeos/features/food/presentation/pages/food_page.dart';
 import 'package:lifeos/features/profile/domain/entities/user_profile.dart';
+import 'package:lifeos/features/reminders/domain/entities/reminder.dart';
+import 'package:lifeos/features/reminders/presentation/pages/reminders_page.dart';
+import 'package:lifeos/features/reminders/presentation/providers/reminder_providers.dart';
 import 'package:lifeos/features/profile/presentation/providers/profile_providers.dart';
 import 'package:lifeos/features/wellness/presentation/pages/wellness_page.dart';
+import 'package:lifeos/shared/providers/core_providers.dart';
 import 'package:lifeos/shared/theme/app_theme.dart';
 import 'package:lifeos/features/rooms/domain/life_room.dart';
 import 'package:lifeos/features/rooms/presentation/widgets/room_scaffold.dart';
@@ -135,6 +140,10 @@ class HealthPage extends ConsumerWidget {
               ),
             ]
           : [
+            // One accent, three tones. These rings used to be blue, the money
+            // room's green and the mind room's purple — three colours that
+            // belong to other parts of the app, shouting on one screen. Depth
+            // now carries the difference instead of hue.
             Row(
               children: [
                 _Ring(
@@ -142,25 +151,31 @@ class HealthPage extends ConsumerWidget {
                   value: day.waterMl.toDouble(),
                   goal: (goals.water * HealthDay.mlPerGlass).toDouble(),
                   unit: context.tr('drink.ml'),
-                  color: const Color(0xFF3BA7FF),
+                  color: accent,
                 ),
                 _Ring(
                   label: context.tr('health.steps'),
                   value: day.steps.toDouble(),
                   goal: goals.steps.toDouble(),
                   unit: '',
-                  color: LifeColors.finance,
+                  color: accent,
+                  tone: 0.22,
                 ),
                 _Ring(
                   label: context.tr('health.sleep'),
                   value: day.sleepHours,
                   goal: goals.sleep,
-                  unit: 'h',
-                  color: LifeColors.mind,
+                  unit: context.tr('unit.hoursShort'),
+                  color: accent,
+                  tone: 0.44,
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
+            const _DayLineCard(),
+            const SizedBox(height: 14),
+            const _CareShelf(),
+            const SizedBox(height: 14),
             const _StreaksCard(),
             const SizedBox(height: 16),
             Text(context.tr('health.log'),
@@ -816,6 +831,211 @@ class _SystolicSparkline extends CustomPainter {
   bool shouldRepaint(covariant _SystolicSparkline old) => old.values != values;
 }
 
+/// The day's line: a different sentence for the morning, the middle of the day
+/// and the evening, and a different one again tomorrow.
+///
+/// Kept visually apart from the room's voice above it on purpose — that line
+/// tells you what to do about your own numbers, this one is not about your
+/// numbers at all. Same weight for both would make each sound like the other.
+class _DayLineCard extends ConsumerWidget {
+  const _DayLineCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+    final now = ref.watch(clockProvider).now();
+    final part = DailyMotivation.partOf(now.hour);
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: scheme.outlineVariant, width: 0.5),
+      ),
+      padding: const EdgeInsets.fromLTRB(16, 13, 16, 15),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            context.tr('motiv.part.${part.name}').toUpperCase(),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 10,
+              letterSpacing: 1.3,
+              fontWeight: FontWeight.w600,
+              color: scheme.outline,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            context.tr(DailyMotivation.keyFor(now, part)),
+            style: TextStyle(
+              // Serif, like the rooms' voice: it marks a sentence meant to be
+              // read rather than scanned.
+              fontFamily: 'serif',
+              fontSize: 16,
+              height: 1.4,
+              color: scheme.onSurface,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// One-tap care reminders. Tapping a chip arms a real OS notification and
+/// tapping it again takes it away — no form, no time picker, because the whole
+/// point is that drinking water should not need to be configured.
+class _CareShelf extends ConsumerWidget {
+  const _CareShelf();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+    final accent = roomById(RoomId.body).colorFor(Theme.of(context).brightness);
+    final reminders = ref.watch(remindersProvider);
+    final armed = {
+      for (final r in reminders)
+        if (r.enabled) r.kind: r,
+    };
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(context.tr('care.title'),
+                  style: Theme.of(context).textTheme.titleMedium,
+                  overflow: TextOverflow.ellipsis),
+            ),
+            IconButton(
+              icon: const Icon(Icons.tune, size: 20),
+              tooltip: context.tr('reminder.title'),
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const RemindersPage()),
+              ),
+            ),
+          ],
+        ),
+        Text(
+          context.tr('care.sub'),
+          style: Theme.of(context)
+              .textTheme
+              .bodySmall
+              ?.copyWith(color: scheme.outline),
+        ),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final kind in ReminderKind.care)
+              _CareChip(
+                // Named so a test can reach this chip rather than the first
+                // widget that happens to say "Water" — the rings say it too.
+                key: ValueKey('care.${kind.name}'),
+                kind: kind,
+                armed: armed[kind],
+                accent: accent,
+                onTap: () =>
+                    ref.read(remindersProvider.notifier).toggleKind(kind),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _CareChip extends StatelessWidget {
+  final ReminderKind kind;
+
+  /// The armed reminder, or null when this care is off.
+  final Reminder? armed;
+  final Color accent;
+  final VoidCallback onTap;
+
+  const _CareChip({
+    required this.kind,
+    required this.armed,
+    required this.accent,
+    required this.onTap,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final on = armed != null;
+    return Material(
+      color: on
+          ? Color.lerp(accent, scheme.surfaceContainerLowest, 0.86)
+          : scheme.surfaceContainerLowest,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: on ? accent.withValues(alpha: 0.5) : scheme.outlineVariant,
+              width: 0.5,
+            ),
+          ),
+          padding: const EdgeInsets.fromLTRB(12, 9, 12, 9),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(mainAxisSize: MainAxisSize.min, children: [
+                Text(kind.emoji, style: const TextStyle(fontSize: 15)),
+                const SizedBox(width: 7),
+                Flexible(
+                  child: Text(
+                    context.tr(kind.shortKey),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: on ? FontWeight.w700 : FontWeight.w500,
+                      color: scheme.onSurface,
+                    ),
+                  ),
+                ),
+              ]),
+              const SizedBox(height: 3),
+              Text(
+                // Off chips advertise what turning them on would do, so the
+                // shelf reads as a menu rather than a row of mystery switches.
+                on ? armed!.timeLabel : _defaultLabel(context),
+                style: TextStyle(
+                  fontSize: 11,
+                  color: on ? accent : scheme.outline,
+                  fontWeight: on ? FontWeight.w600 : FontWeight.w400,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _defaultLabel(BuildContext context) {
+    if (kind.every <= 0) {
+      return '${kind.defaultHour.toString().padLeft(2, '0')}:'
+          '${kind.defaultMinute.toString().padLeft(2, '0')}';
+    }
+    return context.trp('care.every', {'h': (kind.every / 60).toStringAsFixed(
+        kind.every % 60 == 0 ? 0 : 1)});
+  }
+}
+
 class _Ring extends StatelessWidget {
   final String label;
   final double value;
@@ -823,16 +1043,23 @@ class _Ring extends StatelessWidget {
   final String unit;
   final Color color;
 
+  /// How far this ring is pulled towards the page, 0 = the full accent. Lets
+  /// three rings read as three things without three different hues.
+  final double tone;
+
   const _Ring({
     required this.label,
     required this.value,
     required this.goal,
     required this.unit,
     required this.color,
+    this.tone = 0,
   });
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final shade = Color.lerp(color, scheme.surface, tone)!;
     final pct = goal <= 0 ? 0.0 : (value / goal).clamp(0.0, 1.0).toDouble();
     final display =
         value == value.roundToDouble() ? value.toInt().toString() : '$value';
@@ -843,7 +1070,7 @@ class _Ring extends StatelessWidget {
             progress: pct,
             size: 70,
             strokeWidth: 7,
-            colors: [color, color.withValues(alpha: 0.45)],
+            colors: [shade, shade.withValues(alpha: 0.45)],
             center: Text('${(pct * 100).round()}%',
                 style: const TextStyle(fontWeight: FontWeight.w800)),
           ),

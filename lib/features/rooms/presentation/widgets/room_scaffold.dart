@@ -259,7 +259,11 @@ class RoomHero extends StatelessWidget {
                 child: LinearProgressIndicator(
                   value: progress!.clamp(0.0, 1.0),
                   minHeight: 4,
-                  backgroundColor: scheme.surfaceContainerHighest,
+                  // The unfilled track is the room's own colour, muted. The
+                  // theme surface is tinted by the chosen accent, so this used
+                  // to be a cold blue-grey bar sitting on a warm page.
+                  backgroundColor:
+                      Color.lerp(accent, scheme.surface, 0.78),
                   valueColor: AlwaysStoppedAnimation(accent),
                 ),
               ),

@@ -89,12 +89,19 @@ class GradientRing extends StatelessWidget {
   final List<Color> colors;
   final Widget? center;
 
+  /// The unfilled part of the ring. Defaults to a muted version of the ring's
+  /// own colour rather than a theme grey: the theme surface is tinted by the
+  /// chosen accent, so on the night skin every track came out cold blue —
+  /// including on a warm terracotta page, where it read as a stray colour.
+  final Color? trackColor;
+
   const GradientRing({
     required this.progress,
     required this.colors,
     this.size = 72,
     this.strokeWidth = 8,
     this.center,
+    this.trackColor,
     super.key,
   });
 
@@ -112,7 +119,9 @@ class GradientRing extends StatelessWidget {
             progress: value,
             strokeWidth: strokeWidth,
             colors: colors,
-            trackColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+            trackColor: trackColor ??
+                Color.lerp(colors.first,
+                    Theme.of(context).colorScheme.surface, 0.78)!,
           ),
           child: Center(child: center),
         ),

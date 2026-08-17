@@ -37,6 +37,8 @@ class ReminderController extends Notifier<List<Reminder>> {
     String customLabel = '',
     required int hour,
     required int minute,
+    int? everyMinutes,
+    int? untilHour,
   }) {
     final reminder = Reminder(
       id: _uuid.v4(),
@@ -44,9 +46,26 @@ class ReminderController extends Notifier<List<Reminder>> {
       customLabel: customLabel,
       hour: hour,
       minute: minute,
+      // A kind that is pointless as a single ping (water, movement) brings its
+      // own repeat window unless the caller asked for something else.
+      everyMinutes: everyMinutes ?? kind.every,
+      untilHour: untilHour ?? kind.untilHour,
     );
     _persist([...state, reminder]);
     _schedule(reminder);
+  }
+
+  /// Adds [kind] with its own defaults, or removes it if it is already there —
+  /// the one-tap gesture the Body room's care shelf needs.
+  void toggleKind(ReminderKind kind) {
+    final existing = state.where((r) => r.kind == kind).toList();
+    if (existing.isNotEmpty) {
+      for (final r in existing) {
+        remove(r.id);
+      }
+      return;
+    }
+    add(kind: kind, hour: kind.defaultHour, minute: kind.defaultMinute);
   }
 
   void toggle(String id) {
@@ -59,7 +78,7 @@ class ReminderController extends Notifier<List<Reminder>> {
     if (changed.enabled) {
       _schedule(changed);
     } else {
-      notificationGateway.cancel(changed.notificationId);
+      _cancelAllSlots(changed);
     }
   }
 
@@ -67,7 +86,7 @@ class ReminderController extends Notifier<List<Reminder>> {
     final gone = state.where((r) => r.id == id).toList();
     _persist(state.where((r) => r.id != id).toList());
     for (final r in gone) {
-      notificationGateway.cancel(r.notificationId);
+      _cancelAllSlots(r);
     }
   }
 
@@ -78,7 +97,7 @@ class ReminderController extends Notifier<List<Reminder>> {
       if (enabled) {
         _schedule(r);
       } else {
-        notificationGateway.cancel(r.notificationId);
+        _cancelAllSlots(r);
       }
     }
   }
@@ -97,7 +116,7 @@ class ReminderController extends Notifier<List<Reminder>> {
       if (r.enabled) {
         _schedule(r);
       } else {
-        notificationGateway.cancel(r.notificationId);
+        _cancelAllSlots(r);
       }
     }
   }
@@ -107,13 +126,30 @@ class ReminderController extends Notifier<List<Reminder>> {
     final t = AppLocalizations(lang);
     final body =
         r.kind == ReminderKind.custom ? r.customLabel : t.tr(r.kind.labelKey);
-    notificationGateway.scheduleDaily(
-      id: r.notificationId,
-      title: t.tr('reminder.fire.title'),
-      body: body.isEmpty ? t.tr('reminder.fire.title') : body,
-      hour: r.hour,
-      minute: r.minute,
-    );
+    final text = body.isEmpty ? t.tr('reminder.fire.title') : body;
+
+    // Clear the whole reserved block first: shortening a window or slowing the
+    // interval leaves orphaned OS notifications that nothing would ever cancel,
+    // and the user would keep being pinged at times the app no longer knows
+    // about.
+    _cancelAllSlots(r);
+
+    final times = r.occurrences;
+    for (var i = 0; i < times.length; i++) {
+      notificationGateway.scheduleDaily(
+        id: r.notificationId + i,
+        title: t.tr('reminder.fire.title'),
+        body: text,
+        hour: times[i].hour,
+        minute: times[i].minute,
+      );
+    }
+  }
+
+  void _cancelAllSlots(Reminder r) {
+    for (var i = 0; i < Reminder.idSpan; i++) {
+      notificationGateway.cancel(r.notificationId + i);
+    }
   }
 }
 

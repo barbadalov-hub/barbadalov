@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:lifeos/core/services/key_value_store.dart';
+import 'package:lifeos/features/health/presentation/pages/health_page.dart';
 import 'package:lifeos/features/rooms/domain/life_room.dart';
 import 'package:lifeos/features/rooms/domain/room_attention.dart';
 import 'package:lifeos/features/rooms/presentation/pages/rooms_page.dart';
@@ -48,6 +49,11 @@ void main() {
     for (final entry in {
       'Roboto': const ['assets/fonts/NotoSans.ttf'],
       'RobotoWeb': const ['assets/fonts/NotoSans.ttf'],
+      // The room voice and the day's line ask for 'serif', which every real
+      // platform resolves and the test renderer does not — those two lines
+      // photographed as blocks of empty squares. This stands in for it so the
+      // wording and the line breaks can be judged; it is not a real serif.
+      'serif': const ['assets/fonts/NotoSans.ttf'],
       if (File(sdkIcons).existsSync()) 'MaterialIcons': [sdkIcons],
     }.entries) {
       final loader = FontLoader(entry.key);
@@ -83,6 +89,7 @@ void main() {
     Brightness b,
     String name, {
     required RoomAttention? lead,
+    Widget home = const RoomsPage(),
   }) async {
     await loadFonts(tester);
     tester.view.physicalSize = const Size(390, 844);
@@ -127,7 +134,7 @@ void main() {
             return t.copyWith(
                 textTheme: t.textTheme.apply(fontFamily: 'Roboto'));
           }(),
-          home: const RoomsPage(),
+          home: home,
         ),
         ),
       ),
@@ -167,6 +174,13 @@ void main() {
     'paper': Brightness.light,
     'night': Brightness.dark,
   }.entries) {
+    testWidgets('the body room in the ${skin.key} skin', (t) async {
+      await capture(t, skin.value, 'body_${skin.key}',
+          lead: null, home: const HealthPage());
+      expect(File('build/skin/body_${skin.key}.png').lengthSync(),
+          greaterThan(1000));
+    });
+
     testWidgets('home leads a story in the ${skin.key} skin', (t) async {
       await capture(t, skin.value, 'lead_${skin.key}', lead: shortNight);
       expect(File('build/skin/lead_${skin.key}.png').lengthSync(),
