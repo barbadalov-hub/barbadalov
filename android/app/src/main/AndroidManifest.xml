@@ -1,11 +1,20 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Runtime notification permission (required on Android 13+). -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
-    <!-- Receipt photo capture for on-device OCR. -->
-    <uses-permission android:name="android.permission.CAMERA"/>
+    <!-- Deliberately NOT android.permission.CAMERA. Receipt photos are taken by
+         the system camera app through an intent, which needs no permission from
+         us — and Android inverts the usual rule here: an app that *declares*
+         CAMERA must also be granted it, or the capture intent fails. Declaring
+         it without ever requesting it is the one combination that breaks. Not
+         holding camera access is also simply less to ask for. -->
     <!-- Dictating into text fields. Declared explicitly rather than inherited
          from the plugin, so what the app asks for is visible in one place. -->
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <!-- Daily reminders are re-armed on launch, but a phone that reboots at
+         night would otherwise stay silent until the app is next opened — and
+         the reminders that matter (medication, water) are exactly the ones
+         nobody opens an app to receive. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <!-- Lets the system speech recogniser be discovered on Android 11+. -->
     <queries>
         <intent>
@@ -38,6 +47,25 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <!-- Re-arms scheduled reminders after a reboot or an app update.
+             Without these the OS forgets every pending alarm, and a daily
+             medication reminder would quietly stop until the app happened to
+             be opened again. MY_PACKAGE_REPLACED covers the update case, which
+             is the easier one to miss. -->
+        <receiver
+            android:exported="false"
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+                <action android:name="android.intent.action.QUICKBOOT_POWERON"/>
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/>
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:exported="false"
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"/>
+
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
