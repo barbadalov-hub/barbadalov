@@ -15,6 +15,7 @@ import 'package:lifeos/features/health/presentation/pages/health_page.dart';
 import 'package:lifeos/features/home/presentation/pages/today_page.dart';
 import 'package:lifeos/features/mind/presentation/pages/mind_page.dart';
 import 'package:lifeos/features/money/presentation/pages/money_page.dart';
+import 'package:lifeos/features/money/presentation/pages/warranty_page.dart';
 import 'package:lifeos/features/planner/presentation/pages/planner_page.dart';
 import 'package:lifeos/features/rooms/domain/life_room.dart';
 import 'package:lifeos/features/rooms/domain/room_attention.dart';
@@ -184,6 +185,13 @@ void main() {
     'paper': Brightness.light,
     'night': Brightness.dark,
   }.entries) {
+    testWidgets('the warranty shelf in the ${skin.key} skin', (t) async {
+      await capture(t, skin.value, 'warranty_${skin.key}',
+          lead: null, home: const WarrantyPage());
+      expect(File('build/skin/warranty_${skin.key}.png').lengthSync(),
+          greaterThan(1000));
+    });
+
     testWidgets('the planner in the ${skin.key} skin', (t) async {
       await capture(t, skin.value, 'planner_${skin.key}',
           lead: null, home: const PlannerPage());

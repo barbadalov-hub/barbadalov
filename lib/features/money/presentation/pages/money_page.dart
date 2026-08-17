@@ -14,6 +14,7 @@ import 'package:lifeos/features/money/presentation/pages/category_rules_page.dar
 import 'package:lifeos/features/money/presentation/pages/csv_import_page.dart';
 import 'package:lifeos/features/money/presentation/pages/receipt_page.dart';
 import 'package:lifeos/features/money/presentation/pages/recurring_page.dart';
+import 'package:lifeos/features/money/presentation/pages/warranty_page.dart';
 import 'package:lifeos/features/money/presentation/providers/money_providers.dart';
 import 'package:lifeos/features/money/presentation/widgets/add_transaction_sheet.dart';
 import 'package:lifeos/features/rooms/domain/life_room.dart';
@@ -61,11 +62,16 @@ class MoneyPage extends ConsumerWidget {
     return RoomScaffold(
       room: room,
       title: context.tr('nav.money'),
+      // The old button was a third door to the same sheet the two chips above
+      // already open. It now does the one thing nothing else does: puts a
+      // receipt on the shelf, camera first.
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'fab-money',
-        onPressed: () => AddTransactionSheet.show(context),
-        icon: const Icon(Icons.add),
-        label: Text(context.tr('common.add')),
+        onPressed: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(builder: (_) => const WarrantyPage()),
+        ),
+        icon: const Icon(Icons.document_scanner_outlined),
+        label: Text(context.tr('warranty.add')),
       ),
       hero: RoomHero(
         label: context.tr('today.safeToSpend'),
@@ -104,6 +110,13 @@ class MoneyPage extends ConsumerWidget {
         ),
       ],
       tools: [
+        RoomTool(
+          icon: Icons.receipt_long_outlined,
+          label: context.tr('warranty.short'),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => const WarrantyPage()),
+          ),
+        ),
         RoomTool(
           icon: Icons.tune,
           label: context.tr('limit.short'),

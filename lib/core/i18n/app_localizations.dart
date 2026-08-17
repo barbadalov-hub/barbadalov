@@ -70,6 +70,7 @@ const Map<String, Map<String, String>> _values = {
   'common.create': {'en': 'Create', 'ru': 'Создать', 'uk': 'Створити'},
   'common.soon': {'en': 'Soon', 'ru': 'Скоро', 'uk': 'Скоро'},
   'common.save': {'en': 'Save', 'ru': 'Сохранить', 'uk': 'Зберегти'},
+  'common.delete': {'en': 'Delete', 'ru': 'Удалить', 'uk': 'Видалити'},
   'common.note': {'en': 'Note (optional)', 'ru': 'Заметка (необязательно)', 'uk': 'Нотатка (необовʼязково)'},
   'money.deleted': {'en': 'Transaction deleted', 'ru': 'Операция удалена', 'uk': 'Операцію видалено'},
 
@@ -1633,6 +1634,98 @@ const Map<String, Map<String, String>> _values = {
   'reminder.short.meal': {'en': 'Meals', 'ru': 'Еда', 'uk': 'Їжа'},
   'reminder.short.meds': {'en': 'Meds', 'ru': 'Лекарства', 'uk': 'Ліки'},
   'unit.hoursShort': {'en': 'h', 'ru': 'ч', 'uk': 'год'},
+  // --- Warranty & receipts vault ------------------------------------------
+  'warranty.short': {'en': 'Receipts', 'ru': 'Чеки', 'uk': 'Чеки'},
+  'warranty.title': {
+    'en': 'Receipts & warranties',
+    'ru': 'Чеки и гарантии',
+    'uk': 'Чеки та гарантії'
+  },
+  'warranty.moreSub': {
+    'en': 'What you can still take back',
+    'ru': 'Что ещё можно вернуть или обменять',
+    'uk': 'Що ще можна повернути або обміняти'
+  },
+  'warranty.intro': {
+    'en': 'Photograph the receipt once. In eleven months, when the thing breaks, it is still here.',
+    'ru': 'Сфотографируй чек один раз. Через одиннадцать месяцев, когда вещь сломается, он всё ещё здесь.',
+    'uk': 'Сфотографуй чек один раз. За одинадцять місяців, коли річ зламається, він усе ще тут.'
+  },
+  'warranty.emptyTitle': {
+    'en': 'Nothing kept yet',
+    'ru': 'Пока ничего не сохранено',
+    'uk': 'Поки нічого не збережено'
+  },
+  'warranty.emptyBody': {
+    'en': 'Headphones die five months in and you assume that is that. Add them here with the receipt and the app will tell you the warranty runs another seven.',
+    'ru': 'Наушники ломаются на пятый месяц, и кажется, что это конец. Добавь их сюда вместе с чеком — и приложение напомнит, что гарантия идёт ещё семь.',
+    'uk': 'Навушники ламаються на п’ятий місяць, і здається, що це кінець. Додай їх сюди разом із чеком — і застосунок нагадає, що гарантія триває ще сім.'
+  },
+  'warranty.phoneOnly': {
+    'en': 'The camera works on the phone build; here you can still type everything in by hand.',
+    'ru': 'Камера работает в версии для телефона; здесь всё можно вписать вручную.',
+    'uk': 'Камера працює у версії для телефона; тут усе можна вписати вручну.'
+  },
+  'warranty.add': {'en': 'Keep a receipt', 'ru': 'Сохранить чек', 'uk': 'Зберегти чек'},
+  'warranty.edit': {'en': 'Kept purchase', 'ru': 'Сохранённая покупка', 'uk': 'Збережена покупка'},
+  'warranty.photograph': {
+    'en': 'Photograph',
+    'ru': 'Сфотографировать',
+    'uk': 'Сфотографувати'
+  },
+  'warranty.fromGallery': {'en': 'From gallery', 'ru': 'Из галереи', 'uk': 'З галереї'},
+  'warranty.receiptKept': {
+    'en': 'The receipt is kept on this device',
+    'ru': 'Чек сохранён на этом устройстве',
+    'uk': 'Чек збережено на цьому пристрої'
+  },
+  'warranty.export': {'en': 'Save a copy', 'ru': 'Сохранить копию', 'uk': 'Зберегти копію'},
+  'warranty.exported': {
+    'en': 'A copy of the receipt is saved',
+    'ru': 'Копия чека сохранена',
+    'uk': 'Копію чека збережено'
+  },
+  'warranty.exportFailed': {
+    'en': 'Could not save a copy',
+    'ru': 'Не удалось сохранить копию',
+    'uk': 'Не вдалося зберегти копію'
+  },
+  'warranty.what': {'en': 'What was bought', 'ru': 'Что купил', 'uk': 'Що купив'},
+  'warranty.shop': {'en': 'Shop', 'ru': 'Магазин', 'uk': 'Магазин'},
+  'warranty.price': {'en': 'Price', 'ru': 'Цена', 'uk': 'Ціна'},
+  'warranty.kindWarranty': {'en': 'Warranty', 'ru': 'Гарантия', 'uk': 'Гарантія'},
+  'warranty.kindExpiry': {'en': 'Use by', 'ru': 'Срок годности', 'uk': 'Термін придатності'},
+  'warranty.bought': {'en': 'Bought on', 'ru': 'Куплено', 'uk': 'Куплено'},
+  'warranty.until': {'en': 'Warranty until', 'ru': 'Гарантия до', 'uk': 'Гарантія до'},
+  'warranty.goodUntil': {'en': 'Good until', 'ru': 'Годен до', 'uk': 'Придатний до'},
+  'warranty.notSet': {'en': 'not set', 'ru': 'не указано', 'uk': 'не вказано'},
+  'warranty.months': {'en': '{n} months', 'ru': '{n} мес.', 'uk': '{n} міс.'},
+  'warranty.stateCovered': {
+    'en': 'Under warranty until {date} · {days} days left',
+    'ru': 'На гарантии до {date} · осталось {days} дн.',
+    'uk': 'На гарантії до {date} · лишилося {days} дн.'
+  },
+  'warranty.stateFresh': {
+    'en': 'Good until {date} · {days} days left',
+    'ru': 'Годен до {date} · осталось {days} дн.',
+    'uk': 'Придатний до {date} · лишилося {days} дн.'
+  },
+  'warranty.stateEnded': {
+    'en': 'Warranty ended {date}',
+    'ru': 'Гарантия закончилась {date}',
+    'uk': 'Гарантія закінчилася {date}'
+  },
+  'warranty.stateSpoiled': {
+    'en': 'Expired {date}',
+    'ru': 'Срок вышел {date}',
+    'uk': 'Термін вийшов {date}'
+  },
+  'warranty.stateUnknown': {
+    'en': 'No end date recorded',
+    'ru': 'Дата окончания не указана',
+    'uk': 'Дата закінчення не вказана'
+  },
+
   // --- Starter goals ------------------------------------------------------
   'starter.title': {
     'en': 'Start with one of these',

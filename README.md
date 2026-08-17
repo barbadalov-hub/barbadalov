@@ -44,6 +44,10 @@ four rooms stay spines. That empty headline is the point, not a gap.
 
 - **Money** answers the one question the rest of the app cannot: *can I afford
   this?* — in days of your remaining allowance, not in a percentage or a lecture.
+  It also keeps **receipts and warranties**: photograph the receipt in the shop,
+  and eleven months later, when the thing breaks and the paper is long gone, the
+  app still knows the warranty runs another seven months — and hands the photo
+  back as a file you can take to the counter.
 - **Body** carries the day's line (a different sentence for morning, midday and
   evening, and a different one tomorrow) and one-tap care reminders that fire as
   real phone notifications.
@@ -51,6 +55,17 @@ four rooms stay spines. That empty headline is the point, not a gap.
   unearned badge named so an empty wall is a target rather than a tally.
 - **Goals** offers four goals to start from; only the safety cushion is worked
   out from real spending, and only that one says so.
+
+### Receipts & warranties
+
+| The shelf, paper | The shelf, night |
+|---|---|
+| <img src="docs/screens/warranty_paper.png" width="270"> | <img src="docs/screens/warranty_night.png" width="270"> |
+
+The photo is kept beside your data rather than in the cache, because the system
+is free to empty the cache whenever it likes and that would lose exactly the file
+the feature exists to keep. Cover about to lapse sorts to the top — it is the
+only group where doing nothing costs you something.
 
 ### Day, plan, and the long view
 

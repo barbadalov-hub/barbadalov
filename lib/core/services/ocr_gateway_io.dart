@@ -1,10 +1,20 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:image_picker_platform_interface/image_picker_platform_interface.dart';
 
 /// Where to get the receipt image from.
 enum OcrSource { camera, gallery }
+
+/// A photographed document: the picture itself plus whatever text was read off
+/// it. The text is a bonus — the picture is the point, because a warranty claim
+/// is made with an image of the receipt, not with a transcript of it.
+class ScannedDoc {
+  final Uint8List bytes;
+  final String? text;
+  const ScannedDoc({required this.bytes, this.text});
+}
 
 /// Native backend: pick a photo and run on-device ML Kit text recognition.
 /// Only Android/iOS have the plugins; desktop (also `dart:io`) reports
@@ -30,6 +40,47 @@ class OcrGateway {
           await recognizer.processImage(InputImage.fromFilePath(file.path));
       final text = result.text.trim();
       return text.isEmpty ? null : text;
+    } catch (_) {
+      return null;
+    } finally {
+      await recognizer?.close();
+    }
+  }
+
+  /// Picks a photo and returns it **with** its recognized text.
+  ///
+  /// Downscaled and re-compressed by the picker itself: a modern phone camera
+  /// produces several megabytes per shot, and a shelf of those would bloat the
+  /// device for no gain — a receipt only has to stay readable.
+  Future<ScannedDoc?> captureDocument(OcrSource source) async {
+    if (!available) return null;
+    TextRecognizer? recognizer;
+    try {
+      final file = await ImagePickerPlatform.instance.getImageFromSource(
+        source: source == OcrSource.camera
+            ? ImageSource.camera
+            : ImageSource.gallery,
+        options: const ImagePickerOptions(
+          maxWidth: 1600,
+          imageQuality: 72,
+        ),
+      );
+      if (file == null) return null;
+
+      final bytes = await file.readAsBytes();
+
+      String? text;
+      try {
+        recognizer = TextRecognizer(script: TextRecognitionScript.latin);
+        final result =
+            await recognizer.processImage(InputImage.fromFilePath(file.path));
+        final recognized = result.text.trim();
+        if (recognized.isNotEmpty) text = recognized;
+      } catch (_) {
+        // Unreadable text must not lose the photo — that is the valuable half.
+      }
+
+      return ScannedDoc(bytes: bytes, text: text);
     } catch (_) {
       return null;
     } finally {
