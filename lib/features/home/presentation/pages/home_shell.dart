@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:lifeos/core/i18n/locale_controller.dart';
@@ -33,6 +33,7 @@ import 'package:lifeos/features/home/presentation/pages/today_page.dart';
 import 'package:lifeos/features/home/presentation/providers/home_tab_provider.dart';
 import 'package:lifeos/features/rooms/domain/life_room.dart';
 import 'package:lifeos/features/rooms/presentation/pages/rooms_page.dart';
+import 'package:lifeos/features/telescope/presentation/pages/telescope_page.dart';
 import 'package:lifeos/features/search/presentation/pages/command_palette.dart';
 import 'package:lifeos/features/mind/presentation/pages/mind_page.dart';
 import 'package:lifeos/features/mind/presentation/pages/mood_journal_page.dart';
@@ -91,12 +92,14 @@ class _HomeShellState extends ConsumerState<HomeShell> {
     const pillars = [
       Color(0xFF7B5CFF), // Rooms — the home grid, all four pillars at once
       Color(0xFF3BA7FF), // Day
+      Color(0xFF9C6BFF), // Telescope
       LifeColors.mind, // More
     ];
     final accent = pillars[index];
     final pages = [
       RoomsPage(onOpenRoom: (room) => _openRoom(context, room)),
       const TodayPage(),
+      const TelescopePage(),
       const MorePage(),
     ];
     return Scaffold(
@@ -119,8 +122,14 @@ class _HomeShellState extends ConsumerState<HomeShell> {
             label: context.tr('nav.day'),
           ),
           NavigationDestination(
-            icon: _maybeBadge(unread, const Icon(Icons.grid_view_outlined)),
-            selectedIcon: _maybeBadge(unread, const Icon(Icons.grid_view)),
+            icon: const Icon(Icons.insights_outlined),
+            selectedIcon: const Icon(Icons.insights),
+            label: context.tr('nav.telescope'),
+          ),
+          NavigationDestination(
+            // Not a grid — the Rooms tab owns that icon now.
+            icon: _maybeBadge(unread, const Icon(Icons.more_horiz)),
+            selectedIcon: _maybeBadge(unread, const Icon(Icons.more_horiz)),
             label: context.tr('nav.more'),
           ),
         ],

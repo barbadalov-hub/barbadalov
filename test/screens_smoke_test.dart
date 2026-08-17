@@ -35,7 +35,7 @@ void main() {
     expect(find.byType(NavigationBar), findsOneWidget);
     expect(tester.takeException(), isNull);
 
-    for (final label in const ['Day', 'More', 'Rooms']) {
+    for (final label in const ['Day', 'Zoom', 'More', 'Rooms']) {
       final target = find.descendant(
         of: find.byType(NavigationBar),
         matching: find.text(label),

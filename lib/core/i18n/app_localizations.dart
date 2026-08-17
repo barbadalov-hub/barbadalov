@@ -2005,6 +2005,45 @@ const Map<String, Map<String, String>> _values = {
     'uk': 'витрачено {spent} з {total}'
   },
   'money.importCsv': {'en': 'Import', 'ru': 'Импорт', 'uk': 'Імпорт'},
+  // --- Telescope (the time zoom) ------------------------------------------
+  'nav.telescope': {'en': 'Zoom', 'ru': 'Периоды', 'uk': 'Періоди'},
+  'zoom.title': {'en': 'Your life, zoomed', 'ru': 'Твоя жизнь в масштабе', 'uk': 'Твоє життя в масштабі'},
+  'zoom.d3': {'en': '3d', 'ru': '3д', 'uk': '3д'},
+  'zoom.d7': {'en': '7d', 'ru': '7д', 'uk': '7д'},
+  'zoom.d30': {'en': '30d', 'ru': '30д', 'uk': '30д'},
+  'zoom.all': {'en': 'All', 'ru': 'Всё', 'uk': 'Усе'},
+  'zoom.empty': {
+    'en': 'Nothing logged in this window yet. Track a day or two and it fills in.',
+    'ru': 'За этот период пока ничего не отмечено. Отметь день-другой — и здесь появятся цифры.',
+    'uk': 'За цей період поки нічого не відмічено. Відміть день-другий — і тут з’являться цифри.'
+  },
+  'zoom.voiceAll': {
+    'en': '{n} days of your life are recorded here.',
+    'ru': 'Здесь записано {n} дней твоей жизни.',
+    'uk': 'Тут записано {n} днів твого життя.'
+  },
+  'zoom.voiceGoodMood': {
+    'en': 'A good stretch — mood averaged {m} across {n} tracked days.',
+    'ru': 'Хороший отрезок — настроение в среднем {m} за {n} отмеченных дней.',
+    'uk': 'Гарний відрізок — настрій у середньому {m} за {n} відмічених днів.'
+  },
+  'zoom.voiceOverspent': {
+    'en': 'You spent {v} more than you took in over this stretch.',
+    'ru': 'За этот отрезок ты потратил на {v} больше, чем получил.',
+    'uk': 'За цей відрізок ти витратив на {v} більше, ніж отримав.'
+  },
+  'zoom.voiceShortSleep': {
+    'en': 'Sleep averaged {h}h here — the thing most worth fixing.',
+    'ru': 'Сон в среднем {h} ч — это то, что стоит поправить в первую очередь.',
+    'uk': 'Сон у середньому {h} год — це те, що варто виправити насамперед.'
+  },
+  'zoom.voiceSteady': {
+    'en': 'Steady stretch — {n} days tracked.',
+    'ru': 'Ровный отрезок — отмечено дней: {n}.',
+    'uk': 'Рівний відрізок — відмічено днів: {n}.'
+  },
+  'insight.lblMoodShort': {'en': 'Mood', 'ru': 'Настроение', 'uk': 'Настрій'},
+
   'nav.rooms': {'en': 'Rooms', 'ru': 'Комнаты', 'uk': 'Кімнати'},
   'nav.day': {'en': 'Day', 'ru': 'День', 'uk': 'День'},
 
