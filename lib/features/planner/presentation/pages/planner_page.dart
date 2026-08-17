@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lifeos/shared/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
@@ -40,7 +41,7 @@ class PlannerPage extends ConsumerWidget {
       ),
       body: AnimatedBackdrop(
         style: BackdropStyle.galaxy,
-        color: const Color(0xFF3BA7FF),
+        color: LifeColors.info,
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
           children: [

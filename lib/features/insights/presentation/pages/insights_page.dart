@@ -258,7 +258,7 @@ class _CorrelationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = insight.positive
-        ? const Color(0xFF2E9E6B)
+        ? LifeColors.positive
         : const Color(0xFFE08A2B);
     final sentence =
         'insight.${insight.driver.name}.${insight.positive ? 'pos' : 'neg'}';
@@ -353,7 +353,7 @@ class _MoodPatterns extends StatelessWidget {
           if (lifts.isNotEmpty) ...[
             Text(context.tr('insight.liftsMood'),
                 style: const TextStyle(
-                    fontWeight: FontWeight.w700, color: Color(0xFF2E9E6B))),
+                    fontWeight: FontWeight.w700, color: LifeColors.positive)),
             const SizedBox(height: 6),
             for (final c in lifts) _activityRow(context, c),
           ],
@@ -395,7 +395,7 @@ class _MoodPatterns extends StatelessWidget {
               style: TextStyle(
                 fontWeight: FontWeight.w700,
                 color: c.delta > 0
-                    ? const Color(0xFF2E9E6B)
+                    ? LifeColors.positive
                     : const Color(0xFFE08A2B),
               )),
         ],

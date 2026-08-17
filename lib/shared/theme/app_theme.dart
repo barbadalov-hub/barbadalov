@@ -177,6 +177,18 @@ class LifeColors {
   static const mind = Color(0xFF8E5BFF);
   static const goals = Color(0xFFB07408);
 
+  /// A calm blue for informational marks (water, carbs, "day" accents). It had
+  /// no home here, so screens reached for `0xFF3BA7FF` directly — bright enough
+  /// to disappear against cream.
+  static const info = Color(0xFF1F72B8);
+
+  /// Names for the same ink used outside its pillar: a green tick means "good"
+  /// rather than "money", an amber bar means "careful" rather than "goals".
+  /// Aliases rather than new values, so there is one green and one amber in the
+  /// app instead of a near-miss pair.
+  static const positive = finance;
+  static const warning = goals;
+
   /// Every semantic colour, for the contrast guard to iterate.
   static const all = <String, Color>{
     'finance': finance,
@@ -184,5 +196,6 @@ class LifeColors {
     'health': health,
     'mind': mind,
     'goals': goals,
+    'info': info,
   };
 }

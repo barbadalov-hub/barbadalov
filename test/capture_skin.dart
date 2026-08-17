@@ -11,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:lifeos/core/services/key_value_store.dart';
 import 'package:lifeos/features/health/presentation/pages/health_page.dart';
+import 'package:lifeos/features/mind/presentation/pages/mind_page.dart';
 import 'package:lifeos/features/money/presentation/pages/money_page.dart';
 import 'package:lifeos/features/rooms/domain/life_room.dart';
 import 'package:lifeos/features/rooms/domain/room_attention.dart';
@@ -175,6 +176,13 @@ void main() {
     'paper': Brightness.light,
     'night': Brightness.dark,
   }.entries) {
+    testWidgets('the mind room in the ${skin.key} skin', (t) async {
+      await capture(t, skin.value, 'mind_${skin.key}',
+          lead: null, home: const MindPage());
+      expect(File('build/skin/mind_${skin.key}.png').lengthSync(),
+          greaterThan(1000));
+    });
+
     testWidgets('the money room in the ${skin.key} skin', (t) async {
       await capture(t, skin.value, 'money_${skin.key}',
           lead: null, home: const MoneyPage());

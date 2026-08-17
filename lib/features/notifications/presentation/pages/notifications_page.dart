@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lifeos/shared/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
@@ -249,7 +250,7 @@ class _TierMeta {
 
 _TierMeta _tierMeta(NotificationTier tier) => switch (tier) {
       NotificationTier.critical => const _TierMeta('🔴', Color(0xFFE5484D)),
-      NotificationTier.important => const _TierMeta('🟡', Color(0xFFF5A623)),
-      NotificationTier.optional => const _TierMeta('🟢', Color(0xFF2E9E6B)),
+      NotificationTier.important => const _TierMeta('🟡', LifeColors.warning),
+      NotificationTier.optional => const _TierMeta('🟢', LifeColors.positive),
       NotificationTier.aiInsight => const _TierMeta('🤖', Color(0xFF8E5BFF)),
     };

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:lifeos/shared/theme/app_theme.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
@@ -14,7 +15,6 @@ import 'package:lifeos/features/mind/presentation/providers/mind_providers.dart'
 import 'package:lifeos/features/rooms/domain/life_room.dart';
 import 'package:lifeos/features/rooms/presentation/widgets/room_scaffold.dart';
 import 'package:lifeos/shared/providers/core_providers.dart';
-import 'package:lifeos/shared/widgets/gradient_card.dart';
 import 'package:lifeos/shared/widgets/section_card.dart';
 
 class MindPage extends ConsumerWidget {
@@ -103,6 +103,12 @@ class MindPage extends ConsumerWidget {
                     overflow: TextOverflow.ellipsis),
               ),
               IconButton.filledTonal(
+                // Section buttons wore the app's violet in a blue room.
+                style: IconButton.styleFrom(
+                  backgroundColor:
+                      Color.lerp(accent, Theme.of(context).colorScheme.surface, 0.85),
+                  foregroundColor: accent,
+                ),
                 onPressed: () => _addHabitDialog(context, ref),
                 icon: const Icon(Icons.add),
               ),
@@ -212,6 +218,12 @@ class MindPage extends ConsumerWidget {
                     overflow: TextOverflow.ellipsis),
               ),
               IconButton.filledTonal(
+                // Section buttons wore the app's violet in a blue room.
+                style: IconButton.styleFrom(
+                  backgroundColor:
+                      Color.lerp(accent, Theme.of(context).colorScheme.surface, 0.85),
+                  foregroundColor: accent,
+                ),
                 onPressed: () => _addBookDialog(context, ref),
                 icon: const Icon(Icons.add),
               ),
@@ -441,28 +453,46 @@ class _AchievementsCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+    final accent = roomById(RoomId.mind).colorFor(Theme.of(context).brightness);
     final best = ref.watch(bestStreakProvider);
     final badges = ref.watch(habitBadgesProvider);
     final earned = badges.where((b) => b.earned).length;
 
-    return GradientCard(
-      colors: LifeGradients.mind,
+    // The nearest unearned badge, so a wall of grey circles becomes a target.
+    // "0 of 7" tells a new user only that they have nothing.
+    final next = badges.where((b) => !b.earned).fold<HabitBadge?>(null, (a, b) {
+      if (a == null) return b;
+      return (b.goal - b.progress) < (a.goal - a.progress) ? b : a;
+    });
+
+    return Container(
+      decoration: BoxDecoration(
+        // Was a full-bleed violet gradient — the loudest thing on a paper page,
+        // and violet at that, in a room whose colour is blue.
+        color: scheme.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: scheme.outlineVariant, width: 0.5),
+      ),
+      padding: const EdgeInsets.fromLTRB(16, 13, 16, 15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Text('🔥', style: TextStyle(fontSize: 26)),
-              const SizedBox(width: 8),
+              const Text('🔥', style: TextStyle(fontSize: 22)),
+              const SizedBox(width: 9),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       context.trp('ach.bestStreak', {'n': best}),
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                          color: scheme.onSurface,
+                          fontSize: 17,
                           fontWeight: FontWeight.w800),
                     ),
                     Text(
@@ -470,7 +500,7 @@ class _AchievementsCard extends ConsumerWidget {
                         'n': earned,
                         'total': badges.length,
                       }),
-                      style: const TextStyle(color: Colors.white70, fontSize: 12),
+                      style: TextStyle(color: scheme.outline, fontSize: 12),
                     ),
                   ],
                 ),
@@ -479,35 +509,56 @@ class _AchievementsCard extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: [for (final b in badges) _badge(context, b)],
+            spacing: 9,
+            runSpacing: 9,
+            children: [for (final b in badges) _badge(context, b, accent)],
           ),
+          if (next != null) ...[
+            const SizedBox(height: 12),
+            Text(
+              context.trp('ach.next', {
+                'name': context.tr(next.titleKey),
+                'n': next.progress,
+                'goal': next.goal,
+              }),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontSize: 12, color: scheme.outline),
+            ),
+          ],
         ],
       ),
     );
   }
 
-  Widget _badge(BuildContext context, HabitBadge b) {
+  Widget _badge(BuildContext context, HabitBadge b, Color accent) {
+    final scheme = Theme.of(context).colorScheme;
     return Tooltip(
       message: b.earned
           ? context.tr(b.titleKey)
           : '${context.tr(b.titleKey)} · ${b.progress}/${b.goal}',
-      child: Opacity(
-        opacity: b.earned ? 1 : 0.35,
-        child: Container(
-          width: 46,
-          height: 46,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: b.earned ? 0.25 : 0.08),
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: Colors.white.withValues(alpha: b.earned ? 0.9 : 0.3),
-              width: 1.5,
-            ),
+      child: Container(
+        width: 44,
+        height: 44,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          // Earned badges are filled with the room's colour; the rest are just
+          // outlines. Opacity is not used — it drags the emoji into the page.
+          color: b.earned
+              ? Color.lerp(accent, scheme.surfaceContainerLowest, 0.82)
+              : Colors.transparent,
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: b.earned ? accent : scheme.outlineVariant,
+            width: b.earned ? 1.5 : 1,
           ),
-          child: Text(b.emoji, style: const TextStyle(fontSize: 22)),
+        ),
+        child: Text(
+          b.emoji,
+          style: TextStyle(
+            fontSize: 20,
+            color: b.earned ? null : scheme.outlineVariant,
+          ),
         ),
       ),
     );
@@ -564,7 +615,7 @@ class _RecommendedBooks extends ConsumerWidget {
         ),
         isThreeLine: true,
         trailing: added
-            ? const Icon(Icons.check_circle, color: Color(0xFF2E9E6B))
+            ? const Icon(Icons.check_circle, color: LifeColors.positive)
             : IconButton(
                 icon: const Icon(Icons.add_circle_outline),
                 tooltip: context.tr('rec.add'),
@@ -646,8 +697,11 @@ class _FocusTimerCardState extends State<_FocusTimerCard> {
 
   @override
   Widget build(BuildContext context) {
+    final accent = roomById(RoomId.mind).colorFor(Theme.of(context).brightness);
     return SectionCard(
-      color: LifeGradients.mind.first.withValues(alpha: 0.12),
+      // Tinted with the room's own colour instead of the old cosmic violet,
+      // which sat right under the achievements slab in a different hue again.
+      color: Color.lerp(accent, Theme.of(context).colorScheme.surface, 0.9),
       child: Row(
         children: [
           Text(_isBreak ? '☕' : '🎯', style: const TextStyle(fontSize: 30)),
@@ -672,6 +726,10 @@ class _FocusTimerCardState extends State<_FocusTimerCard> {
           ),
           IconButton.filled(
             onPressed: _toggle,
+            style: IconButton.styleFrom(
+              backgroundColor: accent,
+              foregroundColor: Colors.white,
+            ),
             icon: Icon(_running ? Icons.pause : Icons.play_arrow),
           ),
           IconButton(

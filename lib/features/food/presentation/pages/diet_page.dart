@@ -193,9 +193,9 @@ class _MacroRings extends ConsumerWidget {
           _ring(context, context.tr('profile.protein'), eaten.proteinG,
               a.proteinG, const Color(0xFFE5484D)),
           _ring(context, context.tr('profile.carbs'), eaten.carbsG, a.carbsG,
-              const Color(0xFF3BA7FF)),
+              LifeColors.info),
           _ring(context, context.tr('profile.fat'), eaten.fatG, a.fatG,
-              const Color(0xFFF5A623)),
+              LifeColors.warning),
         ],
       ),
     );
@@ -237,7 +237,7 @@ class _RemainingCard extends ConsumerWidget {
     final kcalLeft = left(a.targetKcal, eaten.kcal);
     final over = eaten.kcal > a.targetKcal;
     return SectionCard(
-      color: (over ? LifeColors.financeDanger : const Color(0xFF2E9E6B))
+      color: (over ? LifeColors.financeDanger : LifeColors.positive)
           .withValues(alpha: 0.12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -727,7 +727,7 @@ class _DietDetailSheet {
               _heading(ctx, '✅ ${ctx.tr('diet.pros')}'),
               const SizedBox(height: 6),
               for (final k in plan.proKeys)
-                _bulletRow(ctx, '+', ctx.tr(k), const Color(0xFF2E9E6B)),
+                _bulletRow(ctx, '+', ctx.tr(k), LifeColors.positive),
               const SizedBox(height: 12),
               _heading(ctx, '⚠️ ${ctx.tr('diet.cons')}'),
               const SizedBox(height: 6),
@@ -1498,9 +1498,9 @@ class _WeekMenuSection extends ConsumerWidget {
 /// Accent colour for a meal slot — used as a left bar on the meal card and the
 /// summary chips.
 Color slotColor(MealSlot slot) => switch (slot) {
-      MealSlot.breakfast => const Color(0xFFF5A623),
-      MealSlot.lunch => const Color(0xFF2E9E6B),
-      MealSlot.dinner => const Color(0xFF3BA7FF),
+      MealSlot.breakfast => LifeColors.warning,
+      MealSlot.lunch => LifeColors.positive,
+      MealSlot.dinner => LifeColors.info,
       MealSlot.snack => const Color(0xFF8E5BFF),
     };
 
@@ -1625,9 +1625,9 @@ class _DaySummaryCard extends ConsumerWidget {
               _macro(context, context.tr('profile.protein'), t.proteinG,
                   const Color(0xFFE5484D)),
               _macro(context, context.tr('profile.fat'), t.fatG,
-                  const Color(0xFFF5A623)),
+                  LifeColors.warning),
               _macro(context, context.tr('profile.carbs'), t.carbsG,
-                  const Color(0xFF3BA7FF)),
+                  LifeColors.info),
             ],
           ),
         ],
@@ -1746,7 +1746,7 @@ class _MealTile extends ConsumerWidget {
                     const SizedBox(width: 6),
                     Icon(eaten ? Icons.check_circle : Icons.chevron_right,
                         size: 20,
-                        color: eaten ? const Color(0xFF2E9E6B) : null),
+                        color: eaten ? LifeColors.positive : null),
                   ],
                 ),
               ),

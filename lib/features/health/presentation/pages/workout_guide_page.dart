@@ -127,7 +127,7 @@ class _WorkoutGuidePageState extends ConsumerState<WorkoutGuidePage> {
                           {'max': 220 - profile.age, 'age': profile.age})),
                       const SizedBox(height: 8),
                       _zoneRow(context, 'guide.zone1', 0.50, 0.60,
-                          220 - profile.age, const Color(0xFF3BA7FF)),
+                          220 - profile.age, LifeColors.info),
                       _zoneRow(context, 'guide.zone2', 0.60, 0.70,
                           220 - profile.age, LifeColors.finance),
                       _zoneRow(context, 'guide.zone3', 0.70, 0.80,

@@ -94,7 +94,7 @@ class _FieldCard extends ConsumerWidget {
               }),
               style: TextStyle(
                 fontSize: 12,
-                color: delta <= 0 ? const Color(0xFF2E9E6B) : LifeColors.health,
+                color: delta <= 0 ? LifeColors.positive : LifeColors.health,
               ),
             ),
           ],

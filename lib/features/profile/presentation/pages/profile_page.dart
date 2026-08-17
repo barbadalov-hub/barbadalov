@@ -256,9 +256,9 @@ class _BmiGauge extends StatelessWidget {
     // Range 15–40; band widths proportional.
     final pos = ((a.bmi.clamp(15, 40) - 15) / 25).toDouble();
     const bands = [
-      (3.5, Color(0xFF3BA7FF)), // <18.5 under
-      (6.5, Color(0xFF2E9E6B)), // 18.5–25 normal
-      (5.0, Color(0xFFF5A623)), // 25–30 over
+      (3.5, LifeColors.info), // <18.5 under
+      (6.5, LifeColors.positive), // 18.5–25 normal
+      (5.0, LifeColors.warning), // 25–30 over
       (10.0, Color(0xFFE5484D)), // 30+ obese
     ];
     return SectionCard(
@@ -313,8 +313,8 @@ class _MacroBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const p = Color(0xFFE5484D);
-    const f = Color(0xFFF5A623);
-    const c = Color(0xFF3BA7FF);
+    const f = LifeColors.warning;
+    const c = LifeColors.info;
     final total = (a.proteinG + a.fatG + a.carbsG).clamp(1, 1 << 30);
     return SectionCard(
       child: Column(
@@ -414,7 +414,7 @@ class _IdealWeightCard extends StatelessWidget {
                   }),
             style: TextStyle(
                 fontWeight: FontWeight.w700,
-                color: inRange ? const Color(0xFF2E9E6B) : null),
+                color: inRange ? LifeColors.positive : null),
           ),
         ],
       ),
@@ -560,7 +560,7 @@ class _StatusPill extends StatelessWidget {
         color = Theme.of(context).colorScheme.outline;
       case CheckupStatus.planned:
         icon = Icons.schedule;
-        color = const Color(0xFFF5A623);
+        color = LifeColors.warning;
       case CheckupStatus.done:
         icon = Icons.check_circle;
         color = LifeColors.finance;

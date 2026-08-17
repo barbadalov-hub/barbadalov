@@ -110,7 +110,7 @@ class BodyShapeCard extends ConsumerWidget {
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
                   color: waistDelta <= 0
-                      ? const Color(0xFF2E9E6B)
+                      ? LifeColors.positive
                       : LifeColors.health,
                 ),
               ),

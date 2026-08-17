@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lifeos/shared/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
@@ -525,8 +526,8 @@ class _CycleCalendar extends StatelessWidget {
     Color colorFor(DateTime day) {
       final p = predictor.predict(data, day);
       if (p.phase == CyclePhase.menstrual) return const Color(0xFFF5576C);
-      if (p.phase == CyclePhase.ovulation) return const Color(0xFFF5A623);
-      if (p.isFertile) return const Color(0xFF2E9E6B);
+      if (p.phase == CyclePhase.ovulation) return LifeColors.warning;
+      if (p.isFertile) return LifeColors.positive;
       return Colors.transparent;
     }
 
@@ -580,9 +581,9 @@ class _CycleCalendar extends StatelessWidget {
             runSpacing: 4,
             children: [
               _legend(context, const Color(0xFFF5576C), 'cycle.legend.period'),
-              _legend(context, const Color(0xFF2E9E6B), 'cycle.legend.fertile'),
+              _legend(context, LifeColors.positive, 'cycle.legend.fertile'),
               _legend(
-                  context, const Color(0xFFF5A623), 'cycle.legend.ovulation'),
+                  context, LifeColors.warning, 'cycle.legend.ovulation'),
             ],
           ),
         ],

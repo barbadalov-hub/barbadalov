@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lifeos/shared/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:lifeos/features/achievements/domain/achievement.dart';
@@ -145,7 +146,7 @@ class _BadgeTile extends StatelessWidget {
             if (status.unlocked)
               Text('✅ ${ctx.tr('ach.done')}',
                   style: const TextStyle(
-                      color: Color(0xFF2E9E6B), fontWeight: FontWeight.w700))
+                      color: LifeColors.positive, fontWeight: FontWeight.w700))
             else ...[
               ClipRRect(
                 borderRadius: BorderRadius.circular(6),

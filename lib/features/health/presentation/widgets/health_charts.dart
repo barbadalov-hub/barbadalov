@@ -177,7 +177,7 @@ class WaterWeekCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) => MetricWeekCard(
         titleKey: 'health.waterWeek',
         goal: ref.watch(healthGoalsProvider).water.toDouble(),
-        barColor: const Color(0xFF3BA7FF),
+        barColor: LifeColors.info,
         value: (d) => d.waterGlasses.toDouble(),
       );
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lifeos/shared/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:lifeos/features/mind/domain/mood.dart';
@@ -135,7 +136,7 @@ class MoodJournalPage extends ConsumerWidget {
   Widget _correlationRow(BuildContext context, MoodCorrelation c) {
     final act = MoodActivities.byId(c.activityId);
     final up = c.delta >= 0;
-    final color = up ? const Color(0xFF2E9E6B) : const Color(0xFFE5484D);
+    final color = up ? LifeColors.positive : const Color(0xFFE5484D);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(

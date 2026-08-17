@@ -742,8 +742,8 @@ class _VitalsCard extends ConsumerWidget {
   }
 
   Color _bandColor(String key) => switch (key) {
-        'vitals.normal' => const Color(0xFF2E9E6B),
-        'vitals.elevated' => const Color(0xFFF5A623),
+        'vitals.normal' => LifeColors.positive,
+        'vitals.elevated' => LifeColors.warning,
         _ => const Color(0xFFE5484D),
       };
 

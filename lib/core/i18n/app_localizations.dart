@@ -1633,6 +1633,11 @@ const Map<String, Map<String, String>> _values = {
   'reminder.short.meal': {'en': 'Meals', 'ru': 'Еда', 'uk': 'Їжа'},
   'reminder.short.meds': {'en': 'Meds', 'ru': 'Лекарства', 'uk': 'Ліки'},
   'unit.hoursShort': {'en': 'h', 'ru': 'ч', 'uk': 'год'},
+  'ach.next': {
+    'en': 'Closest: {name} — {n} of {goal}.',
+    'ru': 'Ближе всего: {name} — {n} из {goal}.',
+    'uk': 'Найближче: {name} — {n} із {goal}.'
+  },
 
   // --- Can I afford this? -------------------------------------------------
   'afford.title': {

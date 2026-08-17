@@ -79,7 +79,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
     // nav bar feels tied to wherever you are.
     const pillars = [
       Color(0xFF7B5CFF), // Rooms — the home grid, all four pillars at once
-      Color(0xFF3BA7FF), // Day
+      LifeColors.info, // Day
       Color(0xFF9C6BFF), // Telescope
       LifeColors.mind, // More
     ];

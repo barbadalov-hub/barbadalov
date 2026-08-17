@@ -221,7 +221,7 @@ class _GoalRow extends StatelessWidget {
     required this.lang,
   });
 
-  static const _warning = Color(0xFFF5A623);
+  static const _warning = LifeColors.warning;
 
   @override
   Widget build(BuildContext context) {
