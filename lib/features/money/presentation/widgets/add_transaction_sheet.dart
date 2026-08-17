@@ -14,14 +14,25 @@ import 'package:lifeos/shared/models/money.dart';
 /// no money logic.
 class AddTransactionSheet extends ConsumerStatefulWidget {
   final Transaction? initial;
-  const AddTransactionSheet({this.initial, super.key});
 
-  static Future<void> show(BuildContext context, {Transaction? initial}) =>
+  /// Which side the sheet opens on for a new entry. Without it the room's
+  /// "income" button opened the sheet on the expense tab — two buttons doing
+  /// the same thing, one of them lying about it.
+  final TransactionType? startAs;
+
+  const AddTransactionSheet({this.initial, this.startAs, super.key});
+
+  static Future<void> show(
+    BuildContext context, {
+    Transaction? initial,
+    TransactionType? startAs,
+  }) =>
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,
         showDragHandle: true,
-        builder: (_) => AddTransactionSheet(initial: initial),
+        builder: (_) =>
+            AddTransactionSheet(initial: initial, startAs: startAs),
       );
 
   @override
@@ -36,7 +47,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
   late final _noteController =
       TextEditingController(text: widget.initial?.note ?? '');
   late TransactionType _type =
-      widget.initial?.type ?? TransactionType.expense;
+      widget.initial?.type ?? widget.startAs ?? TransactionType.expense;
   late Category _category = widget.initial == null
       ? DefaultCategories.of(_type).first
       : DefaultCategories.byId(widget.initial!.categoryId);

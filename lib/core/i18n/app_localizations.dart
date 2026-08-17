@@ -1633,6 +1633,38 @@ const Map<String, Map<String, String>> _values = {
   'reminder.short.meal': {'en': 'Meals', 'ru': 'Еда', 'uk': 'Їжа'},
   'reminder.short.meds': {'en': 'Meds', 'ru': 'Лекарства', 'uk': 'Ліки'},
   'unit.hoursShort': {'en': 'h', 'ru': 'ч', 'uk': 'год'},
+
+  // --- Can I afford this? -------------------------------------------------
+  'afford.title': {
+    'en': 'Can I afford this?',
+    'ru': 'Могу я себе это позволить?',
+    'uk': 'Чи можу я собі це дозволити?'
+  },
+  'afford.hint': {
+    'en': 'Type an amount — the answer is in days, not opinions.',
+    'ru': 'Введи сумму — ответ будет в днях, а не в нравоучениях.',
+    'uk': 'Введи суму — відповідь буде в днях, а не в повчаннях.'
+  },
+  'afford.easy': {
+    'en': 'Yes. It costs {days} of your remaining days; {left} would still be left for the month.',
+    'ru': 'Да. Это {days} из оставшихся дней, на месяц ещё останется {left}.',
+    'uk': 'Так. Це {days} із решти днів, на місяць ще залишиться {left}.'
+  },
+  'afford.tight': {
+    'en': 'It fits, but it eats {days} of your remaining days and leaves {left} for everything else.',
+    'ru': 'Влезает, но съедает {days} из оставшихся дней — на всё остальное останется {left}.',
+    'uk': 'Влазить, але з’їдає {days} із решти днів — на все інше залишиться {left}.'
+  },
+  'afford.over': {
+    'en': 'No — that is {over} more than is left this month.',
+    'ru': 'Нет — это на {over} больше, чем осталось в этом месяце.',
+    'uk': 'Ні — це на {over} більше, ніж лишилося цього місяця.'
+  },
+  'afford.nothingLeft': {
+    'en': 'There is nothing free left this month. Anything now comes out of the reserve.',
+    'ru': 'Свободных денег в этом месяце не осталось. Всё сейчас — из резерва.',
+    'uk': 'Вільних грошей цього місяця не лишилося. Усе зараз — із резерву.'
+  },
   'care.title': {'en': 'Care reminders', 'ru': 'Забота о себе', 'uk': 'Турбота про себе'},
   'care.sub': {
     'en': 'One tap arms a phone reminder. Tap again to switch it off.',
@@ -1812,7 +1844,14 @@ const Map<String, Map<String, String>> _values = {
   'limit.monthlyLimit': {'en': 'Monthly limit', 'ru': 'Лимит на месяц', 'uk': 'Ліміт на місяць'},
   'limit.noLimit': {'en': 'no limit', 'ru': 'без лимита', 'uk': 'без ліміту'},
   'limit.spentOf': {'en': '{spent} of {limit}', 'ru': '{spent} из {limit}', 'uk': '{spent} з {limit}'},
+  // The alert the notification fires with. It is NOT a screen name: using it
+  // as one labelled the room's limits tool "Budget limit reached".
   'limit.title': {'en': 'Budget limit reached', 'ru': 'Лимит бюджета превышен', 'uk': 'Ліміт бюджету перевищено'},
+  // Tool-shelf names: one word where the page title is a phrase, because an
+  // 80px tile breaks a long Russian word across lines mid-word.
+  'limit.short': {'en': 'Limits', 'ru': 'Лимиты', 'uk': 'Ліміти'},
+  'recurring.short': {'en': 'Recurring', 'ru': 'Повторы', 'uk': 'Повтори'},
+  'rules.short': {'en': 'Rules', 'ru': 'Правила', 'uk': 'Правила'},
   'limit.body': {'en': '{cat}: {spent} spent of your {limit} limit.', 'ru': '{cat}: потрачено {spent} из лимита {limit}.', 'uk': '{cat}: витрачено {spent} з ліміту {limit}.'},
 
   // --- Recurring transactions ---------------------------------------------

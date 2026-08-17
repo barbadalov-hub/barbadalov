@@ -52,8 +52,10 @@ void main() {
       (tester) async {
     await open(tester, const MoneyPage());
     expect(find.textContaining('No transactions yet'), findsOneWidget);
-    // ...and does not offer to search or filter nothing.
-    expect(find.byType(TextField), findsNothing,
+    // ...and does not offer to search or filter nothing. Targeted at the
+    // search field itself rather than "any TextField": the room legitimately
+    // has one for the affordability check, which works on an empty account.
+    expect(find.text('Search transactions…'), findsNothing,
         reason: 'the history search should be hidden until there is history');
   });
 

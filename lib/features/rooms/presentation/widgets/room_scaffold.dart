@@ -79,7 +79,22 @@ class RoomScaffold extends StatelessWidget {
         ),
         actions: appBarActions,
       ),
-      floatingActionButton: floatingActionButton,
+      // The room's main action wears the room's colour. Left to the theme it
+      // was the app's violet accent — a violet button sitting in the green
+      // money room, the same stray-colour problem the ring tracks had.
+      // Both skins use the paper value: those four are the ink-strength ones
+      // picked to carry white type, and theme_contrast_test holds them to it.
+      floatingActionButton: floatingActionButton == null
+          ? null
+          : Theme(
+              data: Theme.of(context).copyWith(
+                floatingActionButtonTheme: FloatingActionButtonThemeData(
+                  backgroundColor: room.paper,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+              child: floatingActionButton!,
+            ),
       body: AnimatedBackdrop(
         style: BackdropStyle.galaxy,
         color: accent,

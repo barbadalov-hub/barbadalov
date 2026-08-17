@@ -6,6 +6,7 @@ import 'package:lifeos/core/constants/app_constants.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:lifeos/core/utils/download_file.dart';
 import 'package:lifeos/features/money/application/transaction_csv.dart';
+import 'package:lifeos/features/money/domain/afford_check.dart';
 import 'package:lifeos/features/money/domain/entities/category.dart';
 import 'package:lifeos/features/money/domain/entities/transaction.dart';
 import 'package:lifeos/features/money/presentation/pages/budget_limits_page.dart';
@@ -31,7 +32,10 @@ class MoneyPage extends ConsumerWidget {
   /// conclusion. Falls back to the evergreen tip when there's nothing to say.
   String _voice(BuildContext context, WidgetRef ref) {
     final insights = ref.watch(smartFinanceProvider);
-    if (insights.isEmpty) return ref.watch(financeTipProvider);
+    // FinanceTips hands back a *key*, not a sentence. Returning it straight
+    // put a literal "ftip.payYourself" on the room's voice line for every
+    // account with nothing logged yet — which is every new account.
+    if (insights.isEmpty) return context.tr(ref.watch(financeTipProvider));
     final top = insights.first;
     return context.trp(top.msgKey, {
       ...top.params,
@@ -78,12 +82,18 @@ class MoneyPage extends ConsumerWidget {
         RoomAction(
           icon: Icons.remove,
           label: context.tr('money.expense'),
-          onTap: () => AddTransactionSheet.show(context),
+          onTap: () => AddTransactionSheet.show(
+            context,
+            startAs: TransactionType.expense,
+          ),
         ),
         RoomAction(
           icon: Icons.add,
           label: context.tr('money.income'),
-          onTap: () => AddTransactionSheet.show(context),
+          onTap: () => AddTransactionSheet.show(
+            context,
+            startAs: TransactionType.income,
+          ),
         ),
         RoomAction(
           icon: Icons.receipt_long,
@@ -96,21 +106,21 @@ class MoneyPage extends ConsumerWidget {
       tools: [
         RoomTool(
           icon: Icons.tune,
-          label: context.tr('limit.title'),
+          label: context.tr('limit.short'),
           onTap: () => Navigator.of(context).push(
             MaterialPageRoute<void>(builder: (_) => const BudgetLimitsPage()),
           ),
         ),
         RoomTool(
           icon: Icons.repeat,
-          label: context.tr('recurring.title'),
+          label: context.tr('recurring.short'),
           onTap: () => Navigator.of(context).push(
             MaterialPageRoute<void>(builder: (_) => const RecurringPage()),
           ),
         ),
         RoomTool(
           icon: Icons.sell_outlined,
-          label: context.tr('rules.title'),
+          label: context.tr('rules.short'),
           onTap: () => Navigator.of(context).push(
             MaterialPageRoute<void>(builder: (_) => const CategoryRulesPage()),
           ),
@@ -132,6 +142,10 @@ class MoneyPage extends ConsumerWidget {
         // The strongest verdict is the room's voice; the rest stay here so no
         // advice is lost to the shorter layout.
         const _MoreInsightsCard(),
+        // Everything else in this room describes what already happened. This is
+        // the one thing that answers a question about money not yet spent.
+        const _AffordCard(),
+        const SizedBox(height: 12),
         // The four charts (trend, categories, comparison, calendar) live
         // together in one popup so the room stays short.
         _AnalyticsEntry(onTap: () => _showAnalyticsSheet(context)),
@@ -171,6 +185,117 @@ Future<void> _exportCsv(BuildContext context, WidgetRef ref) async {
       content: Text(
           context.tr(downloaded ? 'money.csvDownloaded' : 'money.csvCopied')),
     ));
+}
+
+/// "Can I afford this?" — the room's one forward-looking answer.
+///
+/// The verdict is deliberately expressed in days rather than in a percentage
+/// or a scolding: money left means nothing without knowing how long it has to
+/// last, and "four of your twelve remaining days" is a fact the user can argue
+/// with, rather than a judgement about whether they deserve the thing.
+class _AffordCard extends ConsumerStatefulWidget {
+  const _AffordCard();
+
+  @override
+  ConsumerState<_AffordCard> createState() => _AffordCardState();
+}
+
+class _AffordCardState extends ConsumerState<_AffordCard> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final accent = roomById(RoomId.money).colorFor(Theme.of(context).brightness);
+    final budget = ref.watch(currentBudgetProvider);
+    final now = ref.watch(clockProvider).now();
+
+    final freeLeft = budget.income.minorUnits -
+        budget.reserve.minorUnits -
+        budget.expenses.minorUnits;
+
+    final typed = double.tryParse(_controller.text.replaceAll(',', '.')) ?? 0;
+    final answer = AffordCheck.ask(
+      amountMinor: (typed * 100).round(),
+      freeLeftMinor: freeLeft,
+      daysLeftInMonth: AffordCheck.daysLeftInMonth(now),
+    );
+
+    final tone = switch (answer?.verdict) {
+      AffordVerdict.no => LifeColors.financeDanger,
+      AffordVerdict.tight => LifeColors.goals,
+      _ => accent,
+    };
+
+    return SectionCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(context.tr('afford.title'),
+              style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 2),
+          Text(
+            context.tr('afford.hint'),
+            style: Theme.of(context)
+                .textTheme
+                .bodySmall
+                ?.copyWith(color: scheme.outline),
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            controller: _controller,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: const InputDecoration(
+              isDense: true,
+              border: OutlineInputBorder(),
+            ),
+            onChanged: (_) => setState(() {}),
+          ),
+          if (answer != null) ...[
+            const SizedBox(height: 12),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 3,
+                  height: 34,
+                  margin: const EdgeInsets.only(right: 10, top: 2),
+                  decoration: BoxDecoration(
+                    color: tone,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    context.trp(answer.reasonKey, {
+                      ...answer.params,
+                      // Amounts arrive as minor units; the sentence needs them
+                      // in the user's own currency formatting.
+                      for (final k in const ['left', 'over'])
+                        if (answer.params[k] != null)
+                          k: Money(answer.params[k]! as int).format(),
+                      'days': answer.daysCost,
+                    }),
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      height: 1.35,
+                      color: scheme.onSurface,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
 }
 
 /// The finance verdicts that didn't make it into the room's voice line. The
