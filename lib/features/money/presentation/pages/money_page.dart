@@ -690,21 +690,22 @@ class _HistoryControlsState extends ConsumerState<_HistoryControls> {
           ),
         ),
         const SizedBox(height: 8),
-        Row(
+        // Wrap, not Row: the three Russian labels are 15px wider than a 360px
+        // phone, and a fixed Row has nowhere to put the overflow.
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
           children: [
             for (final (label, value) in [
               (context.tr('money.filterAll'), null),
               (context.tr('money.income'), TransactionType.income),
               (context.tr('money.expense'), TransactionType.expense),
             ])
-              Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: ChoiceChip(
-                  label: Text(label),
-                  selected: filter == value,
-                  onSelected: (_) =>
-                      ref.read(txTypeFilterProvider.notifier).state = value,
-                ),
+              ChoiceChip(
+                label: Text(label),
+                selected: filter == value,
+                onSelected: (_) =>
+                    ref.read(txTypeFilterProvider.notifier).state = value,
               ),
           ],
         ),

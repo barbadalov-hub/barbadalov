@@ -72,7 +72,9 @@ class RoomScaffold extends StatelessWidget {
               decoration: BoxDecoration(color: accent, shape: BoxShape.circle),
             ),
             const SizedBox(width: 10),
-            Text(title),
+            // Flexible, not bare: the title shares a 360px bar with up to three
+            // actions, and a Russian room name plus those buttons overflows.
+            Flexible(child: Text(title, overflow: TextOverflow.ellipsis)),
           ],
         ),
         actions: appBarActions,
