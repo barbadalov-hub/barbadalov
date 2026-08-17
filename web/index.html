@@ -70,6 +70,29 @@
       var b = document.getElementById('cosmos-boot');
       if (b) { b.classList.add('hide'); setTimeout(function () { b.remove(); }, 600); }
     });
+
+    // Keep an installed PWA from getting stuck on an old build. Flutter's
+    // service worker serves cached assets (so the app works offline), but that
+    // means a new deploy can show the previous version until the worker
+    // refreshes. Here we eagerly check for a new worker whenever the app is
+    // opened or comes back to the foreground, and reload once the new one takes
+    // control — so the latest version lands on the next open instead of never.
+    if ('serviceWorker' in navigator) {
+      var reloaded = false;
+      navigator.serviceWorker.addEventListener('controllerchange', function () {
+        if (reloaded) return;
+        reloaded = true;
+        window.location.reload();
+      });
+      navigator.serviceWorker.ready.then(function (reg) {
+        function check() { reg.update().catch(function () {}); }
+        check();
+        setInterval(check, 60000);
+        document.addEventListener('visibilitychange', function () {
+          if (document.visibilityState === 'visible') check();
+        });
+      });
+    }
   </script>
 </body>
 </html>
