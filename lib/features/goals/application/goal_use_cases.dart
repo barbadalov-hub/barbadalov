@@ -75,8 +75,13 @@ class ContributeToGoal {
   final IdService _idService;
   final Clock _clock;
 
+  /// Called after a successful top-up so the presentation layer can keep a
+  /// record of it. Same callback seam the health use case uses for weight.
+  final void Function(Goal goal, Money amount, DateTime at)? onContributed;
+
   const ContributeToGoal(
-      this._repository, this._eventBus, this._idService, this._clock);
+      this._repository, this._eventBus, this._idService, this._clock,
+      {this.onContributed});
 
   Result<Goal> call(Goal goal, Money amount, {String userId = 'local'}) {
     if (!amount.isPositive) {
@@ -84,6 +89,7 @@ class ContributeToGoal {
     }
     final updated = goal.contribute(amount);
     _repository.update(updated);
+    onContributed?.call(updated, amount, _clock.now());
     _eventBus.publish(GoalUpdatedEvent(
       id: _idService.newId(),
       userId: userId,

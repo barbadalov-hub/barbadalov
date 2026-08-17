@@ -4,6 +4,7 @@ import 'package:lifeos/features/goals/application/forecast_goal.dart';
 import 'package:lifeos/features/goals/application/goal_use_cases.dart';
 import 'package:lifeos/features/goals/data/goal_repository_impl.dart';
 import 'package:lifeos/features/goals/domain/entities/goal.dart';
+import 'package:lifeos/features/goals/domain/goal_pace.dart';
 import 'package:lifeos/features/goals/domain/repositories/goal_repository.dart';
 import 'package:lifeos/features/money/presentation/providers/money_providers.dart';
 import 'package:lifeos/shared/models/money.dart';
@@ -98,7 +99,63 @@ final contributeToGoalProvider =
           ref.watch(eventBusProvider),
           ref.watch(idServiceProvider),
           ref.watch(clockProvider),
+          // A goal stores a running total, and a total cannot say whether it
+          // took two weeks or two years. Each top-up is written down so the
+          // room can forecast from behaviour rather than from intentions.
+          onContributed: (goal, amount, at) => ref
+              .read(goalContributionsProvider.notifier)
+              .record(goal.id, amount.minorUnits, at),
         ));
+
+/// The record of top-ups, kept because the event log lives only in memory and
+/// is empty again on every launch.
+class GoalContributionController extends Notifier<List<GoalContribution>> {
+  static const _key = 'goals.contributions';
+
+  /// Enough history for the six-month window with room to spare, capped so the
+  /// list cannot grow without limit on an account used for years.
+  static const _maxKept = 400;
+
+  @override
+  List<GoalContribution> build() =>
+      ref.watch(jsonStoreProvider).loadList<GoalContribution>(
+            _key,
+            GoalContribution.fromJson,
+            fallback: const [],
+          );
+
+  void record(String goalId, int minorUnits, DateTime at) {
+    if (minorUnits <= 0) return;
+    final next = [
+      ...state,
+      GoalContribution(goalId: goalId, minorUnits: minorUnits, at: at),
+    ];
+    // Oldest first, so trimming drops the entries the window ignores anyway.
+    if (next.length > _maxKept) next.removeRange(0, next.length - _maxKept);
+    ref
+        .read(jsonStoreProvider)
+        .saveList<GoalContribution>(_key, next, (c) => c.toJson());
+    state = next;
+  }
+
+  List<GoalContribution> forGoal(String goalId) =>
+      state.where((c) => c.goalId == goalId).toList();
+}
+
+final goalContributionsProvider =
+    NotifierProvider<GoalContributionController, List<GoalContribution>>(
+        GoalContributionController.new);
+
+/// When a goal arrives at the rate its owner is actually saving — null until
+/// there is enough history to say anything honest.
+final goalPaceProvider = Provider.family<PaceEstimate?, Goal>((ref, goal) {
+  return GoalPace.estimate(
+    contributions:
+        ref.watch(goalContributionsProvider.notifier).forGoal(goal.id),
+    remainingMinor: goal.remaining.minorUnits,
+    now: ref.watch(clockProvider).now(),
+  );
+});
 
 final addMilestoneProvider = Provider<AddMilestone>(
     (ref) => AddMilestone(ref.watch(goalRepositoryProvider)));

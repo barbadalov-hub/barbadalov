@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:lifeos/features/goals/application/forecast_goal.dart';
 import 'package:lifeos/features/goals/domain/entities/goal.dart';
+import 'package:lifeos/features/goals/domain/goal_pace.dart';
 import 'package:lifeos/features/goals/domain/goal_starters.dart';
 import 'package:lifeos/features/goals/presentation/providers/goal_providers.dart';
 import 'package:lifeos/features/lifeweeks/presentation/pages/life_weeks_page.dart';
@@ -274,6 +275,10 @@ class _GoalCard extends ConsumerWidget {
                   context,
                   forecast,
                   sharedWith: ref.watch(activeGoalCountProvider),
+                  // Once there is a real record of top-ups it replaces the
+                  // budget projection: what someone actually saves beats what
+                  // their leftover budget says they could.
+                  pace: ref.watch(goalPaceProvider(goal)),
                 ),
               ),
               TextButton.icon(
@@ -373,11 +378,40 @@ class _GoalCard extends ConsumerWidget {
     BuildContext context,
     GoalForecast f, {
     required int sharedWith,
+    PaceEstimate? pace,
   }) {
     final style = Theme.of(context).textTheme.bodySmall;
     if (f.complete) {
       return Text(context.tr('goals.reached'), style: style);
     }
+
+    // A forecast from real top-ups beats one from a spare-budget assumption,
+    // so when it exists it takes over the line entirely rather than sitting
+    // next to a second, contradicting date.
+    if (pace != null) {
+      final lang = Localizations.localeOf(context).languageCode;
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            context.trp('goals.pace', {
+              'date': DateFormat.yMMM(lang).format(pace.arrivesOn),
+              'amount': Money(pace.perMonthMinor).format(),
+            }),
+            style: style?.copyWith(fontWeight: FontWeight.w600),
+          ),
+          Text(
+            // Say what it rests on. A projection built on two payments should
+            // be read with a raised eyebrow, and hiding that would be a way of
+            // sounding more certain than the data allows.
+            context.trp('goals.paceBasis', {'n': pace.basedOn}),
+            style: style?.copyWith(
+                color: Theme.of(context).colorScheme.outline),
+          ),
+        ],
+      );
+    }
+
     final Widget main;
     if (f.monthsRemaining == null) {
       main = Text(context.tr('goals.saveMonthly'), style: style);

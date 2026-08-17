@@ -1775,6 +1775,16 @@ const Map<String, Map<String, String>> _values = {
     'ru': 'три месяца твоих расходов',
     'uk': 'три місяці твоїх витрат'
   },
+  'goals.pace': {
+    'en': 'At your own pace — {date}, about {amount} a month',
+    'ru': 'В твоём темпе — {date}, примерно {amount} в месяц',
+    'uk': 'У твоєму темпі — {date}, приблизно {amount} на місяць'
+  },
+  'goals.paceBasis': {
+    'en': 'from your last {n} top-ups',
+    'ru': 'по твоим последним {n} пополнениям',
+    'uk': 'за твоїми останніми {n} поповненнями'
+  },
   'goals.splitNote': {
     'en': 'assuming the leftover is split evenly between {n} goals',
     'ru': 'если делить свободный остаток поровну между {n} целями',

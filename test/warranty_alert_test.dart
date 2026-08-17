@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:lifeos/core/services/clock.dart';
 import 'package:lifeos/core/services/key_value_store.dart';
 import 'package:lifeos/features/money/domain/entities/purchase.dart';
-import 'package:lifeos/features/money/presentation/providers/purchase_providers.dart';
 import 'package:lifeos/features/money/presentation/providers/warranty_alert_provider.dart';
 import 'package:lifeos/features/notifications/presentation/providers/notification_providers.dart';
 import 'package:lifeos/shared/models/money.dart';
