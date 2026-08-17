@@ -1,14 +1,16 @@
 ﻿import 'dart:io';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show FontLoader;
 import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:lifeos/core/services/key_value_store.dart';
-import 'package:lifeos/features/planner/presentation/pages/planner_page.dart';
+import 'package:lifeos/features/rooms/presentation/pages/rooms_page.dart';
 import 'package:lifeos/shared/providers/core_providers.dart';
 import 'package:lifeos/shared/theme/app_theme.dart';
 
@@ -24,7 +26,33 @@ import 'package:lifeos/shared/theme/app_theme.dart';
 /// and `toImage` never lets go). Give it ~40s, kill it, read the PNGs. Keeping
 /// it out of `test/` guarantees that hang can never eat a CI run.
 void main() {
+  /// The test renderer ships no fonts, so every glyph comes out as a tofu box
+  /// and the design cannot actually be judged. Load the ones the app already
+  /// bundles for web.
+  /// Must run inside [WidgetTester.runAsync]: reading the files is real I/O,
+  /// and a widget test's fake clock never completes it otherwise — the run just
+  /// hangs with no error.
+  Future<void> loadFonts(WidgetTester tester) => tester.runAsync(() async {
+    // The bundled Roboto is a Latin subset — the app pairs it with NotoSans for
+    // Cyrillic via fontFamilyFallback, but that is web-only, so in tests every
+    // Russian glyph would still come out as tofu. Registering NotoSans *as*
+    // Roboto gives the renderer one family that covers the whole UI.
+    for (final entry in const {
+      'Roboto': ['assets/fonts/NotoSans.ttf'],
+      'RobotoWeb': ['assets/fonts/NotoSans.ttf'],
+    }.entries) {
+      final loader = FontLoader(entry.key);
+      for (final path in entry.value) {
+        loader.addFont(
+          File(path).readAsBytes().then((b) => ByteData.view(b.buffer)),
+        );
+      }
+      await loader.load();
+    }
+  });
+
   Future<void> capture(WidgetTester tester, Brightness b, String name) async {
+    await loadFonts(tester);
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
@@ -55,7 +83,7 @@ void main() {
           ],
           supportedLocales: AppLocalizations.supportedLocales,
           theme: b == Brightness.dark ? AppTheme.dark() : AppTheme.light(),
-          home: const PlannerPage(),
+          home: const RoomsPage(),
         ),
         ),
       ),

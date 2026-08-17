@@ -158,13 +158,31 @@ class AppTheme {
   }
 }
 
-/// Semantic colours for LifeOS domains, resolved against the active scheme.
+/// Semantic colours for the app's domains, used for text, icons and accents in
+/// ~100 places across both skins.
+///
+/// Each value must stay legible on the paper page *and* on the night one, which
+/// only mid-tones can do: too light and it vanishes on cream, too dark and it
+/// vanishes on near-black. The old amber (`0xFFF5A623`) scored 1.8 against
+/// paper — effectively invisible — and the old green 2.99, just under the bar.
+/// Both were tuned for a dark-only app. `theme_contrast_test` now holds the
+/// line at 3.0 on both skins, so any future tweak is checked rather than
+/// eyeballed.
 class LifeColors {
   const LifeColors._();
 
-  static const finance = Color(0xFF2E9E6B);
+  static const finance = Color(0xFF24855A);
   static const financeDanger = Color(0xFFE5484D);
   static const health = Color(0xFFE5484D);
   static const mind = Color(0xFF8E5BFF);
-  static const goals = Color(0xFFF5A623);
+  static const goals = Color(0xFFB07408);
+
+  /// Every semantic colour, for the contrast guard to iterate.
+  static const all = <String, Color>{
+    'finance': finance,
+    'financeDanger': financeDanger,
+    'health': health,
+    'mind': mind,
+    'goals': goals,
+  };
 }

@@ -61,6 +61,24 @@ void main() {
     }
   }
 
+  // The semantic colours are single constants shared by both skins (they are
+  // used in ~100 places, so per-skin variants would mean touching every call
+  // site). That only works if each one sits in the mid-tone band that reads on
+  // cream *and* on near-black — this is the guard for that band.
+  group('semantic colours', () {
+    final paper = AppTheme.light().colorScheme.surface;
+    final night = AppTheme.dark().colorScheme.surface;
+
+    LifeColors.all.forEach((name, colour) {
+      test('$name is legible on both skins', () {
+        expect(_contrast(colour, paper), greaterThanOrEqualTo(minMutedContrast),
+            reason: '$name would fade into the paper page');
+        expect(_contrast(colour, night), greaterThanOrEqualTo(minMutedContrast),
+            reason: '$name would fade into the night page');
+      });
+    });
+  });
+
   test('paper surfaces are light and dark surfaces are dark', () {
     expect(_luminance(AppTheme.light().colorScheme.surface),
         greaterThan(0.5),
