@@ -35,11 +35,12 @@ void main() {
     // Drain the staggered FadeSlideIn entrance timers (up to ~600ms).
     await tester.pump(const Duration(seconds: 1));
 
-    // The home grid renders every room, so the money/health/mind/goals
-    // providers all resolved without throwing.
-    expect(find.text('left to spend today'), findsOneWidget);
-    expect(find.text('habits kept today'), findsOneWidget);
-    expect(find.text('score'), findsOneWidget);
+    // The home page renders every room — one as the lead cover, the rest as
+    // spines — so the money/health/mind/goals providers all resolved without
+    // throwing. Titles are the stable anchor: they appear in both forms.
+    for (final title in const ['MONEY', 'BODY', 'MIND', 'GOALS']) {
+      expect(find.text(title), findsOneWidget, reason: '$title missing');
+    }
 
     // Bottom navigation wired with the three primary destinations.
     expect(find.text('Rooms'), findsWidgets);

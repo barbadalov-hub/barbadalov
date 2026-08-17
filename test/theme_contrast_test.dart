@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lifeos/features/rooms/domain/life_room.dart';
 import 'package:lifeos/shared/theme/app_theme.dart';
 import 'package:lifeos/shared/theme/theme_controller.dart';
 
@@ -85,5 +86,28 @@ void main() {
         reason: 'the paper page must actually be light');
     expect(_luminance(AppTheme.dark().colorScheme.surface), lessThan(0.1),
         reason: 'the night page must actually be dark');
+  });
+
+  group('the home cover', () {
+    test('every room can carry white type at full bleed', () {
+      // The lead cover fills itself with the room's paper colour and prints
+      // white on top, in both skins. That is only safe because these four are
+      // the ink-strength versions — a new room added with a pastel would look
+      // fine in the palette and be unreadable the day it leads.
+      for (final room in kLifeRooms) {
+        expect(_contrast(Colors.white, room.paper), greaterThanOrEqualTo(4.5),
+            reason: '${room.id.name}: white on its cover is unreadable');
+      }
+    });
+
+    test('the supporting copy on a cover still clears the bar', () {
+      // The headline sentence is drawn at 92% alpha over the same ground.
+      for (final room in kLifeRooms) {
+        final faded = Color.alphaBlend(
+            Colors.white.withValues(alpha: 0.92), room.paper);
+        expect(_contrast(faded, room.paper), greaterThanOrEqualTo(4.5),
+            reason: '${room.id.name}: the cover sentence is too faint');
+      }
+    });
   });
 }

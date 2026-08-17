@@ -10,7 +10,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:lifeos/core/services/key_value_store.dart';
+import 'package:lifeos/features/rooms/domain/life_room.dart';
+import 'package:lifeos/features/rooms/domain/room_attention.dart';
 import 'package:lifeos/features/rooms/presentation/pages/rooms_page.dart';
+import 'package:lifeos/features/rooms/presentation/providers/rooms_providers.dart';
 import 'package:lifeos/shared/providers/core_providers.dart';
 import 'package:lifeos/shared/theme/app_theme.dart';
 
@@ -37,9 +40,15 @@ void main() {
     // Cyrillic via fontFamilyFallback, but that is web-only, so in tests every
     // Russian glyph would still come out as tofu. Registering NotoSans *as*
     // Roboto gives the renderer one family that covers the whole UI.
-    for (final entry in const {
-      'Roboto': ['assets/fonts/NotoSans.ttf'],
-      'RobotoWeb': ['assets/fonts/NotoSans.ttf'],
+    // MaterialIcons ships with the SDK rather than the app, and without it
+    // every icon photographs as an empty square — which is worthless when the
+    // point of the shot is judging a cover whose illustration IS an icon.
+    const sdkIcons = r'C:\src\flutter\bin\cache\artifacts\material_fonts'
+        r'\MaterialIcons-Regular.otf';
+    for (final entry in {
+      'Roboto': const ['assets/fonts/NotoSans.ttf'],
+      'RobotoWeb': const ['assets/fonts/NotoSans.ttf'],
+      if (File(sdkIcons).existsSync()) 'MaterialIcons': [sdkIcons],
     }.entries) {
       final loader = FontLoader(entry.key);
       for (final path in entry.value) {
@@ -51,7 +60,30 @@ void main() {
     }
   });
 
-  Future<void> capture(WidgetTester tester, Brightness b, String name) async {
+  /// Realistic figures, injected rather than seeded: the repositories load from
+  /// storage and an empty account would photograph as a wall of zeroes, which
+  /// says nothing about how the design actually reads.
+  final livedIn = <RoomSummary>[
+    const RoomSummary(
+        id: RoomId.money, hero: '12 400 ₽', subtitleKey: 'room.money.sub'),
+    const RoomSummary(
+      id: RoomId.body,
+      hero: '7.4k',
+      subtitleKey: 'room.body.sub',
+      params: {'h': 6, 'm': 30},
+    ),
+    const RoomSummary(
+        id: RoomId.mind, hero: '4/5', subtitleKey: 'room.mind.sub'),
+    const RoomSummary(
+        id: RoomId.goals, hero: '62%', subtitleKey: 'room.goals.sub'),
+  ];
+
+  Future<void> capture(
+    WidgetTester tester,
+    Brightness b,
+    String name, {
+    required RoomAttention? lead,
+  }) async {
     await loadFonts(tester);
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1.0;
@@ -63,6 +95,8 @@ void main() {
       overrides: [
         keyValueStoreProvider
             .overrideWithValue(InMemoryKeyValueStore({'onboarding.done': 'true'})),
+        roomSummariesProvider.overrideWithValue(livedIn),
+        roomAttentionProvider.overrideWithValue(lead),
       ],
       // The backdrop drives a forever-repeating AnimationController. Left
       // running it keeps the test alive until the 10-minute timeout (the PNG is
@@ -82,7 +116,17 @@ void main() {
             GlobalCupertinoLocalizations.delegate,
           ],
           supportedLocales: AppLocalizations.supportedLocales,
-          theme: b == Brightness.dark ? AppTheme.dark() : AppTheme.light(),
+          // The app leaves the font family null off the web so each platform
+          // uses its own system face. In the test renderer "null" means a stub
+          // font of empty squares, and only the styles inherited from Material
+          // (which hard-code Roboto) came out readable — half the screen was
+          // tofu. Pinning the loaded family across the whole theme is a
+          // harness concern only; the shipped app is untouched.
+          theme: () {
+            final t = b == Brightness.dark ? AppTheme.dark() : AppTheme.light();
+            return t.copyWith(
+                textTheme: t.textTheme.apply(fontFamily: 'Roboto'));
+          }(),
           home: const RoomsPage(),
         ),
         ),
@@ -106,13 +150,33 @@ void main() {
     await tester.pump();
   }
 
-  testWidgets('home renders in the paper skin', (t) async {
-    await capture(t, Brightness.light, 'today_paper');
-    expect(File('build/skin/today_paper.png').lengthSync(), greaterThan(1000));
-  });
+  // A short night is the most common real lead, and the one whose headline and
+  // hero figure have to agree.
+  const shortNight = RoomAttention(
+    room: RoomId.body,
+    urgency: 78,
+    reasonKey: 'attn.body.sleep',
+    params: {'h': '6.5'},
+    heroKey: 'attn.hero.sleep',
+    heroParams: {'h': '6.5'},
+    action: AttentionAction.openRoom,
+    actionKey: 'attn.body.sleepAction',
+  );
 
-  testWidgets('home renders in the night skin', (t) async {
-    await capture(t, Brightness.dark, 'today_night');
-    expect(File('build/skin/today_night.png').lengthSync(), greaterThan(1000));
-  });
+  for (final skin in const {
+    'paper': Brightness.light,
+    'night': Brightness.dark,
+  }.entries) {
+    testWidgets('home leads a story in the ${skin.key} skin', (t) async {
+      await capture(t, skin.value, 'lead_${skin.key}', lead: shortNight);
+      expect(File('build/skin/lead_${skin.key}.png').lengthSync(),
+          greaterThan(1000));
+    });
+
+    testWidgets('home on a calm day in the ${skin.key} skin', (t) async {
+      await capture(t, skin.value, 'calm_${skin.key}', lead: null);
+      expect(File('build/skin/calm_${skin.key}.png').lengthSync(),
+          greaterThan(1000));
+    });
+  }
 }

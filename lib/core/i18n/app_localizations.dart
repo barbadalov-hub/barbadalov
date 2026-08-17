@@ -2105,6 +2105,130 @@ const Map<String, Map<String, String>> _values = {
     'uk': 'цілей поки немає'
   },
 
+  // --- Home: the lead cover and the day's headline ------------------------
+  'rooms.scoreLabel': {
+    'en': 'Life score',
+    'ru': 'Индекс жизни',
+    'uk': 'Індекс життя'
+  },
+  'rooms.calm': {
+    'en': 'All four rooms are in order. Today you owe nobody anything.',
+    'ru': 'Все четыре комнаты в порядке. Сегодня ты никому ничего не должен.',
+    'uk': 'Усі чотири кімнати в порядку. Сьогодні ти нікому нічого не винен.'
+  },
+  'rooms.watered': {
+    'en': 'A glass of water logged',
+    'ru': 'Стакан воды записан',
+    'uk': 'Склянку води записано'
+  },
+  'rooms.habitDone': {
+    'en': 'Day closed — every habit done',
+    'ru': 'День закрыт — все привычки выполнены',
+    'uk': 'День закрито — усі звички виконано'
+  },
+  'attn.hero.sleep': {'en': '{h} h', 'ru': '{h} ч', 'uk': '{h} год'},
+  'attn.hero.water': {'en': '{l} l', 'ru': '{l} л', 'uk': '{l} л'},
+  'attn.money.over': {
+    'en': 'You have gone past this month’s budget. Worth a look before the next purchase.',
+    'ru': 'Ты вышел за бюджет месяца. Стоит заглянуть до следующей покупки.',
+    'uk': 'Ти вийшов за бюджет місяця. Варто зазирнути до наступної покупки.'
+  },
+  'attn.money.overAction': {
+    'en': 'Check the budget',
+    'ru': 'Посмотреть бюджет',
+    'uk': 'Подивитися бюджет'
+  },
+  'attn.money.dry': {
+    'en': 'Nothing left in today’s allowance. Anything spent now comes out of the rest of the month.',
+    'ru': 'На сегодня свободных денег не осталось. Всё, что потратишь, уйдёт из остатка месяца.',
+    'uk': 'На сьогодні вільних грошей не лишилося. Усе, що витратиш, піде із залишку місяця.'
+  },
+  'attn.money.dryAction': {
+    'en': 'See where it went',
+    'ru': 'Посмотреть, куда ушло',
+    'uk': 'Подивитися, куди пішло'
+  },
+  'attn.body.sleep': {
+    'en': 'You slept {h} h — short of your goal. Sleep is what the rest of the day is built on.',
+    'ru': 'Ты спал {h} ч — меньше нормы. На сне держится весь остальной день.',
+    'uk': 'Ти спав {h} год — менше за норму. На сні тримається весь інший день.'
+  },
+  'attn.body.sleepAction': {
+    'en': 'Log sleep',
+    'ru': 'Записать сон',
+    'uk': 'Записати сон'
+  },
+  'attn.body.blank': {
+    'en': 'Nothing logged today. One number is enough to start.',
+    'ru': 'Сегодня ещё ничего не отмечено. Хватит одного числа, чтобы начать.',
+    'uk': 'Сьогодні ще нічого не відмічено. Досить одного числа, щоб почати.'
+  },
+  'attn.body.blankAction': {
+    'en': 'Log the day',
+    'ru': 'Отметить день',
+    'uk': 'Відмітити день'
+  },
+  'attn.body.water': {
+    'en': 'You are behind on water for this time of day.',
+    'ru': 'По воде ты отстаёшь для этого времени дня.',
+    'uk': 'По воді ти відстаєш для цього часу дня.'
+  },
+  'attn.body.waterAction': {
+    'en': '+ a glass',
+    'ru': '+ стакан',
+    'uk': '+ склянка'
+  },
+  'attn.body.steps': {
+    'en': '{n} steps short of the goal, and the day is nearly out.',
+    'ru': 'До цели не хватает {n} шагов, а день почти закончился.',
+    'uk': 'До мети бракує {n} кроків, а день майже скінчився.'
+  },
+  'attn.body.stepsAction': {
+    'en': 'Open the body room',
+    'ru': 'Открыть комнату тела',
+    'uk': 'Відкрити кімнату тіла'
+  },
+  'attn.mind.none': {
+    'en': 'Not one habit ticked off today yet.',
+    'ru': 'Сегодня ещё не отмечено ни одной привычки.',
+    'uk': 'Сьогодні ще не відмічено жодної звички.'
+  },
+  'attn.mind.noneAction': {
+    'en': 'Open habits',
+    'ru': 'Открыть привычки',
+    'uk': 'Відкрити звички'
+  },
+  'attn.mind.one': {
+    'en': 'One habit left: {name}. A single tap closes the day.',
+    'ru': 'Осталась одна привычка: {name}. Одно нажатие закроет день.',
+    'uk': 'Лишилася одна звичка: {name}. Один дотик закриє день.'
+  },
+  'attn.mind.oneAction': {
+    'en': 'Tick it off',
+    'ru': 'Отметить',
+    'uk': 'Відмітити'
+  },
+  'attn.mind.left': {
+    'en': '{n} habits still open, and the evening is going.',
+    'ru': 'Ещё {n} привычек не закрыто, а вечер уходит.',
+    'uk': 'Ще {n} звичок не закрито, а вечір минає.'
+  },
+  'attn.mind.leftAction': {
+    'en': 'Open habits',
+    'ru': 'Открыть привычки',
+    'uk': 'Відкрити звички'
+  },
+  'attn.goals.none': {
+    'en': 'No goal named yet. Everything else is easier once there is one.',
+    'ru': 'Ни одной цели пока не названо. С ней всё остальное даётся легче.',
+    'uk': 'Жодної мети поки не названо. З нею все інше дається легше.'
+  },
+  'attn.goals.noneAction': {
+    'en': 'Name a goal',
+    'ru': 'Назвать цель',
+    'uk': 'Назвати мету'
+  },
+
   // --- Appearance / theme -------------------------------------------------
   'theme.title': {'en': 'Appearance', 'ru': 'Оформление', 'uk': 'Оформлення'},
   'theme.moreSub': {'en': 'Accent & light/dark', 'ru': 'Акцент и свет/тёмная', 'uk': 'Акцент і світла/темна'},

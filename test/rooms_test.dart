@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:lifeos/core/services/key_value_store.dart';
 import 'package:lifeos/features/rooms/domain/life_room.dart';
+import 'package:lifeos/features/rooms/domain/room_attention.dart';
 import 'package:lifeos/features/rooms/presentation/pages/rooms_page.dart';
 import 'package:lifeos/features/rooms/presentation/providers/rooms_providers.dart';
 import 'package:lifeos/shared/providers/core_providers.dart';
@@ -76,42 +77,121 @@ void main() {
     });
   });
 
-  testWidgets('home renders four rooms and the score on the seam',
-      (tester) async {
-    tester.view.physicalSize = const Size(420, 900);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
+  group('the front page', () {
+    /// The lead is stubbed rather than provoked with data: which room wins is
+    /// [RoomAttentionBuilder]'s job and is covered exhaustively in
+    /// room_attention_test. Here we only care what the page does with it.
+    Future<void> pump(
+      WidgetTester tester,
+      RoomAttention? lead, {
+      void Function(RoomId room)? onOpenRoom,
+    }) async {
+      tester.view.physicalSize = const Size(420, 900);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
 
-    RoomId? tapped;
-    await tester.pumpWidget(ProviderScope(
-      overrides: [
-        keyValueStoreProvider.overrideWithValue(InMemoryKeyValueStore({})),
-      ],
-      child: MaterialApp(
-        locale: const Locale('en'),
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
+      await tester.pumpWidget(ProviderScope(
+        overrides: [
+          keyValueStoreProvider.overrideWithValue(InMemoryKeyValueStore({})),
+          roomAttentionProvider.overrideWithValue(lead),
         ],
-        supportedLocales: AppLocalizations.supportedLocales,
-        theme: AppTheme.light(),
-        home: RoomsPage(onOpenRoom: (r) => tapped = r),
-      ),
-    ));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 400));
+        child: MaterialApp(
+          locale: const Locale('en'),
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          theme: AppTheme.light(),
+          home: RoomsPage(onOpenRoom: onOpenRoom),
+        ),
+      ));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+    }
 
-    // Every room's subtitle is on screen, and the score badge with it.
-    expect(find.text('left to spend today'), findsOneWidget);
-    expect(find.text('habits kept today'), findsOneWidget);
-    expect(find.text('score'), findsOneWidget);
+    testWidgets('runs a lead cover for the room that needs you',
+        (tester) async {
+      await pump(
+        tester,
+        const RoomAttention(
+          room: RoomId.body,
+          urgency: 78,
+          reasonKey: 'attn.body.blank',
+          action: AttentionAction.openRoom,
+          actionKey: 'attn.body.blankAction',
+        ),
+      );
 
-    // Tapping a room reports which one, without navigating itself.
-    await tester.tap(find.text('left to spend today'));
-    await tester.pump();
-    expect(tapped, RoomId.money);
+      // The headline and its single offer.
+      expect(find.textContaining('Nothing logged today'), findsOneWidget);
+      expect(find.text('Log the day'), findsOneWidget);
+
+      // All four rooms are still reachable: one leads, three are spines.
+      for (final title in const ['MONEY', 'BODY', 'MIND', 'GOALS']) {
+        expect(find.text(title), findsOneWidget, reason: '$title missing');
+      }
+      // The score keeps a home even when the cover is a room.
+      expect(find.byTooltip('Life score'), findsOneWidget);
+    });
+
+    testWidgets('a calm day has no headline at all', (tester) async {
+      await pump(tester, null);
+
+      expect(find.textContaining('you owe nobody anything'), findsOneWidget);
+      expect(find.text('LIFE SCORE'), findsOneWidget);
+      // Nothing leads, so every room sits in the rack.
+      for (final title in const ['MONEY', 'BODY', 'MIND', 'GOALS']) {
+        expect(find.text(title), findsOneWidget, reason: '$title missing');
+      }
+    });
+
+    testWidgets('both a cover and a spine open their own room',
+        (tester) async {
+      const lead = RoomAttention(
+        room: RoomId.body,
+        urgency: 78,
+        reasonKey: 'attn.body.blank',
+        action: AttentionAction.openRoom,
+        actionKey: 'attn.body.blankAction',
+      );
+
+      final opened = <RoomId>[];
+      await pump(tester, lead, onOpenRoom: opened.add);
+
+      await tester.tap(find.text('BODY')); // the lead cover
+      await tester.pump();
+      await tester.tap(find.text('MONEY')); // a spine
+      await tester.pump();
+
+      expect(opened, [RoomId.body, RoomId.money]);
+    });
+
+    testWidgets('the cover offer acts without leaving the page',
+        (tester) async {
+      // Water is the one reason a single tap genuinely fixes, so the chip must
+      // log it here rather than dumping the user into the body room.
+      final opened = <RoomId>[];
+      await pump(
+        tester,
+        const RoomAttention(
+          room: RoomId.body,
+          urgency: 52,
+          reasonKey: 'attn.body.water',
+          action: AttentionAction.drinkGlass,
+          actionKey: 'attn.body.waterAction',
+        ),
+        onOpenRoom: opened.add,
+      );
+
+      await tester.tap(find.text('+ a glass'));
+      await tester.pump();
+
+      expect(opened, isEmpty, reason: 'a one-tap fix must not navigate');
+      expect(find.text('A glass of water logged'), findsOneWidget);
+    });
   });
 }

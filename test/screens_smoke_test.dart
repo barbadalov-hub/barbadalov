@@ -66,20 +66,15 @@ void main() {
     ));
     await settle(tester);
 
-    // Each room is opened by its subtitle; an untouched account shows the
-    // "nothing logged yet" variants.
-    for (final subtitle in const [
-      'left to spend today',
-      'steps today',
-      'habits kept today',
-      'no goals yet',
-    ]) {
-      final tile = find.text(subtitle);
-      expect(tile, findsOneWidget, reason: 'room "$subtitle" missing from home');
+    // Rooms are opened by title: it is printed on the lead cover and on every
+    // spine alike, so this holds whichever room is leading today.
+    for (final title in const ['MONEY', 'BODY', 'MIND', 'GOALS']) {
+      final tile = find.text(title);
+      expect(tile, findsOneWidget, reason: 'room "$title" missing from home');
       await tester.tap(tile);
       await settle(tester);
       expect(tester.takeException(), isNull,
-          reason: 'opening the "$subtitle" room threw while building');
+          reason: 'opening the "$title" room threw while building');
 
       // Back to the grid for the next one.
       await tester.pageBack();
