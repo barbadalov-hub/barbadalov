@@ -104,6 +104,41 @@ const Map<String, Map<String, String>> _values = {
     'ru': 'Ничего не нашлось — впиши вручную.',
     'uk': 'Нічого не знайшлося — впиши вручну.'
   },
+  'diet.protein': {'en': 'Protein', 'ru': 'Белки', 'uk': 'Білки'},
+  'diet.fat': {'en': 'Fat', 'ru': 'Жиры', 'uk': 'Жири'},
+  'diet.carbs': {'en': 'Carbs', 'ru': 'Углеводы', 'uk': 'Вуглеводи'},
+  'wdiet.title': {'en': 'This week', 'ru': 'Неделя', 'uk': 'Тиждень'},
+  'wdiet.days': {'en': '{n} days logged', 'ru': 'отмечено дней: {n}', 'uk': 'відмічено днів: {n}'},
+  'wdiet.needMore': {
+    'en': 'Log {need} days and the weekly picture appears. Two days is an anecdote, not a week.',
+    'ru': 'Отметь {need} дня — и появится картина недели. Два дня — это случай, а не неделя.',
+    'uk': 'Відзнач {need} дні — і з’явиться картина тижня. Два дні — це випадок, а не тиждень.'
+  },
+  'wdiet.noTarget': {
+    'en': 'You average {kcal} kcal a day. Fill in the profile and this can be measured against a target.',
+    'ru': 'В среднем {kcal} ккал в день. Заполни профиль — и будет с чем сравнивать.',
+    'uk': 'У середньому {kcal} ккал на день. Заповни профіль — і буде з чим порівнювати.'
+  },
+  'wdiet.steady': {
+    'en': 'Steady week: {kcal} kcal a day on average, close to your {target}.',
+    'ru': 'Ровная неделя: в среднем {kcal} ккал в день, рядом с твоими {target}.',
+    'uk': 'Рівний тиждень: у середньому {kcal} ккал на день, поруч із твоїми {target}.'
+  },
+  'wdiet.over': {
+    'en': 'Above target most days — {kcal} a day against {target}.',
+    'ru': 'Больше нормы почти каждый день — {kcal} против {target}.',
+    'uk': 'Більше за норму майже щодня — {kcal} проти {target}.'
+  },
+  'wdiet.under': {
+    'en': 'Below target most days — {kcal} a day against {target}. Eating too little is its own problem.',
+    'ru': 'Меньше нормы почти каждый день — {kcal} против {target}. Недоедать — тоже проблема.',
+    'uk': 'Менше за норму майже щодня — {kcal} проти {target}. Недоїдати — теж проблема.'
+  },
+  'wdiet.split': {
+    'en': 'Split: {p}% protein · {f}% fat · {c}% carbs',
+    'ru': 'Соотношение: {p}% белки · {f}% жиры · {c}% углеводы',
+    'uk': 'Співвідношення: {p}% білки · {f}% жири · {c}% вуглеводи'
+  },
   'diet.scanBarcode': {'en': 'Scan a barcode', 'ru': 'Сканировать штрихкод', 'uk': 'Сканувати штрихкод'},
   'diet.barcodeLooking': {'en': 'Looking it up…', 'ru': 'Ищу в базе…', 'uk': 'Шукаю в базі…'},
   'diet.barcodeUnread': {

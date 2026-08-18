@@ -12,6 +12,7 @@ import 'package:lifeos/features/food/presentation/providers/diet_providers.dart'
 import 'package:lifeos/features/food/presentation/providers/food_providers.dart';
 import 'package:lifeos/features/profile/presentation/providers/profile_providers.dart';
 import 'package:lifeos/features/profile/presentation/pages/profile_page.dart';
+import 'package:lifeos/features/food/domain/weekly_diet.dart';
 import 'package:lifeos/features/food/presentation/widgets/food_picker_sheet.dart';
 import 'package:lifeos/features/rooms/domain/life_room.dart';
 import 'package:lifeos/features/rooms/presentation/widgets/room_tint.dart';
@@ -162,6 +163,8 @@ class DietPage extends ConsumerWidget {
                 const _RemainingCard(),
                 const SizedBox(height: 12),
                 const _FoodLogCard(),
+                const SizedBox(height: 12),
+                const _WeeklyDietCard(),
                 const SizedBox(height: 12),
                 const _DayCostCard(),
                 const SizedBox(height: 12),
@@ -394,6 +397,122 @@ class _FoodLogCard extends ConsumerWidget {
 }
 
 /// Estimated cheapest cost to buy today's whole menu.
+/// How the week of eating actually went.
+///
+/// Shown under the day's diary rather than above it: what you ate today is
+/// what you came here for, and the review is what you stay for.
+class _WeeklyDietCard extends ConsumerWidget {
+  const _WeeklyDietCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+    final accent = roomById(RoomId.body).colorFor(Theme.of(context).brightness);
+    final week = ref.watch(weeklyDietProvider);
+    final split = week.macroSplit;
+
+    return SectionCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Text('📊', style: TextStyle(fontSize: 20)),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(context.tr('wdiet.title'),
+                    style: Theme.of(context).textTheme.titleMedium),
+              ),
+              if (week.daysLogged > 0)
+                Text(
+                  context.trp('wdiet.days', {'n': week.daysLogged}),
+                  style: TextStyle(fontSize: 12, color: scheme.outline),
+                ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            context.trp(week.verdictKey, {
+              'kcal': week.avgKcal,
+              'target': week.targetKcal ?? 0,
+              'n': week.daysLogged,
+              'need': WeeklyDietReview.minDays,
+            }),
+            style: TextStyle(fontSize: 13.5, height: 1.35, color: scheme.onSurface),
+          ),
+          if (week.hasEnough) ...[
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                _WeekFigure(
+                  label: context.tr('diet.kcal'),
+                  value: '${week.avgKcal}',
+                  accent: accent,
+                ),
+                _WeekFigure(
+                  label: context.tr('diet.protein'),
+                  value: '${week.avgProteinG}',
+                  accent: accent,
+                ),
+                _WeekFigure(
+                  label: context.tr('diet.fat'),
+                  value: '${week.avgFatG}',
+                  accent: accent,
+                ),
+                _WeekFigure(
+                  label: context.tr('diet.carbs'),
+                  value: '${week.avgCarbsG}',
+                  accent: accent,
+                ),
+              ],
+            ),
+            if (split != null) ...[
+              const SizedBox(height: 10),
+              Text(
+                // The split is what people can act on; three unrelated gram
+                // figures are just numbers.
+                context.trp('wdiet.split', {
+                  'p': split.protein,
+                  'f': split.fat,
+                  'c': split.carbs,
+                }),
+                style: TextStyle(fontSize: 12.5, color: scheme.outline),
+              ),
+            ],
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _WeekFigure extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color accent;
+  const _WeekFigure(
+      {required this.label, required this.value, required this.accent});
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(value,
+              style: TextStyle(
+                  fontSize: 17, fontWeight: FontWeight.w800, color: accent)),
+          Text(label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                  fontSize: 11,
+                  color: Theme.of(context).colorScheme.outline)),
+        ],
+      ),
+    );
+  }
+}
+
 /// One meal of the day: what was eaten, its total, and a way to add more.
 class _SlotSection extends ConsumerWidget {
   /// Null is the bucket for food logged before meals existed.

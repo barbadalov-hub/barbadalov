@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:lifeos/features/food/data/barcode_food_lookup.dart';
+import 'package:lifeos/features/food/domain/weekly_diet.dart';
 import 'package:lifeos/features/food/application/diet_planner.dart';
 import 'package:lifeos/features/food/data/meal_catalog.dart';
 import 'package:lifeos/features/food/data/ua_store_price_catalog.dart';
@@ -237,7 +238,6 @@ class EatenMealsController extends Notifier<Set<String>> {
   static const _key = 'diet.eaten';
 
   String _dayKey(DateTime d) => '${d.year}-${d.month}-${d.day}';
-
   @override
   Set<String> build() {
     final store = ref.watch(jsonStoreProvider);
@@ -334,19 +334,56 @@ class ManualFoodController extends Notifier<List<ManualFoodEntry>> {
   static const _key = 'diet.manualFood';
   String _dayKey(DateTime d) => '${d.year}-${d.month}-${d.day}';
 
+  /// Day keys are `y-m-d` with no padding, so string order is wrong: "2026-9-1"
+  /// sorts before "2026-10-1". Compare the numbers.
+  static int _compareDayKeys(String a, String b) {
+    final x = a.split('-').map(int.parse).toList();
+    final y = b.split('-').map(int.parse).toList();
+    for (var i = 0; i < 3; i++) {
+      final c = x[i].compareTo(y[i]);
+      if (c != 0) return c;
+    }
+    return 0;
+  }
+
+  /// How many days of diary are kept. Enough for a weekly review with room to
+  /// spare, and bounded so the stored blob cannot grow forever.
+  static const _maxDays = 60;
+
   @override
-  List<ManualFoodEntry> build() {
-    final today = _dayKey(ref.read(clockProvider).now());
+  List<ManualFoodEntry> build() =>
+      loadAll()[_dayKey(ref.read(clockProvider).now())] ?? const [];
+
+  /// The whole diary, day key → what was eaten.
+  ///
+  /// It used to keep **only today**: at midnight the previous day was
+  /// overwritten and gone. A food diary that forgets yesterday cannot show a
+  /// trend, cannot be reviewed, and quietly loses work the user did.
+  Map<String, List<ManualFoodEntry>> loadAll() {
     final raw = ref.watch(jsonStoreProvider).loadObject<Map<String, dynamic>>(
           _key,
           (j) => j,
           fallback: const {},
         );
-    if (raw['date'] != today) return [];
-    return [
-      for (final e in (raw['items'] as List<dynamic>? ?? const []))
-        ManualFoodEntry.fromJson(e as Map<String, dynamic>),
-    ];
+
+    final out = <String, List<ManualFoodEntry>>{};
+
+    List<ManualFoodEntry> parse(Object? items) => [
+          for (final e in (items as List<dynamic>? ?? const []))
+            ManualFoodEntry.fromJson(e as Map<String, dynamic>),
+        ];
+
+    // The old single-day shape, so an existing install does not open to an
+    // empty diary on the day it updates.
+    if (raw['date'] is String) {
+      out[raw['date'] as String] = parse(raw['items']);
+    }
+
+    final days = raw['days'];
+    if (days is Map<String, dynamic>) {
+      days.forEach((day, items) => out[day] = parse(items));
+    }
+    return out;
   }
 
   ManualFoodEntry? add(String name, NutritionFacts nutrition,
@@ -372,11 +409,22 @@ class ManualFoodController extends Notifier<List<ManualFoodEntry>> {
   }
 
   void _persist(List<ManualFoodEntry> next) {
+    final today = _dayKey(ref.read(clockProvider).now());
+    final all = {...loadAll(), today: next};
+
+    // Trim oldest-first by date rather than by insertion, so the days that go
+    // are genuinely the oldest.
+    final keys = all.keys.toList()..sort(_compareDayKeys);
+    final kept = keys.length > _maxDays
+        ? keys.sublist(keys.length - _maxDays)
+        : keys;
+
     ref.read(jsonStoreProvider).saveObject<Map<String, dynamic>>(
       _key,
       {
-        'date': _dayKey(ref.read(clockProvider).now()),
-        'items': [for (final e in next) e.toJson()],
+        'days': {
+          for (final k in kept) k: [for (final e in all[k]!) e.toJson()],
+        },
       },
       (m) => m,
     );
@@ -417,3 +465,38 @@ final nextMealProvider = Provider<MealOption?>((ref) {
 /// this adds packaged goods whenever there is one.
 final barcodeLookupProvider = Provider<BarcodeFoodLookup>(
     (ref) => BarcodeFoodLookup(http.Client()));
+
+/// The diary, day by day, for the weekly review.
+final dietHistoryProvider = Provider<List<DietDay>>((ref) {
+  final all = ref.watch(manualFoodProvider.notifier).loadAll();
+  // Depend on today's list too, so the review refreshes the moment food is
+  // logged rather than only when the page is rebuilt for some other reason.
+  ref.watch(manualFoodProvider);
+
+  final out = <DietDay>[];
+  all.forEach((key, entries) {
+    final parts = key.split('-');
+    if (parts.length != 3) return;
+    final date = DateTime(
+      int.tryParse(parts[0]) ?? 2000,
+      int.tryParse(parts[1]) ?? 1,
+      int.tryParse(parts[2]) ?? 1,
+    );
+    var totals = NutritionFacts.zero;
+    for (final e in entries) {
+      totals = totals + e.nutrition;
+    }
+    out.add(DietDay(date: date, totals: totals));
+  });
+  return out;
+});
+
+/// This week's eating, reviewed against the profile's calorie target when
+/// there is one.
+final weeklyDietProvider = Provider<WeeklyDiet>((ref) {
+  return const WeeklyDietReview().build(
+    days: ref.watch(dietHistoryProvider),
+    now: ref.watch(clockProvider).now(),
+    targetKcal: ref.watch(assessmentProvider)?.targetKcal,
+  );
+});
