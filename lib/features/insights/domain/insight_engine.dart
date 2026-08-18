@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
 /// What a mood correlation is measured against.
-enum InsightDriver { sleep, steps, water, spending, stress }
+enum InsightDriver { sleep, steps, water, spending, stress, training }
 
 /// A discovered relationship between daily mood and one life driver.
 class LifeInsight {
@@ -32,6 +32,11 @@ class InsightPoint {
   final double? spendMajor;
   final double? stress; // perceived stress 1..5
 
+  /// Minutes trained that day. Zero is a real value here, not a gap: a day
+  /// without training is exactly the comparison that makes the pattern
+  /// meaningful, where an unrecorded night of sleep tells us nothing.
+  final double? trainingMinutes;
+
   const InsightPoint({
     required this.mood,
     this.sleepHours,
@@ -39,6 +44,7 @@ class InsightPoint {
     this.water,
     this.spendMajor,
     this.stress,
+    this.trainingMinutes,
   });
 }
 
@@ -75,6 +81,7 @@ class InsightEngine {
     tryDriver(InsightDriver.water, (p) => p.water);
     tryDriver(InsightDriver.spending, (p) => p.spendMajor);
     tryDriver(InsightDriver.stress, (p) => p.stress);
+    tryDriver(InsightDriver.training, (p) => p.trainingMinutes);
 
     out.sort((a, b) => b.strength.compareTo(a.strength));
     return out;

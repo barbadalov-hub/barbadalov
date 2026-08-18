@@ -3110,6 +3110,16 @@ const Map<String, Map<String, String>> _values = {
     'ru': 'Настроение падает в дни, когда ты больше тратишь',
     'uk': 'Настрій падає в дні, коли ти більше витрачаєш'
   },
+  'insight.training.pos': {
+    'en': 'Your mood is higher on the days you train',
+    'ru': 'В дни, когда ты тренируешься, настроение выше',
+    'uk': 'У дні, коли ти тренуєшся, настрій вищий'
+  },
+  'insight.training.neg': {
+    'en': 'Your mood tends to be lower on the days you train — worth noticing whether the sessions are too hard',
+    'ru': 'В дни тренировок настроение чаще ниже — стоит присмотреться, не слишком ли тяжело',
+    'uk': 'У дні тренувань настрій частіше нижчий — варто придивитися, чи не надто важко'
+  },
   'insight.stress.pos': {
     'en': 'Odd one: your mood is higher on more stressful days',
     'ru': 'Необычно: в более напряжённые дни настроение выше',

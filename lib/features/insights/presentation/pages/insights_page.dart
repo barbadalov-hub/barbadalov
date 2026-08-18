@@ -57,6 +57,7 @@ class InsightsPage extends ConsumerWidget {
     InsightDriver.water: '💧',
     InsightDriver.spending: '💸',
     InsightDriver.stress: '😰',
+    InsightDriver.training: '🏋️',
   };
 
   @override

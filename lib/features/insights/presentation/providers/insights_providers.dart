@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lifeos/features/health/domain/entities/health_day.dart';
+import 'package:lifeos/features/health/presentation/providers/activity_providers.dart';
 import 'package:lifeos/features/health/presentation/providers/health_providers.dart';
 import 'package:lifeos/features/insights/domain/cross_insights.dart';
 import 'package:lifeos/features/insights/domain/insight_engine.dart';
@@ -96,6 +97,18 @@ final insightsProvider = Provider<InsightsData>((ref) {
   final txs = ref.watch(transactionsProvider).valueOrNull ?? const [];
 
   final healthByDay = {for (final h in days) _dayKey(h.date): h};
+
+  // Minutes trained per day. Days with no session count as zero rather than as
+  // a gap: "the days I did nothing" is precisely the comparison that makes a
+  // training pattern mean anything, unlike an unrecorded night of sleep, which
+  // tells us nothing at all.
+  final trainingByDay = <int, int>{};
+  for (final a in ref.watch(activitiesProvider)) {
+    if (a.minutes <= 0) continue;
+    final k = _dayKey(a.at);
+    trainingByDay[k] = (trainingByDay[k] ?? 0) + a.minutes;
+  }
+  final anyTraining = trainingByDay.isNotEmpty;
   final spendByDay = <int, int>{};
   for (final t in txs) {
     if (t.isExpense) {
@@ -116,6 +129,10 @@ final insightsProvider = Provider<InsightsData>((ref) {
       water: (h != null && h.waterGlasses > 0) ? h.waterGlasses.toDouble() : null,
       spendMajor: (spendByDay[k] ?? 0) / 100.0,
       stress: (h != null && h.stress > 0) ? h.stress.toDouble() : null,
+      // Only offered once there is at least one session anywhere; a column of
+      // zeroes has no variance and would only ever be discarded.
+      trainingMinutes:
+          anyTraining ? (trainingByDay[k] ?? 0).toDouble() : null,
     ));
   }
 
