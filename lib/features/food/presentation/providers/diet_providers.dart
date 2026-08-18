@@ -1,4 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart' as http;
+import 'package:lifeos/features/food/data/barcode_food_lookup.dart';
 import 'package:lifeos/features/food/application/diet_planner.dart';
 import 'package:lifeos/features/food/data/meal_catalog.dart';
 import 'package:lifeos/features/food/data/ua_store_price_catalog.dart';
@@ -409,3 +411,9 @@ final nextMealProvider = Provider<MealOption?>((ref) {
   }
   return null;
 });
+
+/// Barcode → packaged product, via Open Food Facts. The **online** half of the
+/// food diary: the built-in dish catalogue works with no network at all, and
+/// this adds packaged goods whenever there is one.
+final barcodeLookupProvider = Provider<BarcodeFoodLookup>(
+    (ref) => BarcodeFoodLookup(http.Client()));

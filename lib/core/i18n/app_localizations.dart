@@ -104,6 +104,34 @@ const Map<String, Map<String, String>> _values = {
     'ru': 'Ничего не нашлось — впиши вручную.',
     'uk': 'Нічого не знайшлося — впиши вручну.'
   },
+  'diet.scanBarcode': {'en': 'Scan a barcode', 'ru': 'Сканировать штрихкод', 'uk': 'Сканувати штрихкод'},
+  'diet.barcodeLooking': {'en': 'Looking it up…', 'ru': 'Ищу в базе…', 'uk': 'Шукаю в базі…'},
+  'diet.barcodeUnread': {
+    'en': 'No barcode in that shot — try again closer.',
+    'ru': 'На снимке не видно штрихкода — попробуй ближе.',
+    'uk': 'На знімку не видно штрихкоду — спробуй ближче.'
+  },
+  'diet.barcodeOffline': {
+    'en': 'No connection, so the barcode could not be looked up. Search the list or type it by hand.',
+    'ru': 'Нет связи, штрихкод не проверить. Поищи в списке или впиши вручную.',
+    'uk': 'Немає зв’язку, штрихкод не перевірити. Пошукай у списку або впиши вручну.'
+  },
+  'diet.barcodeUnknown': {
+    'en': 'This product is not in the open database yet.',
+    'ru': 'Этого продукта пока нет в открытой базе.',
+    'uk': 'Цього продукту поки немає у відкритій базі.'
+  },
+  'diet.barcodeNoFacts': {
+    'en': 'Found it, but it has no nutrition listed — type the numbers off the packet.',
+    'ru': 'Нашёлся, но без состава — впиши числа с упаковки.',
+    'uk': 'Знайшовся, але без складу — впиши числа з упаковки.'
+  },
+  'diet.per100': {
+    'en': 'From the packet: {kcal} kcal per 100 g',
+    'ru': 'С упаковки: {kcal} ккал на 100 г',
+    'uk': 'З упаковки: {kcal} ккал на 100 г'
+  },
+  'diet.gram': {'en': 'g', 'ru': 'г', 'uk': 'г'},
   'diet.byHand': {'en': 'By hand', 'ru': 'Вручную', 'uk': 'Вручну'},
   'diet.portion': {'en': 'Portion', 'ru': 'Порция', 'uk': 'Порція'},
   'diet.willAdd': {

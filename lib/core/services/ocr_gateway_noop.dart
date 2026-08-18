@@ -17,6 +17,8 @@ class OcrGateway {
   Future<String?> scan(OcrSource source) async => null;
 
   Future<ScannedDoc?> captureDocument(OcrSource source) async => null;
+
+  Future<String?> scanBarcode(OcrSource source) async => null;
 }
 
 final OcrGateway ocrGateway = OcrGateway();

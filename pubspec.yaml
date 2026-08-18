@@ -68,6 +68,11 @@ dependencies:
   # not Cyrillic product names.
   google_mlkit_text_recognition: ^0.13.1
 
+  # Barcode scanning for the food diary, same ML Kit family as the OCR above
+  # and the same platform story: Android/iOS only, no Windows implementation,
+  # so the plugin-free desktop build stays intact.
+  google_mlkit_barcode_scanning: ^0.12.1
+
 
   image_picker_platform_interface: ^2.10.0
   image_picker_android: ^0.8.12+20

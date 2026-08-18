@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:image_picker_platform_interface/image_picker_platform_interface.dart';
 
@@ -44,6 +45,42 @@ class OcrGateway {
       return null;
     } finally {
       await recognizer?.close();
+    }
+  }
+
+  /// Photographs a barcode and returns its digits, or null if nothing was
+  /// found. On-device, so it costs nothing and works without a network — the
+  /// *lookup* that follows is what needs one.
+  Future<String?> scanBarcode(OcrSource source) async {
+    if (!available) return null;
+    BarcodeScanner? scanner;
+    try {
+      final file = await ImagePickerPlatform.instance.getImageFromSource(
+        source: source == OcrSource.camera
+            ? ImageSource.camera
+            : ImageSource.gallery,
+      );
+      if (file == null) return null;
+
+      scanner = BarcodeScanner(formats: [
+        // The formats actually printed on groceries. Narrowing the list makes
+        // the scan quicker and stops it locking onto a QR code on the packet.
+        BarcodeFormat.ean13,
+        BarcodeFormat.ean8,
+        BarcodeFormat.upca,
+        BarcodeFormat.upce,
+      ]);
+      final codes =
+          await scanner.processImage(InputImage.fromFilePath(file.path));
+      for (final code in codes) {
+        final value = code.rawValue?.trim();
+        if (value != null && value.isNotEmpty) return value;
+      }
+      return null;
+    } catch (_) {
+      return null;
+    } finally {
+      await scanner?.close();
     }
   }
 

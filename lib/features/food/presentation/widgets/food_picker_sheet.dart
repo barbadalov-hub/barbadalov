@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
+import 'package:lifeos/core/services/ocr_gateway.dart';
+import 'package:lifeos/features/food/data/barcode_food_lookup.dart';
 import 'package:lifeos/features/food/data/meal_catalog.dart';
 import 'package:lifeos/features/food/domain/entities/nutrition.dart';
 import 'package:lifeos/features/food/presentation/providers/diet_providers.dart';
@@ -36,6 +38,51 @@ class _FoodPickerSheetState extends ConsumerState<FoodPickerSheet> {
   MealOption? _picked;
   double _portion = 1;
 
+  /// A packaged product found by barcode. Kept separately from [_picked]
+  /// because it is measured in grams rather than in servings.
+  ScannedProduct? _scanned;
+  int _grams = 100;
+  bool _scanning = false;
+
+  Future<void> _scan() async {
+    setState(() => _scanning = true);
+    final code = await ocrGateway.scanBarcode(OcrSource.camera);
+    if (!mounted) return;
+    if (code == null) {
+      setState(() => _scanning = false);
+      _say('diet.barcodeUnread');
+      return;
+    }
+
+    final lang = Localizations.localeOf(context).languageCode;
+    final result = await ref.read(barcodeLookupProvider).find(code, lang: lang);
+    if (!mounted) return;
+    setState(() => _scanning = false);
+
+    if (result.product != null) {
+      setState(() {
+        _scanned = result.product;
+        _picked = null;
+        // Use the packet's own serving when it declares one; 100 g is the
+        // honest default because that is what the numbers are stated for.
+        _grams = result.product!.servingG ?? 100;
+      });
+      return;
+    }
+
+    _say(switch (result.failure!) {
+      // Naming the real reason matters: "no signal" is something the user can
+      // act on, "not in the database" means stop waiting and type it.
+      LookupFailure.offline => 'diet.barcodeOffline',
+      LookupFailure.unknown => 'diet.barcodeUnknown',
+      LookupFailure.noNutrition => 'diet.barcodeNoFacts',
+    });
+  }
+
+  void _say(String key) => ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(SnackBar(content: Text(context.tr(key))));
+
   @override
   void dispose() {
     _query.dispose();
@@ -69,6 +116,17 @@ class _FoodPickerSheetState extends ConsumerState<FoodPickerSheet> {
       );
 
   void _log() {
+    final scanned = _scanned;
+    if (scanned != null) {
+      ref.read(manualFoodProvider.notifier).add(
+            scanned.name,
+            scanned.forGrams(_grams),
+            slot: widget.slot,
+          );
+      Navigator.of(context).pop();
+      return;
+    }
+
     final picked = _picked;
     if (picked == null) return;
     ref.read(manualFoodProvider.notifier).add(
@@ -111,8 +169,43 @@ class _FoodPickerSheetState extends ConsumerState<FoodPickerSheet> {
               ),
             ),
           ),
+          if (ocrGateway.available && _scanned == null) ...[
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: _scanning ? null : _scan,
+                icon: const Icon(Icons.qr_code_scanner, size: 18),
+                style: TextButton.styleFrom(foregroundColor: accent),
+                label: Text(context.tr(
+                    _scanning ? 'diet.barcodeLooking' : 'diet.scanBarcode')),
+              ),
+            ),
+          ],
+          if (_scanned != null) ...[
+            const SizedBox(height: 10),
+            _ScannedProductCard(
+              product: _scanned!,
+              grams: _grams,
+              accent: accent,
+              onGrams: (g) => setState(() => _grams = g),
+              onClear: () => setState(() => _scanned = null),
+            ),
+            const SizedBox(height: 14),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: _log,
+                style: FilledButton.styleFrom(
+                  backgroundColor: accent,
+                  foregroundColor: Colors.white,
+                ),
+                child: Text(context.tr('diet.logIt')),
+              ),
+            ),
+          ],
           const SizedBox(height: 10),
-          if (picked == null)
+          if (_scanned == null && picked == null)
             ConstrainedBox(
               constraints: const BoxConstraints(maxHeight: 280),
               child: results.isEmpty
@@ -146,7 +239,7 @@ class _FoodPickerSheetState extends ConsumerState<FoodPickerSheet> {
                       },
                     ),
             )
-          else ...[
+          else if (picked != null) ...[
             Row(
               children: [
                 Text(picked.emoji, style: const TextStyle(fontSize: 24)),
@@ -204,6 +297,93 @@ class _FoodPickerSheetState extends ConsumerState<FoodPickerSheet> {
               ),
             ),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+/// A packaged product found by barcode: what it is, how much of it, and what
+/// that adds up to.
+class _ScannedProductCard extends StatelessWidget {
+  final ScannedProduct product;
+  final int grams;
+  final Color accent;
+  final ValueChanged<int> onGrams;
+  final VoidCallback onClear;
+
+  const _ScannedProductCard({
+    required this.product,
+    required this.grams,
+    required this.accent,
+    required this.onGrams,
+    required this.onClear,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final n = product.forGrams(grams);
+    return Container(
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: scheme.outlineVariant, width: 0.5),
+      ),
+      padding: const EdgeInsets.fromLTRB(13, 11, 13, 13),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Text('🏷️', style: TextStyle(fontSize: 20)),
+              const SizedBox(width: 9),
+              Expanded(
+                child: Text(
+                  product.name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                      fontSize: 15, fontWeight: FontWeight.w700),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.close),
+                tooltip: context.tr('common.cancel'),
+                onPressed: onClear,
+              ),
+            ],
+          ),
+          Text(
+            // Say where the numbers came from. A figure off a packet is not
+            // the same kind of fact as one the app itself put there.
+            context.trp('diet.per100', {'kcal': product.per100.kcal}),
+            style: TextStyle(fontSize: 12, color: scheme.outline),
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            children: [
+              for (final g in const [30, 50, 100, 150, 200])
+                ChoiceChip(
+                  selected: grams == g,
+                  onSelected: (_) => onGrams(g),
+                  label: Text('$g ${context.tr('diet.gram')}'),
+                  selectedColor:
+                      Color.lerp(accent, scheme.surfaceContainerLowest, 0.82),
+                ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            context.trp('diet.willAdd', {
+              'kcal': n.kcal,
+              'p': n.proteinG,
+              'f': n.fatG,
+              'c': n.carbsG,
+            }),
+            style: TextStyle(fontSize: 13, color: scheme.onSurface),
+          ),
         ],
       ),
     );
