@@ -10,7 +10,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:lifeos/core/services/key_value_store.dart';
+import 'package:lifeos/features/food/presentation/pages/diet_page.dart';
+import 'package:lifeos/features/food/presentation/pages/food_page.dart';
 import 'package:lifeos/features/goals/presentation/pages/goals_page.dart';
+import 'package:lifeos/features/home/presentation/pages/home_shell.dart';
 import 'package:lifeos/features/health/presentation/pages/health_page.dart';
 import 'package:lifeos/features/home/presentation/pages/today_page.dart';
 import 'package:lifeos/features/mind/presentation/pages/mind_page.dart';
@@ -189,6 +192,27 @@ void main() {
       await capture(t, skin.value, 'warranty_${skin.key}',
           lead: null, home: const WarrantyPage());
       expect(File('build/skin/warranty_${skin.key}.png').lengthSync(),
+          greaterThan(1000));
+    });
+
+    testWidgets('the diet page in the ${skin.key} skin', (t) async {
+      await capture(t, skin.value, 'diet_${skin.key}',
+          lead: null, home: const DietPage());
+      expect(File('build/skin/diet_${skin.key}.png').lengthSync(),
+          greaterThan(1000));
+    });
+
+    testWidgets('the food page in the ${skin.key} skin', (t) async {
+      await capture(t, skin.value, 'food_${skin.key}',
+          lead: null, home: const FoodPage());
+      expect(File('build/skin/food_${skin.key}.png').lengthSync(),
+          greaterThan(1000));
+    });
+
+    testWidgets('the more hub in the ${skin.key} skin', (t) async {
+      await capture(t, skin.value, 'more_${skin.key}',
+          lead: null, home: const MorePage());
+      expect(File('build/skin/more_${skin.key}.png').lengthSync(),
           greaterThan(1000));
     });
 

@@ -24,30 +24,42 @@ class GlassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     final dark = Theme.of(context).brightness == Brightness.dark;
-    final base = dark ? Colors.white : Colors.black;
     final radius = BorderRadius.circular(20);
 
+    // Frost only works over the dark canvas. On the paper skin the same recipe
+    // is translucent *black*, which is not glass but grey mud — the More hub
+    // was a column of dead slate on a warm page. Paper gets what every other
+    // surface in this app gets: an opaque sheet raised toward white with a
+    // hairline edge. Same reasoning as `AppTheme.cardTheme`.
     Widget surface = DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: radius,
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            base.withValues(alpha: dark ? 0.14 : 0.06),
-            base.withValues(alpha: dark ? 0.06 : 0.03),
-          ],
-        ),
-        border: Border.all(color: base.withValues(alpha: 0.16), width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: dark ? 0.25 : 0.08),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
+      decoration: dark
+          ? BoxDecoration(
+              borderRadius: radius,
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.white.withValues(alpha: 0.14),
+                  Colors.white.withValues(alpha: 0.06),
+                ],
+              ),
+              border:
+                  Border.all(color: Colors.white.withValues(alpha: 0.16)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.25),
+                  blurRadius: 16,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            )
+          : BoxDecoration(
+              borderRadius: radius,
+              color: scheme.surfaceContainerLowest,
+              border: Border.all(color: scheme.outlineVariant, width: 0.5),
+            ),
       child: Padding(padding: padding, child: child),
     );
 

@@ -12,6 +12,8 @@ import 'package:lifeos/features/food/presentation/providers/diet_providers.dart'
 import 'package:lifeos/features/food/presentation/providers/food_providers.dart';
 import 'package:lifeos/features/profile/presentation/providers/profile_providers.dart';
 import 'package:lifeos/features/profile/presentation/pages/profile_page.dart';
+import 'package:lifeos/features/rooms/domain/life_room.dart';
+import 'package:lifeos/features/rooms/presentation/widgets/room_tint.dart';
 import 'package:lifeos/shared/models/money.dart';
 import 'package:lifeos/shared/providers/core_providers.dart';
 import 'package:lifeos/shared/theme/app_theme.dart';
@@ -31,7 +33,11 @@ class DietPage extends ConsumerWidget {
     final assessment = ref.watch(assessmentProvider);
     final plan = ref.watch(dayPlanProvider);
 
-    return Scaffold(
+    // Everything here belongs to the Body room; without this the buttons
+    // came up in the app's violet on a page reached from a red room.
+    return RoomTint(
+      room: RoomId.body,
+      child: Scaffold(
       appBar: AppBar(
         title: Text(context.tr('diet.title')),
         actions: [
@@ -173,6 +179,7 @@ class DietPage extends ConsumerWidget {
                 ),
               ],
             ),
+      ),
       ),
     );
   }

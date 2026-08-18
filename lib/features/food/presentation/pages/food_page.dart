@@ -9,6 +9,8 @@ import 'package:lifeos/features/food/domain/pantry_week_planner.dart';
 import 'package:lifeos/features/food/domain/product_text_matcher.dart';
 import 'package:lifeos/features/food/domain/shelf_life_catalog.dart';
 import 'package:lifeos/features/food/presentation/providers/food_providers.dart';
+import 'package:lifeos/features/rooms/domain/life_room.dart';
+import 'package:lifeos/features/rooms/presentation/widgets/room_tint.dart';
 import 'package:lifeos/shared/models/money.dart';
 import 'package:lifeos/shared/providers/core_providers.dart';
 import 'package:lifeos/shared/theme/app_theme.dart';
@@ -30,7 +32,11 @@ class FoodPage extends ConsumerWidget {
     final foodSpent = ref.watch(foodSpentThisMonthProvider);
     final useNext = ref.watch(useNextProvider);
 
-    return Scaffold(
+    // Everything here belongs to the Body room; without this the buttons
+    // came up in the app's violet on a page reached from a red room.
+    return RoomTint(
+      room: RoomId.body,
+      child: Scaffold(
       appBar: AppBar(title: Text(context.tr('more.food'))),
       body: AnimatedBackdrop(
         style: BackdropStyle.orbs,
@@ -245,6 +251,7 @@ class FoodPage extends ConsumerWidget {
           const SizedBox(height: 24),
         ],
         ),
+      ),
       ),
     );
   }
