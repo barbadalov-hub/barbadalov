@@ -27,6 +27,7 @@ import 'package:lifeos/features/mind/domain/habit_consistency.dart';
 import 'package:lifeos/features/onboarding/presentation/pages/guide_page.dart';
 import 'package:lifeos/features/money/application/project_month_end.dart';
 import 'package:lifeos/features/money/domain/entities/budget.dart';
+import 'package:lifeos/features/money/presentation/providers/cash_providers.dart';
 import 'package:lifeos/features/money/presentation/widgets/add_transaction_sheet.dart';
 import 'package:lifeos/features/profile/presentation/pages/profile_page.dart';
 import 'package:lifeos/features/profile/presentation/providers/profile_providers.dart';
@@ -279,12 +280,14 @@ class _CustomizeSheet extends ConsumerWidget {
   }
 }
 
-class _SafeToSpendCard extends StatelessWidget {
+class _SafeToSpendCard extends ConsumerWidget {
   final Budget budget;
   const _SafeToSpendCard({required this.budget});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final safe = ref.watch(safeToSpendProvider);
+    final cash = ref.watch(cashPositionProvider);
     return GradientCard(
       colors: LifeGradients.money,
       child: Column(
@@ -294,11 +297,8 @@ class _SafeToSpendCard extends StatelessWidget {
               style: const TextStyle(color: Colors.white70)),
           const SizedBox(height: 6),
           AnimatedCounter(
-            value: budget.safeToSpendToday.major,
-            format: (v) => Money.fromMajor(
-              v,
-              currency: budget.safeToSpendToday.currency,
-            ).format(),
+            value: safe.major,
+            format: (v) => Money.fromMajor(v, currency: safe.currency).format(),
             style: Theme.of(context)
                 .textTheme
                 .displaySmall
@@ -307,8 +307,8 @@ class _SafeToSpendCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             context.trp('today.leftAndDays', {
-              'amount': budget.available.format(),
-              'days': budget.remainingDays,
+              'amount': (cash.anchored ? cash.free : budget.available).format(),
+              'days': cash.anchored ? cash.daysCovered : budget.remainingDays,
             }),
             style: const TextStyle(color: Colors.white70),
           ),
@@ -854,20 +854,20 @@ class _GoalMiniCard extends ConsumerWidget {
 
 /// Shows the AI Engine's headline insight (generated through the Core Engine).
 /// Falls back to a budget-derived line before the first analysis lands.
-class _AiInsightCard extends StatelessWidget {
+class _AiInsightCard extends ConsumerWidget {
   final Budget budget;
   final AiInsight? insight;
   const _AiInsightCard({required this.budget, this.insight});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
     final emoji = insight?.emoji ?? '🤖';
     final title = insight == null
         ? context.tr('today.aiInsight')
         : context.tr(insight!.titleKey);
     final message = insight == null
-        ? _fallback(context, budget)
+        ? _fallback(context, budget, ref.watch(safeToSpendProvider))
         : context.trp(insight!.messageKey, insight!.params);
     return SectionCard(
       color: scheme.tertiaryContainer.withValues(alpha: 0.5),
@@ -891,10 +891,10 @@ class _AiInsightCard extends StatelessWidget {
     );
   }
 
-  String _fallback(BuildContext context, Budget budget) {
+  String _fallback(BuildContext context, Budget budget, Money safe) {
     if (budget.income.isZero) return context.tr('today.ai.addIncome');
     return context.trp('today.ai.onTrack', {
-      'amount': budget.safeToSpendToday.format(),
+      'amount': safe.format(),
       'rate': (budget.reserveRate * 100).round(),
     });
   }

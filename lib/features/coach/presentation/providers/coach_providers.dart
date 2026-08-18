@@ -8,6 +8,7 @@ import 'package:lifeos/features/health/presentation/providers/health_providers.d
 import 'package:lifeos/features/home/presentation/providers/today_providers.dart';
 import 'package:lifeos/features/insights/presentation/providers/insights_providers.dart';
 import 'package:lifeos/features/mind/presentation/providers/mood_providers.dart';
+import 'package:lifeos/features/money/presentation/providers/cash_providers.dart';
 import 'package:lifeos/features/money/presentation/providers/money_providers.dart';
 import 'package:lifeos/features/profile/domain/checkup_advisor.dart';
 import 'package:lifeos/features/profile/presentation/providers/profile_providers.dart';
@@ -78,7 +79,7 @@ final coachContextProvider = Provider<CoachContext>((ref) {
     discipline: score.discipline,
     productivity: score.productivity,
     netStr: weekly.net.format(),
-    safeTodayStr: budget.safeToSpendToday.format(),
+    safeTodayStr: ref.watch(safeToSpendProvider).format(),
     availableStr: budget.available.format(),
     goalsSavedStr: Money(savedMinor).format(),
     topCatName: topCatName,

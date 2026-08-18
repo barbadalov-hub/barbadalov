@@ -3,6 +3,7 @@ import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:lifeos/core/i18n/locale_controller.dart';
 import 'package:lifeos/core/services/notification_gateway.dart';
 import 'package:lifeos/features/mind/presentation/providers/mood_providers.dart';
+import 'package:lifeos/features/money/presentation/providers/cash_providers.dart';
 import 'package:lifeos/features/money/presentation/providers/money_providers.dart';
 import 'package:lifeos/features/profile/domain/entities/user_profile.dart';
 import 'package:lifeos/features/profile/presentation/providers/profile_providers.dart';
@@ -162,6 +163,7 @@ final remindersProvider =
 final reminderSuggestionsProvider = Provider<List<ReminderKind>>((ref) {
   final report = ref.watch(weeklyReportProvider);
   final budget = ref.watch(currentBudgetProvider);
+  final cash = ref.watch(cashPositionProvider);
   final moods = ref.watch(moodLogProvider);
   final now = ref.watch(clockProvider).now();
 
@@ -179,7 +181,9 @@ final reminderSuggestionsProvider = Provider<List<ReminderKind>>((ref) {
       avgSleep: report.avgSleep,
       avgWater: report.avgWater,
       moodLoggedRecently: moodRecent,
-      overBudget: budget.isOverspent,
+      // Once the real balance is known, running short of what is already
+      // promised is the fact worth reminding about.
+      overBudget: cash.anchored ? cash.isShort : budget.isOverspent,
       weightLossGoal: goal == FitnessGoal.lose,
     ),
     existing,

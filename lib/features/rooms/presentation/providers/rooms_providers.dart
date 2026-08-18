@@ -5,6 +5,7 @@ import 'package:lifeos/features/health/domain/entities/health_day.dart';
 import 'package:lifeos/features/health/presentation/providers/health_goals_provider.dart';
 import 'package:lifeos/features/health/presentation/providers/health_providers.dart';
 import 'package:lifeos/features/mind/presentation/providers/mind_providers.dart';
+import 'package:lifeos/features/money/presentation/providers/cash_providers.dart';
 import 'package:lifeos/features/money/presentation/providers/money_providers.dart';
 import 'package:lifeos/features/rooms/domain/life_room.dart';
 import 'package:lifeos/features/rooms/domain/room_attention.dart';
@@ -29,6 +30,7 @@ String formatSteps(int steps) {
 /// disagree with the numbers printed beside it.
 final roomAttentionProvider = Provider<RoomAttention?>((ref) {
   final budget = ref.watch(currentBudgetProvider);
+  final cash = ref.watch(cashPositionProvider);
   final health = ref.watch(todayHealthProvider).valueOrNull;
   final habits = ref.watch(habitsProvider).valueOrNull ?? const [];
   final goals = ref.watch(goalsProvider).valueOrNull ?? const <Goal>[];
@@ -39,8 +41,10 @@ final roomAttentionProvider = Provider<RoomAttention?>((ref) {
 
   return RoomAttentionBuilder.build(AttentionInput(
     hour: now.hour,
-    overspent: budget.isOverspent,
-    nothingToSpend: budget.safeToSpendToday.minorUnits <= 0,
+    // A real balance that no longer covers what is promised is the
+    // stronger signal; fall back to the month view until there is one.
+    overspent: cash.anchored ? cash.isShort : budget.isOverspent,
+    nothingToSpend: ref.watch(safeToSpendProvider).minorUnits <= 0,
     sleepHours: health?.sleepHours ?? 0,
     sleepGoal: healthGoals.sleep,
     steps: health?.steps ?? 0,
@@ -56,7 +60,6 @@ final roomAttentionProvider = Provider<RoomAttention?>((ref) {
 
 /// The four hero figures shown on the home grid, in [kLifeRooms] order.
 final roomSummariesProvider = Provider<List<RoomSummary>>((ref) {
-  final budget = ref.watch(currentBudgetProvider);
   final health = ref.watch(todayHealthProvider).valueOrNull;
   final habits = ref.watch(habitsProvider).valueOrNull ?? const [];
   final goals = ref.watch(goalsProvider).valueOrNull ?? const <Goal>[];
@@ -72,7 +75,7 @@ final roomSummariesProvider = Provider<List<RoomSummary>>((ref) {
   return [
     RoomSummary(
       id: RoomId.money,
-      hero: budget.safeToSpendToday.format(),
+      hero: ref.watch(safeToSpendProvider).format(),
       subtitleKey: 'room.money.sub',
     ),
     RoomSummary(

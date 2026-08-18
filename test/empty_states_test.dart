@@ -51,6 +51,14 @@ void main() {
   testWidgets('Money greets an empty account instead of a blank list',
       (tester) async {
     await open(tester, const MoneyPage());
+    // The room now opens by asking what the balance actually is, so the empty
+    // history sits below the fold — scroll to it rather than assuming a
+    // position that any future card would break again.
+    await tester.scrollUntilVisible(
+      find.textContaining('No transactions yet'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.textContaining('No transactions yet'), findsOneWidget);
     // ...and does not offer to search or filter nothing. Targeted at the
     // search field itself rather than "any TextField": the room legitimately

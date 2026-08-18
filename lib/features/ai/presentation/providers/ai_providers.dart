@@ -9,6 +9,9 @@ import 'package:lifeos/features/food/presentation/providers/food_providers.dart'
 import 'package:lifeos/features/health/presentation/providers/health_providers.dart';
 import 'package:lifeos/features/profile/presentation/providers/profile_providers.dart';
 import 'package:lifeos/features/mind/presentation/providers/mind_providers.dart';
+import 'package:lifeos/features/money/domain/cash_position.dart';
+import 'package:lifeos/features/money/presentation/providers/cash_providers.dart';
+import 'package:lifeos/features/money/presentation/providers/recurring_providers.dart';
 import 'package:lifeos/features/money/presentation/providers/money_providers.dart';
 import 'package:lifeos/shared/providers/core_providers.dart';
 
@@ -33,6 +36,20 @@ LifeContext buildLifeContext(Ref ref) {
       .where((t) => t.date.year == now.year && t.date.month == now.month)
       .toList(growable: false);
   final budget = ref.read(computeBudgetProvider).call(monthTx, at: now);
+
+  // The same real-money figure the screens show, assembled from the data
+  // source rather than from `safeToSpendProvider`: that one watches the
+  // transaction stream, and this function runs *inside* an engine handler the
+  // stream depends on, so reaching for it closes a cycle.
+  final cash = const CashPositionCalculator().build(
+    anchor: ref.read(balanceAnchorProvider),
+    transactions: tx,
+    rules: ref.read(recurringProvider),
+    now: now,
+    reserve: budget.reserve,
+    currency: budget.income.currency,
+  );
+  final safe = cash.anchored ? cash.perDay : budget.safeToSpendToday;
 
   // Health.
   final day = ref.read(healthRepositoryProvider).today();
@@ -61,9 +78,9 @@ LifeContext buildLifeContext(Ref ref) {
   final eaten = ref.read(consumedNutritionProvider);
 
   return LifeContext(
-    safeToSpendTodayMinor: budget.safeToSpendToday.minorUnits,
-    currency: budget.safeToSpendToday.currency,
-    overspent: budget.isOverspent,
+    safeToSpendTodayMinor: safe.minorUnits,
+    currency: safe.currency,
+    overspent: cash.anchored ? cash.isShort : budget.isOverspent,
     reserveRatePct: (budget.reserveRate * 100).round(),
     healthScore: healthScore,
     disciplineScore: discipline,

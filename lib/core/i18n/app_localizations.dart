@@ -104,6 +104,77 @@ const Map<String, Map<String, String>> _values = {
     'ru': 'Ничего не нашлось — впиши вручную.',
     'uk': 'Нічого не знайшлося — впиши вручну.'
   },
+  'cash.askTitle': {
+    'en': 'How much do you have right now?',
+    'ru': 'Сколько у тебя сейчас денег?',
+    'uk': 'Скільки в тебе зараз грошей?'
+  },
+  'cash.askHint': {
+    'en': 'Add up your cards and cash and put the total here. From then on the '
+        'app follows it with everything you record. Restate it any time — that '
+        'clears any drift from cash you spent without logging.',
+    'ru': 'Сложи карты и наличные и укажи общую сумму. Дальше приложение будет '
+        'вести её по твоим записям. Уточняй когда угодно — это уберёт '
+        'расхождение из-за трат, которые ты не записал.',
+    'uk': 'Склади картки й готівку та вкажи загальну суму. Далі застосунок '
+        'вестиме її за твоїми записами. Уточнюй будь-коли — це прибере '
+        'розбіжність через витрати, які ти не записав.'
+  },
+  'cash.unknownHint': {
+    'en': 'The app does not know your balance yet — it only sees what you have '
+        'recorded here. Tell it once and every figure becomes real money.',
+    'ru': 'Приложение пока не знает твой баланс — оно видит только то, что ты '
+        'здесь записал. Скажи один раз, и все суммы станут настоящими.',
+    'uk': 'Застосунок поки не знає твій баланс — він бачить лише те, що ти тут '
+        'записав. Скажи один раз, і всі суми стануть справжніми.'
+  },
+  'cash.amount': {'en': 'Total', 'ru': 'Всего', 'uk': 'Усього'},
+  'cash.save': {'en': 'Save', 'ru': 'Сохранить', 'uk': 'Зберегти'},
+  'cash.state': {'en': 'Enter balance', 'ru': 'Указать баланс',
+    'uk': 'Вказати баланс'},
+  'cash.restate': {'en': 'Update balance', 'ru': 'Уточнить баланс',
+    'uk': 'Уточнити баланс'},
+  'cash.forget': {'en': 'Remove the balance', 'ru': 'Убрать баланс',
+    'uk': 'Прибрати баланс'},
+  'cash.onHand': {'en': 'You have', 'ru': 'У тебя есть', 'uk': 'У тебе є'},
+  'cash.committed': {
+    'en': 'Bills before payday',
+    'ru': 'Платежи до зарплаты',
+    'uk': 'Платежі до зарплати'
+  },
+  'cash.reserve': {'en': 'Set aside', 'ru': 'Отложено', 'uk': 'Відкладено'},
+  'cash.freeFor': {
+    'en': '{amount} free for {days} days',
+    'ru': '{amount} свободно на {days} дн.',
+    'uk': '{amount} вільно на {days} дн.'
+  },
+  'cash.shortBy': {
+    'en': 'You are {amount} short of what is already promised',
+    'ru': 'Не хватает {amount} на то, что уже обещано',
+    'uk': 'Не вистачає {amount} на те, що вже обіцяно'
+  },
+  'cash.nextIncome': {
+    'en': 'Next income expected {date}',
+    'ru': 'Следующий доход ожидается {date}',
+    'uk': 'Наступний дохід очікується {date}'
+  },
+  'cash.heroCaption': {
+    'en': '{left} free for the next {days} days',
+    'ru': '{left} свободно на ближайшие {days} дн.',
+    'uk': '{left} вільно на найближчі {days} дн.'
+  },
+  'cash.unknown': {
+    'en': 'Balance not set yet',
+    'ru': 'Баланс ещё не указан',
+    'uk': 'Баланс ще не вказано'
+  },
+  'cash.free': {'en': 'Free to spend', 'ru': 'Свободно', 'uk': 'Вільно'},
+  'cash.afterBills': {
+    'en': 'Free after the bills',
+    'ru': 'Свободно после платежей',
+    'uk': 'Вільно після платежів'
+  },
+  'cash.short': {'en': 'Short', 'ru': 'Не хватает', 'uk': 'Не вистачає'},
   'diet.protein': {'en': 'Protein', 'ru': 'Белки', 'uk': 'Білки'},
   'diet.fat': {'en': 'Fat', 'ru': 'Жиры', 'uk': 'Жири'},
   'diet.carbs': {'en': 'Carbs', 'ru': 'Углеводы', 'uk': 'Вуглеводи'},

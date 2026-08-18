@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:lifeos/core/constants/app_constants.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
+import 'package:lifeos/core/i18n/locale_controller.dart';
 import 'package:lifeos/core/utils/download_file.dart';
 import 'package:lifeos/features/money/application/transaction_csv.dart';
 import 'package:lifeos/features/money/domain/afford_check.dart';
@@ -15,8 +16,10 @@ import 'package:lifeos/features/money/presentation/pages/csv_import_page.dart';
 import 'package:lifeos/features/money/presentation/pages/receipt_page.dart';
 import 'package:lifeos/features/money/presentation/pages/recurring_page.dart';
 import 'package:lifeos/features/money/presentation/pages/warranty_page.dart';
+import 'package:lifeos/features/money/presentation/providers/cash_providers.dart';
 import 'package:lifeos/features/money/presentation/providers/money_providers.dart';
 import 'package:lifeos/features/money/presentation/widgets/add_transaction_sheet.dart';
+import 'package:lifeos/features/money/presentation/widgets/balance_sheet.dart';
 import 'package:lifeos/features/rooms/domain/life_room.dart';
 import 'package:lifeos/features/rooms/presentation/widgets/room_scaffold.dart';
 import 'package:lifeos/shared/models/money.dart';
@@ -49,6 +52,7 @@ class MoneyPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final transactions = ref.watch(transactionsProvider);
     final budget = ref.watch(currentBudgetProvider);
+    final cash = ref.watch(cashPositionProvider);
     final room = roomById(RoomId.money);
     final accent = room.colorFor(Theme.of(context).brightness);
     final sorted = [
@@ -75,13 +79,28 @@ class MoneyPage extends ConsumerWidget {
       ),
       hero: RoomHero(
         label: context.tr('today.safeToSpend'),
-        value: budget.safeToSpendToday.format(),
+        value: ref.watch(safeToSpendProvider).format(),
         accent: accent,
-        progress: spendable <= 0 ? null : spent / spendable,
-        caption: context.trp('money.heroCaption', {
-          'spent': budget.expenses.format(),
-          'total': budget.income.format(),
-        }),
+        // The ring has to measure whatever the number above it means: the
+        // share of real money already spoken for once there is a balance, and
+        // the month's spending until then.
+        progress: cash.anchored
+            ? (cash.onHand.minorUnits <= 0
+                ? 1.0
+                : ((cash.committed.minorUnits + cash.reserve.minorUnits) /
+                    cash.onHand.minorUnits))
+            : (spendable <= 0 ? null : spent / spendable),
+        // Once real money is known, say what it has to last until rather than
+        // restating a month total the figure no longer comes from.
+        caption: cash.anchored
+            ? context.trp('cash.heroCaption', {
+                'left': cash.free.format(),
+                'days': cash.daysCovered,
+              })
+            : context.trp('money.heroCaption', {
+                'spent': budget.expenses.format(),
+                'total': budget.income.format(),
+              }),
       ),
       voice: _voice(context, ref),
       actions: [
@@ -155,6 +174,9 @@ class MoneyPage extends ConsumerWidget {
         // The strongest verdict is the room's voice; the rest stay here so no
         // advice is lost to the shorter layout.
         const _MoreInsightsCard(),
+        // What is actually there comes before any commentary on it.
+        const _CashCard(),
+        const SizedBox(height: 12),
         // Everything else in this room describes what already happened. This is
         // the one thing that answers a question about money not yet spent.
         const _AffordCard(),
@@ -200,6 +222,170 @@ Future<void> _exportCsv(BuildContext context, WidgetRef ref) async {
     ));
 }
 
+/// What is actually in the pocket, and how much of it is already promised.
+///
+/// The room used to open with "income this month minus expenses this month",
+/// which resets to nothing every first of the month and reports anyone who
+/// installed the app after payday as having nothing at all. This card is the
+/// one place the app admits it cannot know the balance until it is told, and
+/// the place the user tells it.
+class _CashCard extends ConsumerWidget {
+  const _CashCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+    final accent = roomById(RoomId.money).colorFor(Theme.of(context).brightness);
+    final cash = ref.watch(cashPositionProvider);
+    final lang = ref.watch(localeProvider)?.languageCode ?? 'en';
+
+    if (!cash.anchored) {
+      return SectionCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(context.tr('cash.askTitle'),
+                style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 4),
+            Text(
+              context.tr('cash.unknownHint'),
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
+                  ?.copyWith(color: scheme.outline, height: 1.35),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: () => BalanceSheet.show(context),
+                icon: const Icon(Icons.account_balance_wallet_outlined),
+                label: Text(context.tr('cash.state')),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final short = cash.isShort;
+    final tone = short ? LifeColors.financeDanger : accent;
+
+    return SectionCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(context.tr('cash.onHand'),
+                    style: Theme.of(context).textTheme.titleMedium),
+              ),
+              IconButton(
+                visualDensity: VisualDensity.compact,
+                tooltip: context.tr('cash.restate'),
+                onPressed: () => BalanceSheet.show(context),
+                icon: const Icon(Icons.edit_outlined, size: 18),
+              ),
+            ],
+          ),
+          Text(
+            cash.onHand.format(),
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: cash.onHand.isNegative
+                      ? LifeColors.financeDanger
+                      : scheme.onSurface,
+                ),
+          ),
+          const SizedBox(height: 10),
+          if (cash.committed.isPositive)
+            _CashRow(
+              label: context.tr('cash.committed'),
+              value: '-${cash.committed.format()}',
+            ),
+          if (cash.reserve.isPositive)
+            _CashRow(
+              label: context.tr('cash.reserve'),
+              value: '-${cash.reserve.format()}',
+            ),
+          const SizedBox(height: 8),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 3,
+                height: 34,
+                margin: const EdgeInsets.only(right: 10, top: 2),
+                decoration: BoxDecoration(
+                  color: tone,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              Expanded(
+                child: Text(
+                  short
+                      ? context.trp('cash.shortBy',
+                          {'amount': cash.shortfall.format()})
+                      : context.trp('cash.freeFor', {
+                          'amount': cash.free.format(),
+                          'days': cash.daysCovered,
+                        }),
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    height: 1.35,
+                    fontWeight: FontWeight.w600,
+                    color: short ? LifeColors.financeDanger : scheme.onSurface,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (cash.nextIncomeOn != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              context.trp('cash.nextIncome', {
+                'date': DateFormat.MMMd(lang).format(cash.nextIncomeOn!),
+              }),
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
+                  ?.copyWith(color: scheme.outline),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _CashRow extends StatelessWidget {
+  final String label;
+  final String value;
+  const _CashRow({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 3),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(label,
+                style: TextStyle(fontSize: 13, color: scheme.outline)),
+          ),
+          Text(value,
+              style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: scheme.onSurface)),
+        ],
+      ),
+    );
+  }
+}
+
 /// "Can I afford this?" — the room's one forward-looking answer.
 ///
 /// The verdict is deliberately expressed in days rather than in a percentage
@@ -229,15 +415,22 @@ class _AffordCardState extends ConsumerState<_AffordCard> {
     final budget = ref.watch(currentBudgetProvider);
     final now = ref.watch(clockProvider).now();
 
-    final freeLeft = budget.income.minorUnits -
-        budget.reserve.minorUnits -
-        budget.expenses.minorUnits;
+    // Answering "can I afford this" from a month total while the app knows the
+    // real balance would contradict the figure at the top of the same screen.
+    final cash = ref.watch(cashPositionProvider);
+    final freeLeft = cash.anchored
+        ? cash.free.minorUnits
+        : budget.income.minorUnits -
+            budget.reserve.minorUnits -
+            budget.expenses.minorUnits;
 
     final typed = double.tryParse(_controller.text.replaceAll(',', '.')) ?? 0;
     final answer = AffordCheck.ask(
       amountMinor: (typed * 100).round(),
       freeLeftMinor: freeLeft,
-      daysLeftInMonth: AffordCheck.daysLeftInMonth(now),
+      daysLeftInMonth: cash.anchored
+          ? cash.daysCovered
+          : AffordCheck.daysLeftInMonth(now),
     );
 
     final tone = switch (answer?.verdict) {
