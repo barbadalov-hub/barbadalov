@@ -93,6 +93,31 @@ const Map<String, Map<String, String>> _values = {
     'ru': 'Другое число минут',
     'uk': 'Інша кількість хвилин'
   },
+  'diet.pickFood': {'en': 'Add food', 'ru': 'Добавить еду', 'uk': 'Додати їжу'},
+  'diet.searchFood': {
+    'en': 'Search a dish…',
+    'ru': 'Найди блюдо…',
+    'uk': 'Знайди страву…'
+  },
+  'diet.noFoodFound': {
+    'en': 'Nothing matches — add it by hand instead.',
+    'ru': 'Ничего не нашлось — впиши вручную.',
+    'uk': 'Нічого не знайшлося — впиши вручну.'
+  },
+  'diet.byHand': {'en': 'By hand', 'ru': 'Вручную', 'uk': 'Вручну'},
+  'diet.portion': {'en': 'Portion', 'ru': 'Порция', 'uk': 'Порція'},
+  'diet.willAdd': {
+    'en': 'Adds {kcal} kcal · P {p} · F {f} · C {c}',
+    'ru': 'Добавится {kcal} ккал · Б {p} · Ж {f} · У {c}',
+    'uk': 'Додасться {kcal} ккал · Б {p} · Ж {f} · В {c}'
+  },
+  'diet.logIt': {'en': 'Log it', 'ru': 'Записать', 'uk': 'Записати'},
+  'diet.foodRemoved': {'en': 'Removed', 'ru': 'Убрано', 'uk': 'Прибрано'},
+  'diet.slotOther': {'en': 'Other', 'ru': 'Прочее', 'uk': 'Інше'},
+  'slot.breakfast': {'en': 'Breakfast', 'ru': 'Завтрак', 'uk': 'Сніданок'},
+  'slot.lunch': {'en': 'Lunch', 'ru': 'Обед', 'uk': 'Обід'},
+  'slot.dinner': {'en': 'Dinner', 'ru': 'Ужин', 'uk': 'Вечеря'},
+  'slot.snack': {'en': 'Snack', 'ru': 'Перекус', 'uk': 'Перекус'},
   'act.trained': {'en': 'Trained', 'ru': 'Тренировки', 'uk': 'Тренування'},
   'act.removed': {'en': 'Session removed', 'ru': 'Тренировка убрана', 'uk': 'Тренування прибрано'},
   'act.walk': {'en': 'Walk', 'ru': 'Прогулка', 'uk': 'Прогулянка'},

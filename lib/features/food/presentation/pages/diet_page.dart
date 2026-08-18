@@ -12,6 +12,7 @@ import 'package:lifeos/features/food/presentation/providers/diet_providers.dart'
 import 'package:lifeos/features/food/presentation/providers/food_providers.dart';
 import 'package:lifeos/features/profile/presentation/providers/profile_providers.dart';
 import 'package:lifeos/features/profile/presentation/pages/profile_page.dart';
+import 'package:lifeos/features/food/presentation/widgets/food_picker_sheet.dart';
 import 'package:lifeos/features/rooms/domain/life_room.dart';
 import 'package:lifeos/features/rooms/presentation/widgets/room_tint.dart';
 import 'package:lifeos/shared/models/money.dart';
@@ -296,35 +297,33 @@ class _FoodLogCard extends ConsumerWidget {
                 child: Text(context.tr('diet.foodLog'),
                     style: Theme.of(context).textTheme.titleMedium),
               ),
-              IconButton(
-                icon: const Icon(Icons.add_circle_outline),
+              TextButton(
                 onPressed: () => _addDialog(context, ref),
+                child: Text(context.tr('diet.byHand')),
               ),
             ],
           ),
-          if (log.isEmpty)
-            Text(context.tr('diet.foodLogEmpty'),
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.outline,
-                    ))
-          else
-            for (final e in log)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 2),
-                child: Row(
-                  children: [
-                    Expanded(child: Text(e.name)),
-                    Text('${e.nutrition.kcal} ${context.tr('diet.kcal')}',
-                        style: const TextStyle(fontWeight: FontWeight.w600)),
-                    IconButton(
-                      visualDensity: VisualDensity.compact,
-                      icon: const Icon(Icons.close, size: 18),
-                      onPressed: () =>
-                          ref.read(manualFoodProvider.notifier).remove(e.id),
-                    ),
-                  ],
-                ),
-              ),
+          // Grouped the way people actually eat, and the way every food diary
+          // worth using is laid out. Each meal adds its own food, so nothing
+          // has to be filed after the fact.
+          for (final slot in MealSlot.values)
+            _SlotSection(
+              slot: slot,
+              entries: [
+                for (final e in log)
+                  if (e.slot == slot) e,
+              ],
+            ),
+          // Anything logged before the diary had meals. Shown rather than
+          // hidden, because it is still food the user ate today.
+          if (log.any((e) => e.slot == null))
+            _SlotSection(
+              slot: null,
+              entries: [
+                for (final e in log)
+                  if (e.slot == null) e,
+              ],
+            ),
         ],
       ),
     );
@@ -395,6 +394,98 @@ class _FoodLogCard extends ConsumerWidget {
 }
 
 /// Estimated cheapest cost to buy today's whole menu.
+/// One meal of the day: what was eaten, its total, and a way to add more.
+class _SlotSection extends ConsumerWidget {
+  /// Null is the bucket for food logged before meals existed.
+  final MealSlot? slot;
+  final List<ManualFoodEntry> entries;
+
+  const _SlotSection({required this.slot, required this.entries});
+
+  static const _emoji = {
+    MealSlot.breakfast: '🌅',
+    MealSlot.lunch: '🍲',
+    MealSlot.dinner: '🌙',
+    MealSlot.snack: '🍎',
+  };
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+    final kcal = entries.fold(0, (sum, e) => sum + e.nutrition.kcal);
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(slot == null ? '📄' : _emoji[slot]!,
+                  style: const TextStyle(fontSize: 15)),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  context.tr(slot == null ? 'diet.slotOther' : 'slot.${slot!.name}'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                      fontSize: 13.5, fontWeight: FontWeight.w700),
+                ),
+              ),
+              if (kcal > 0)
+                Text('$kcal ${context.tr('diet.kcal')}',
+                    style: TextStyle(fontSize: 12.5, color: scheme.outline)),
+              if (slot != null)
+                IconButton(
+                  visualDensity: VisualDensity.compact,
+                  icon: const Icon(Icons.add, size: 19),
+                  tooltip: context.tr('diet.pickFood'),
+                  onPressed: () => FoodPickerSheet.show(context, slot!),
+                ),
+            ],
+          ),
+          for (final e in entries)
+            Padding(
+              padding: const EdgeInsets.only(left: 23, top: 1),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(e.name,
+                        maxLines: 1, overflow: TextOverflow.ellipsis),
+                  ),
+                  Text('${e.nutrition.kcal}',
+                      style: const TextStyle(fontWeight: FontWeight.w600)),
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    icon: const Icon(Icons.close, size: 17),
+                    tooltip: context.tr('common.delete'),
+                    onPressed: () {
+                      ref.read(manualFoodProvider.notifier).remove(e.id);
+                      // Same contract as everywhere else in the app: a tap
+                      // that removes something is offered straight back.
+                      ScaffoldMessenger.of(context)
+                        ..hideCurrentSnackBar()
+                        ..showSnackBar(SnackBar(
+                          content: Text(context.tr('diet.foodRemoved')),
+                          action: SnackBarAction(
+                            label: context.tr('common.undo'),
+                            onPressed: () => ref
+                                .read(manualFoodProvider.notifier)
+                                .restore(e),
+                          ),
+                        ));
+                    },
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
 class _DayCostCard extends ConsumerWidget {
   const _DayCostCard();
 

@@ -288,8 +288,18 @@ class ManualFoodEntry {
   final String id;
   final String name;
   final NutritionFacts nutrition;
-  const ManualFoodEntry(
-      {required this.id, required this.name, required this.nutrition});
+
+  /// Which meal it belonged to. Null for anything logged before the diary had
+  /// meals — honest about not knowing rather than filing old food under a
+  /// breakfast it may never have been.
+  final MealSlot? slot;
+
+  const ManualFoodEntry({
+    required this.id,
+    required this.name,
+    required this.nutrition,
+    this.slot,
+  });
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -298,11 +308,16 @@ class ManualFoodEntry {
         'p': nutrition.proteinG,
         'f': nutrition.fatG,
         'c': nutrition.carbsG,
+        if (slot != null) 'slot': slot!.name,
       };
 
   factory ManualFoodEntry.fromJson(Map<String, dynamic> j) => ManualFoodEntry(
         id: j['id'] as String,
         name: (j['name'] as String?) ?? '',
+        slot: j['slot'] == null
+            ? null
+            : MealSlot.values.firstWhere((s) => s.name == j['slot'],
+                orElse: () => MealSlot.snack),
         nutrition: NutritionFacts(
           kcal: (j['kcal'] as num?)?.toInt() ?? 0,
           proteinG: (j['p'] as num?)?.toInt() ?? 0,
@@ -332,16 +347,27 @@ class ManualFoodController extends Notifier<List<ManualFoodEntry>> {
     ];
   }
 
-  void add(String name, NutritionFacts nutrition) {
-    if (name.trim().isEmpty || nutrition.kcal <= 0) return;
+  ManualFoodEntry? add(String name, NutritionFacts nutrition,
+      {MealSlot? slot}) {
+    if (name.trim().isEmpty || nutrition.kcal <= 0) return null;
     final entry = ManualFoodEntry(
-        id: ref.read(idServiceProvider).newId(),
-        name: name.trim(),
-        nutrition: nutrition);
+      id: ref.read(idServiceProvider).newId(),
+      name: name.trim(),
+      nutrition: nutrition,
+      slot: slot,
+    );
     _persist([...state, entry]);
+    return entry;
   }
 
   void remove(String id) => _persist([for (final e in state) if (e.id != id) e]);
+
+  /// Puts a removed entry back exactly as it was, so undo restores rather than
+  /// recreates. Same contract as the training log.
+  void restore(ManualFoodEntry entry) {
+    if (state.any((e) => e.id == entry.id)) return;
+    _persist([...state, entry]);
+  }
 
   void _persist(List<ManualFoodEntry> next) {
     ref.read(jsonStoreProvider).saveObject<Map<String, dynamic>>(
