@@ -71,6 +71,45 @@ const Map<String, Map<String, String>> _values = {
   'common.soon': {'en': 'Soon', 'ru': 'Скоро', 'uk': 'Скоро'},
   'common.save': {'en': 'Save', 'ru': 'Сохранить', 'uk': 'Зберегти'},
   'common.delete': {'en': 'Delete', 'ru': 'Удалить', 'uk': 'Видалити'},
+  'common.undo': {'en': 'Undo', 'ru': 'Отменить', 'uk': 'Скасувати'},
+
+  // --- Training sessions ---------------------------------------------------
+  'act.title': {'en': 'Training today', 'ru': 'Тренировки сегодня', 'uk': 'Тренування сьогодні'},
+  'act.todayTotal': {
+    'en': '{n} min of training today',
+    'ru': '{n} мин тренировок сегодня',
+    'uk': '{n} хв тренувань сьогодні'
+  },
+  'act.empty': {
+    'en': 'Nothing logged yet — add a walk, a session, anything that moved you.',
+    'ru': 'Пока ничего не записано — добавь прогулку, зал, что угодно, где ты двигался.',
+    'uk': 'Поки нічого не записано — додай прогулянку, зал, будь-що, де ти рухався.'
+  },
+  'act.add': {'en': 'Add', 'ru': 'Добавить', 'uk': 'Додати'},
+  'act.howLong': {'en': 'How long', 'ru': 'Сколько шло', 'uk': 'Скільки тривало'},
+  'act.minutes': {'en': '{n} min', 'ru': '{n} мин', 'uk': '{n} хв'},
+  'act.custom': {
+    'en': 'Another number of minutes',
+    'ru': 'Другое число минут',
+    'uk': 'Інша кількість хвилин'
+  },
+  'act.removed': {'en': 'Session removed', 'ru': 'Тренировка убрана', 'uk': 'Тренування прибрано'},
+  'act.walk': {'en': 'Walk', 'ru': 'Прогулка', 'uk': 'Прогулянка'},
+  'act.run': {'en': 'Run', 'ru': 'Бег', 'uk': 'Біг'},
+  'act.gym': {'en': 'Gym', 'ru': 'Зал', 'uk': 'Зала'},
+  'act.cycling': {'en': 'Cycling', 'ru': 'Велосипед', 'uk': 'Велосипед'},
+  'act.swim': {'en': 'Swimming', 'ru': 'Плавание', 'uk': 'Плавання'},
+  'act.yoga': {'en': 'Yoga', 'ru': 'Йога', 'uk': 'Йога'},
+  'act.team': {'en': 'Team sport', 'ru': 'Игровой спорт', 'uk': 'Ігровий спорт'},
+  'act.other': {'en': 'Something else', 'ru': 'Другое', 'uk': 'Інше'},
+  'health.stepsAdded': {'en': 'Steps added', 'ru': 'Шаги добавлены', 'uk': 'Кроки додано'},
+  'health.sleepLogged': {'en': 'Sleep logged', 'ru': 'Сон записан', 'uk': 'Сон записано'},
+  'health.listeningAdded': {
+    'en': 'Listening time added',
+    'ru': 'Время прослушивания добавлено',
+    'uk': 'Час прослуховування додано'
+  },
+
   'voice.dictate': {'en': 'Dictate', 'ru': 'Продиктовать', 'uk': 'Продиктувати'},
   'voice.stop': {'en': 'Stop', 'ru': 'Остановить', 'uk': 'Зупинити'},
   'voice.unavailable': {

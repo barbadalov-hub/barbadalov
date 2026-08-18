@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lifeos/core/i18n/app_localizations.dart';
 import 'package:flutter/services.dart';
 import 'package:lifeos/features/health/domain/daily_motivation.dart';
+import 'package:lifeos/features/health/domain/entities/activity_entry.dart';
+import 'package:lifeos/features/health/presentation/providers/activity_providers.dart';
+import 'package:lifeos/features/health/presentation/widgets/activity_sheet.dart';
 import 'package:lifeos/features/health/presentation/providers/health_goals_provider.dart';
 import 'package:lifeos/features/health/presentation/providers/health_providers.dart';
 import 'package:lifeos/features/health/presentation/providers/vitals_provider.dart';
@@ -174,6 +177,8 @@ class HealthPage extends ConsumerWidget {
             const SizedBox(height: 14),
             const _DayLineCard(),
             const SizedBox(height: 14),
+            const _ActivityCard(),
+            const SizedBox(height: 14),
             const _CareShelf(),
             const SizedBox(height: 14),
             const _StreaksCard(),
@@ -190,20 +195,38 @@ class HealthPage extends ConsumerWidget {
                   label: Text(context.tr('health.addWater')),
                   onPressed: () => DrinkSheet.show(context),
                 ),
+                // Each of these adds to the day in one tap, so each also has to
+                // be removable in one tap. Restoring the previous value is the
+                // honest undo: "subtract what I just added" would be wrong if
+                // anything else changed in between.
                 ActionChip(
                   avatar: const Text('👟'),
                   label: Text(context.tr('health.addSteps')),
-                  onPressed: () => log.setSteps(day.steps + 1000),
+                  onPressed: () {
+                    final before = day.steps;
+                    log.setSteps(before + 1000);
+                    _undoable(context, 'health.stepsAdded',
+                        () => log.setSteps(before));
+                  },
                 ),
                 ActionChip(
                   avatar: const Text('😴'),
                   label: Text(context.tr('health.logSleep')),
-                  onPressed: () => log.logSleep(8),
+                  onPressed: () {
+                    final before = day.sleepHours;
+                    log.logSleep(8);
+                    _undoable(context, 'health.sleepLogged',
+                        () => log.logSleep(before));
+                  },
                 ),
                 ActionChip(
                   avatar: const Text('🎧'),
                   label: Text(context.tr('health.addListening')),
-                  onPressed: () => log.addListening(30),
+                  onPressed: () {
+                    log.addListening(30);
+                    _undoable(context, 'health.listeningAdded',
+                        () => log.addListening(-30));
+                  },
                 ),
               ],
             ),
@@ -218,6 +241,23 @@ class HealthPage extends ConsumerWidget {
             ),
           ],
     );
+  }
+
+  /// Confirms a one-tap log and offers it straight back.
+  ///
+  /// Every chip here changes today's numbers instantly, which is the point —
+  /// but a finger lands in the wrong place often enough that a log with no way
+  /// out is a log people stop trusting.
+  void _undoable(BuildContext context, String messageKey, VoidCallback undo) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(
+        content: Text(context.tr(messageKey)),
+        action: SnackBarAction(
+          label: context.tr('common.undo'),
+          onPressed: undo,
+        ),
+      ));
   }
 
   /// One sentence about the body: the metric furthest from its goal, so the
@@ -879,6 +919,119 @@ class _DayLineCard extends ConsumerWidget {
               height: 1.4,
               color: scheme.onSurface,
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Today's training: what was done, for how long, and a way to take back the
+/// one you added by mistake.
+///
+/// Sessions are listed individually rather than summed, because a total cannot
+/// tell you which forty minutes were the wrong tap.
+class _ActivityCard extends ConsumerWidget {
+  const _ActivityCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+    final accent = roomById(RoomId.body).colorFor(Theme.of(context).brightness);
+    final today = ref.watch(todayActivitiesProvider);
+    final minutes = ref.watch(todayActiveMinutesProvider);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: scheme.outlineVariant, width: 0.5),
+      ),
+      padding: const EdgeInsets.fromLTRB(16, 13, 16, 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  minutes > 0
+                      ? context.trp('act.todayTotal', {'n': minutes})
+                      : context.tr('act.title'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+              TextButton.icon(
+                onPressed: () => ActivitySheet.show(context),
+                icon: const Icon(Icons.add, size: 18),
+                style: TextButton.styleFrom(foregroundColor: accent),
+                label: Text(context.tr('act.add')),
+              ),
+            ],
+          ),
+          if (today.isEmpty)
+            Text(
+              context.tr('act.empty'),
+              style: TextStyle(fontSize: 12.5, color: scheme.outline),
+            )
+          else
+            for (final entry in today)
+              _ActivityRow(entry: entry, accent: accent),
+        ],
+      ),
+    );
+  }
+}
+
+class _ActivityRow extends ConsumerWidget {
+  final ActivityEntry entry;
+  final Color accent;
+  const _ActivityRow({required this.entry, required this.accent});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Row(
+        children: [
+          Text(entry.kind.emoji, style: const TextStyle(fontSize: 18)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              context.tr(entry.kind.labelKey),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 14),
+            ),
+          ),
+          Text(
+            context.trp('act.minutes', {'n': entry.minutes}),
+            style: TextStyle(
+                fontSize: 13, fontWeight: FontWeight.w600, color: accent),
+          ),
+          const SizedBox(width: 4),
+          IconButton(
+            visualDensity: VisualDensity.compact,
+            tooltip: context.tr('common.delete'),
+            icon: Icon(Icons.close, size: 17, color: scheme.outline),
+            onPressed: () {
+              ref.read(activitiesProvider.notifier).remove(entry.id);
+              // Removing is itself a tap that can be wrong, so it is offered
+              // back rather than being final.
+              ScaffoldMessenger.of(context)
+                ..hideCurrentSnackBar()
+                ..showSnackBar(SnackBar(
+                  content: Text(context.tr('act.removed')),
+                  action: SnackBarAction(
+                    label: context.tr('common.undo'),
+                    onPressed: () =>
+                        ref.read(activitiesProvider.notifier).restore(entry),
+                  ),
+                ));
+            },
           ),
         ],
       ),
