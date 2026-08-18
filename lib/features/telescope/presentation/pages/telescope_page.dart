@@ -191,6 +191,12 @@ class _StatGrid extends StatelessWidget {
           context.trp('report.hours', {'n': stats.avgSleep.toStringAsFixed(1)}),
           '😴'
         ),
+      if (stats.trainingMinutes > 0)
+        (
+          context.tr('act.trained'),
+          context.trp('act.minutes', {'n': stats.trainingMinutes}),
+          '🏋️'
+        ),
       if (stats.moodDays > 0)
         (
           context.tr('insight.lblMoodShort'),

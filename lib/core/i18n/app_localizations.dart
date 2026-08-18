@@ -93,6 +93,7 @@ const Map<String, Map<String, String>> _values = {
     'ru': 'Другое число минут',
     'uk': 'Інша кількість хвилин'
   },
+  'act.trained': {'en': 'Trained', 'ru': 'Тренировки', 'uk': 'Тренування'},
   'act.removed': {'en': 'Session removed', 'ru': 'Тренировка убрана', 'uk': 'Тренування прибрано'},
   'act.walk': {'en': 'Walk', 'ru': 'Прогулка', 'uk': 'Прогулянка'},
   'act.run': {'en': 'Run', 'ru': 'Бег', 'uk': 'Біг'},

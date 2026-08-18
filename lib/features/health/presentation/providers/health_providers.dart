@@ -6,6 +6,7 @@ import 'package:lifeos/features/health/application/health_use_cases.dart';
 import 'package:lifeos/features/health/application/sync_device_health.dart';
 import 'package:lifeos/features/health/data/health_repository_impl.dart';
 import 'package:lifeos/features/health/domain/entities/health_day.dart';
+import 'package:lifeos/features/health/presentation/providers/activity_providers.dart';
 import 'package:lifeos/features/health/domain/repositories/health_repository.dart';
 import 'package:lifeos/features/health/domain/weekly_health.dart';
 import 'package:lifeos/shared/providers/core_providers.dart';
@@ -125,7 +126,10 @@ final todayHealthProvider = StreamProvider<HealthDay>((ref) {
 final healthScoreProvider = Provider<int>((ref) {
   final day = ref.watch(todayHealthProvider).valueOrNull;
   if (day == null) return 50;
-  return ref.watch(healthScoreServiceProvider).scoreFor(day);
+  return ref.watch(healthScoreServiceProvider).scoreFor(
+        day,
+        activeMinutes: ref.watch(todayActiveMinutesProvider),
+      );
 });
 
 /// A 7-day rollup (today + archived history) of averages and goal-hit days.

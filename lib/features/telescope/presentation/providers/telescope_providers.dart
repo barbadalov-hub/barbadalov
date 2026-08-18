@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lifeos/features/health/presentation/providers/activity_providers.dart';
 import 'package:lifeos/features/health/presentation/providers/health_providers.dart';
 import 'package:lifeos/features/mind/presentation/providers/mood_providers.dart';
 import 'package:lifeos/features/money/presentation/providers/money_providers.dart';
@@ -21,5 +22,6 @@ final periodStatsProvider = Provider<PeriodStats>((ref) {
     transactions: ref.watch(transactionsProvider).valueOrNull ?? const [],
     days: days,
     moods: ref.watch(moodLogProvider),
+    activities: ref.watch(activitiesProvider),
   );
 });

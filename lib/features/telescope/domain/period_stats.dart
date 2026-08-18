@@ -1,5 +1,6 @@
 import 'package:lifeos/features/health/domain/entities/health_day.dart';
 import 'package:lifeos/features/mind/domain/mood.dart';
+import 'package:lifeos/features/health/domain/entities/activity_entry.dart';
 import 'package:lifeos/features/money/domain/entities/transaction.dart';
 
 /// How far the telescope is zoomed out. The point of the app: the same life,
@@ -40,6 +41,13 @@ class PeriodStats {
   final int daysTracked;
   final int peakSteps;
 
+  /// Minutes of logged training in the window, and how many days had any.
+  /// Kept as a total rather than an average: "three hours this week" is a
+  /// figure people recognise, where "26 minutes a day" is one nobody has ever
+  /// actually trained.
+  final int trainingMinutes;
+  final int trainingDays;
+
   const PeriodStats({
     required this.zoom,
     this.spentMinor = 0,
@@ -53,6 +61,8 @@ class PeriodStats {
     this.moodDays = 0,
     this.daysTracked = 0,
     this.peakSteps = 0,
+    this.trainingMinutes = 0,
+    this.trainingDays = 0,
   });
 
   int get netMinor => incomeMinor - spentMinor;
@@ -73,6 +83,7 @@ class PeriodStatsBuilder {
     required List<Transaction> transactions,
     required List<HealthDay> days,
     required List<MoodEntry> moods,
+    List<ActivityEntry> activities = const [],
   }) {
     final span = zoom.days;
     final today = DateTime(now.year, now.month, now.day);
@@ -128,6 +139,16 @@ class PeriodStatsBuilder {
       }
     }
 
+    var trainingMinutes = 0;
+    final trainingDayKeys = <int>{};
+    for (final a in activities) {
+      if (!inWindow(a.at) || a.minutes <= 0) continue;
+      trainingMinutes += a.minutes;
+      trainingDayKeys.add(_dayKey(a.at));
+      // A day you only trained on is still a day you tracked something.
+      logged.add(_dayKey(a.at));
+    }
+
     var moodSum = 0.0, moodDays = 0;
     for (final m in moods) {
       if (!inWindow(m.date)) continue;
@@ -148,6 +169,8 @@ class PeriodStatsBuilder {
       avgWater: waterDays == 0 ? 0 : waterSum / waterDays,
       avgMood: moodDays == 0 ? 0 : moodSum / moodDays,
       moodDays: moodDays,
+      trainingMinutes: trainingMinutes,
+      trainingDays: trainingDayKeys.length,
       daysTracked: logged.length,
     );
   }
